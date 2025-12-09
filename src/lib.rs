@@ -1,4 +1,5 @@
 pub mod camera;
+pub mod balloon_control;
 pub mod controls;
 pub mod probe;
 pub mod tunnel;
@@ -6,6 +7,7 @@ pub mod tunnel;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use balloon_control::{balloon_control_input, BalloonControl};
 use camera::{camera_controller, setup_camera};
 use controls::{control_inputs_and_apply, spawn_controls_ui, update_controls_ui, ControlParams};
 use probe::{distributed_thrust, peristaltic_drive, spawn_probe};
@@ -18,6 +20,7 @@ pub fn run_app() {
             brightness: 0.4,
             affects_lightmapped_meshes: true,
         })
+        .insert_resource(BalloonControl::default())
         .insert_resource(ControlParams {
             tension: 0.5,
             stiffness: 500.0,
@@ -45,6 +48,7 @@ pub fn run_app() {
         .add_systems(
             Update,
             (
+                balloon_control_input,
                 camera_controller,
                 control_inputs_and_apply,
                 update_controls_ui,

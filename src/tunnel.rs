@@ -4,6 +4,7 @@ use bevy::math::primitives::Cylinder;
 use bevy_rapier3d::prelude::*;
 
 use crate::probe::ProbeHead;
+use crate::balloon_control::BalloonControl;
 
 #[derive(Component)]
 pub struct TunnelRing {
@@ -108,6 +109,7 @@ pub fn setup_tunnel(
 
 pub fn tunnel_expansion_system(
     time: Res<Time>,
+    balloon: Res<BalloonControl>,
     probe_q: Query<&GlobalTransform, With<ProbeHead>>,
     mut rings_q: Query<(
         &mut TunnelRing,
@@ -122,26 +124,44 @@ pub fn tunnel_expansion_system(
     let Ok(probe_tf) = probe_q.single() else {
         return;
     };
-    let probe_z = probe_tf.translation().z;
+    let _probe_z = probe_tf.translation().z;
+
+    let balloon_pos_z = if balloon.inflated {
+        let tip_tf = probe_tf.compute_transform();
+        let forward = (tip_tf.rotation * Vec3::Z).normalize_or_zero();
+        let pos = tip_tf.translation + forward * balloon.offset;
+        Some(pos.z)
+    } else {
+        None
+    };
 
     let strong_expand_radius = 3.0;
     let soft_expand_radius = 6.0;
     let expand_speed = 6.5;
 
     let base_color = Color::srgba(0.7, 0.4, 0.4, 0.25);
-    let expanded_color = Color::srgba(1.0, 0.7, 0.7, 0.45);
+    let balloon_color = Color::srgba(0.55, 1.0, 0.55, 0.5);
     let high_friction = 1.2;
     let low_friction = 0.4;
 
+    let falloff = |dz: f32| {
+        if dz < strong_expand_radius {
+            1.0
+        } else if dz < soft_expand_radius {
+            1.0 - (dz - strong_expand_radius) / (soft_expand_radius - strong_expand_radius)
+        } else {
+            0.0
+        }
+    };
+
     for (mut ring, tf, children, mut collider, mut friction) in rings_q.iter_mut() {
         let ring_z = tf.translation().z;
-        let dz = (ring_z - probe_z).abs();
+        let balloon_factor = balloon_pos_z
+            .map(|bz| falloff((ring_z - bz).abs()))
+            .unwrap_or(0.0);
 
-        let target_radius = if dz < strong_expand_radius {
-            ring.expanded_radius
-        } else if dz < soft_expand_radius {
-            let t = (dz - strong_expand_radius) / (soft_expand_radius - strong_expand_radius);
-            lerp(ring.expanded_radius, ring.base_radius, t)
+        let target_radius = if balloon_factor > 0.0 {
+            lerp(ring.base_radius, ring.expanded_radius, balloon_factor.clamp(0.0, 1.0))
         } else {
             ring.base_radius
         };
@@ -159,7 +179,8 @@ pub fn tunnel_expansion_system(
                     .clamp(0.0, 1.0);
 
                 if let Some(mat) = materials.get_mut(&v_mat.0) {
-                    mat.base_color = base_color.mix(&expanded_color, expansion_factor);
+                    // Balloon expansion only (green gradient).
+                    mat.base_color = base_color.mix(&balloon_color, expansion_factor);
                 }
             }
         }
