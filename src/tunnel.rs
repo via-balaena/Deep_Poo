@@ -127,10 +127,7 @@ pub fn tunnel_expansion_system(
     let _probe_z = probe_tf.translation().z;
 
     let balloon_pos_z = if balloon.inflated {
-        let tip_tf = probe_tf.compute_transform();
-        let forward = (tip_tf.rotation * Vec3::Z).normalize_or_zero();
-        let pos = tip_tf.translation + forward * balloon.offset;
-        Some(pos.z)
+        Some(balloon.position.z)
     } else {
         None
     };

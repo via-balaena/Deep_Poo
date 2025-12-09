@@ -7,7 +7,10 @@ pub mod tunnel;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use balloon_control::{balloon_control_input, BalloonControl};
+use balloon_control::{
+    balloon_body_update, balloon_control_input, balloon_marker_update, spawn_balloon_body,
+    spawn_balloon_marker, BalloonControl,
+};
 use camera::{camera_controller, setup_camera};
 use controls::{control_inputs_and_apply, spawn_controls_ui, update_controls_ui, ControlParams};
 use probe::{distributed_thrust, peristaltic_drive, spawn_probe};
@@ -41,6 +44,8 @@ pub fn run_app() {
                 disable_gravity,
                 setup_tunnel,
                 spawn_probe,
+                spawn_balloon_body,
+                spawn_balloon_marker,
                 spawn_controls_ui,
             )
                 .chain(),
@@ -49,6 +54,8 @@ pub fn run_app() {
             Update,
             (
                 balloon_control_input,
+                balloon_body_update,
+                balloon_marker_update,
                 camera_controller,
                 control_inputs_and_apply,
                 update_controls_ui,
