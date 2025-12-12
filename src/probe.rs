@@ -1,9 +1,20 @@
+use bevy::math::primitives::Cylinder;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use std::f32::consts::FRAC_PI_2;
 
 use crate::controls::ControlParams;
 use crate::balloon_control::BalloonControl;
+
+const MIN_STRETCH: f32 = 1.0;
+const MAX_STRETCH: f32 = 6.0;
+const STRETCH_RATE: f32 = 0.6; // slower extension
+const RETRACT_RATE: f32 = 0.9;
+
+#[derive(Resource, Default)]
+pub struct StretchState {
+    pub factor: f32,
+}
 
 #[derive(Component)]
 pub struct CapsuleProbe;
@@ -25,157 +36,238 @@ pub struct SegmentSpring {
 #[derive(Component)]
 pub struct SegmentIndex(pub usize);
 
+#[derive(Component)]
+pub struct ProbeBody {
+    pub base_radius: f32,
+    pub base_length: f32,
+    pub ring_count: usize,
+}
+
+#[derive(Component)]
+pub struct ProbeRing {
+    pub index: usize,
+}
+
+#[derive(Component)]
+pub struct ProbeVisual;
+
+fn ring_shell_collider(radius: f32, half_height: f32) -> Collider {
+    let wall_thickness = 0.08;
+    let segments = 16;
+    let angle_step = std::f32::consts::TAU / segments as f32;
+    let wall_half = wall_thickness * 0.5;
+    let tangent_half = radius * (angle_step * 0.5).tan() + wall_half;
+
+    let mut shapes = Vec::with_capacity(segments);
+    for i in 0..segments {
+        let angle = i as f32 * angle_step;
+        let dir = Vec2::new(angle.cos(), angle.sin());
+        let center = Vec3::new(dir.x * radius, dir.y * radius, 0.0);
+        let rot = Quat::from_rotation_z(angle);
+        shapes.push((center, rot, Collider::cuboid(wall_half, tangent_half, half_height)));
+    }
+
+    Collider::compound(shapes)
+}
+
 pub fn spawn_probe(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     control: Res<ControlParams>,
 ) {
-    // Capsule dimensions stretched longer than the tunnel (radius ~0.8, length ~16.0).
-    let collider_radius = 0.8;
-    let total_length = 32.0;
-    let segment_count = 12;
-    let segment_length = total_length / segment_count as f32;
-    let segment_half_height = segment_length * 0.5 - collider_radius;
-    let span = segment_half_height + collider_radius;
+    // Elastic probe tube built from ring colliders (like the tunnel) driven by stretch.
+    let base_radius = 0.8;
+    let base_length = 20.0;
+    let ring_count = 24usize;
+    let ring_spacing = base_length / ring_count as f32;
+    let ring_half_height = ring_spacing * 0.45;
+    // Keep similar placement to previous chain: tail back near -16, tip ahead in the straight.
+    let tail_z = -10.0;
 
-    let mesh = meshes.add(Mesh::from(Capsule3d::new(
-        collider_radius,
-        segment_half_height * 2.0,
-    )));
+    let visual_mesh = meshes.add(Mesh::from(Cylinder {
+        radius: base_radius * 0.9,
+        half_height: base_length * 0.5,
+    }));
     let material_handle = materials.add(Color::srgb(0.8, 0.2, 0.2));
 
-    // Place the chain well inside the long straight (length_a ~60); keep tail inside and tip shy of the bend.
-    let joint_front_second_z = 12.0;
-    let base_rotation = Quat::from_rotation_x(FRAC_PI_2);
+    let mut root = commands.spawn((
+        ProbeBody {
+            base_radius,
+            base_length,
+            ring_count,
+        },
+        CapsuleProbe,
+        RigidBody::KinematicPositionBased,
+        Collider::ball(base_radius),
+        Friction {
+            coefficient: control.friction,
+            combine_rule: CoefficientCombineRule::Average,
+            ..default()
+        },
+        CollisionGroups::new(Group::GROUP_1, Group::ALL),
+        Transform::from_translation(Vec3::new(0.0, 0.0, tail_z)),
+        GlobalTransform::default(),
+        Visibility::default(),
+    ));
 
-    let mut segments = Vec::new();
-    for i in 0..segment_count {
-        let center_z = joint_front_second_z + span - (2.0 * span * i as f32);
-        let mut entity = commands.spawn((
-            Mesh3d(mesh.clone()),
-            MeshMaterial3d(material_handle.clone()),
-            Transform {
-                translation: Vec3::new(0.0, 0.0, center_z),
-                rotation: base_rotation,
-                ..default()
-            },
-            RigidBody::Dynamic,
-            Collider::capsule_y(segment_half_height, collider_radius),
+    root.with_children(|child| {
+        // Head marker and collider.
+        child.spawn((
+            ProbeHead,
+            ProbeTip,
+            Collider::ball(base_radius * 0.9),
             Friction {
                 coefficient: control.friction,
                 combine_rule: CoefficientCombineRule::Average,
                 ..default()
             },
-            Velocity::default(),
-            Sleeping::disabled(),
-            ExternalImpulse::default(),
-            ExternalForce::default(),
-            Damping {
-                linear_damping: control.linear_damping,
-                angular_damping: 0.3,
-            },
-            ProbeSegment,
-            SegmentIndex(i),
-        ));
-
-        if i == 0 {
-            entity.insert((ProbeTip, ProbeHead));
-        }
-        if i == segment_count - 1 {
-            entity.insert(CapsuleProbe);
-        }
-
-        // Front four segments (including tip) get their own collision group to be ignored by balloon shell.
-        let groups = if i < 4 {
-            CollisionGroups::new(Group::GROUP_3, Group::ALL)
-        } else {
-            CollisionGroups::new(Group::GROUP_1, Group::ALL)
-        };
-        entity.insert(groups);
-
-        segments.push(entity.id());
-    }
-
-    let anchor_top = Vec3::Y * span;
-    let anchor_bottom = Vec3::NEG_Y * span;
-    let base_rest = 2.0 * span;
-    let base_stiffness = control.stiffness;
-    let base_damping = control.damping;
-    let rest_length = base_rest * control.tension;
-
-    for window in segments.windows(2) {
-        let parent = window[1];
-        let child = window[0];
-        let mut joint = SphericalJointBuilder::new()
-            .local_anchor1(anchor_top)
-            .local_anchor2(anchor_bottom)
-            .build();
-        joint.set_contacts_enabled(false);
-        commands
-            .entity(child)
-            .insert(ImpulseJoint::new(parent, joint));
-
-        let mut spring = GenericJointBuilder::new(JointAxesMask::empty())
-            .local_anchor1(anchor_top)
-            .local_anchor2(anchor_bottom)
-            .motor_position(JointAxis::LinY, rest_length, base_stiffness, base_damping)
-            .build();
-        spring.set_contacts_enabled(false);
-        spring.set_motor_model(JointAxis::LinY, MotorModel::AccelerationBased);
-        spring.set_motor_max_force(JointAxis::LinY, 10_000.0);
-
-        commands.spawn((
-            SegmentSpring { base_rest },
-            ImpulseJoint::new(parent, TypedJoint::GenericJoint(spring)),
-            Transform::default(),
+            CollisionGroups::new(Group::GROUP_1, Group::ALL),
+            Transform::from_translation(Vec3::new(0.0, 0.0, base_length)),
             GlobalTransform::default(),
-            ChildOf(child),
         ));
-    }
+
+        // Body rings for collision hull.
+        for i in 0..=ring_count {
+            let z = i as f32 * ring_spacing;
+            child.spawn((
+                ProbeRing { index: i },
+                ring_shell_collider(base_radius, ring_half_height),
+                Friction {
+                    coefficient: control.friction,
+                    combine_rule: CoefficientCombineRule::Average,
+                    ..default()
+                },
+                CollisionGroups::new(Group::GROUP_1, Group::ALL),
+                Transform::from_translation(Vec3::new(0.0, 0.0, z)),
+                GlobalTransform::default(),
+            ));
+        }
+
+        // Visual skin.
+        child.spawn((
+            ProbeVisual,
+            Mesh3d(visual_mesh),
+            MeshMaterial3d(material_handle),
+            Transform {
+                translation: Vec3::new(0.0, 0.0, base_length * 0.5),
+                rotation: Quat::from_rotation_x(FRAC_PI_2),
+                scale: Vec3::ONE,
+            },
+            GlobalTransform::default(),
+            Visibility::default(),
+        ));
+    });
 }
 
 pub fn peristaltic_drive(
     time: Res<Time>,
+    keys: Res<ButtonInput<KeyCode>>,
     control: Res<ControlParams>,
     balloon: Res<BalloonControl>,
-    mut joints: Query<(&mut ImpulseJoint, &SegmentSpring, &SegmentIndex)>,
-    mut frictions: Query<(&SegmentIndex, &mut Friction), With<ProbeSegment>>,
+    mut stretch: ResMut<StretchState>,
+    mut tail_body: Query<(&ProbeBody, Entity, &mut RigidBody), With<CapsuleProbe>>,
+    mut transforms: ParamSet<(
+        Query<&mut Transform, (With<ProbeHead>, Without<ProbeVisual>)>,
+        Query<&mut Transform, With<ProbeVisual>>,
+        Query<(&ProbeRing, &mut Transform, &mut Collider, &mut Friction)>,
+        Query<&mut Friction, With<CapsuleProbe>>,
+        Query<&mut Transform, With<CapsuleProbe>>,
+    )>,
 ) {
-    if !(balloon.head_inflated || balloon.tail_inflated) {
+    let Ok((body, tail_entity, mut body_rb)) = tail_body.single_mut() else {
         return;
+    };
+
+    let mut tail_tf_query = transforms.p4();
+    let Ok(mut body_tf) = tail_tf_query.get_mut(tail_entity) else {
+        return;
+    };
+
+    // Capture current head world position before we change length so head-anchored deflate pulls the tail forward.
+    let current_length = body.base_length * stretch.factor.max(MIN_STRETCH);
+    let head_anchor_z = if balloon.head_inflated {
+        Some(body_tf.translation.z + current_length)
+    } else {
+        None
+    };
+
+    // Manual extension/retraction:
+    // - Extend: tail balloon on, head balloon off, hold Up/I.
+    // - Retract/deflate: Down/K always shrinks length, regardless of anchor state.
+    // - Head balloon on locks length from auto change, but manual deflate still works.
+    let extend_command = balloon.tail_inflated
+        && !balloon.head_inflated
+        && (keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyI));
+    let retract_command = keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyK);
+
+    let dt = time.delta_secs();
+    if extend_command {
+        stretch.factor = (stretch.factor + STRETCH_RATE * dt).min(MAX_STRETCH);
+    } else if retract_command {
+        stretch.factor = (stretch.factor - RETRACT_RATE * dt).max(MIN_STRETCH);
     }
 
-    let amp = 0.35;
-    let freq = 0.6;
-    let phase_step = 0.9;
-    let anchor_on = 1.4;
-    let anchor_off = 0.6;
-    let omega = freq * std::f32::consts::TAU;
-    let t = time.elapsed_secs();
+    // Anchor tail rigidly when tail balloon is on; release when off.
+    *body_rb = if balloon.tail_inflated {
+        RigidBody::KinematicPositionBased
+    } else {
+        RigidBody::Dynamic
+    };
 
-    for (mut joint, spring, idx) in &mut joints {
-        if let TypedJoint::GenericJoint(ref mut j) = joint.data {
-            let base = spring.base_rest * control.tension;
-            let wave = 1.0 + amp * (omega * t + phase_step * idx.0 as f32).sin();
-            let target = (base * wave).max(0.05);
-            j.set_motor_position(JointAxis::LinY, target, control.stiffness, control.damping);
-            j.set_motor_model(JointAxis::LinY, MotorModel::AccelerationBased);
-            j.set_motor_max_force(JointAxis::LinY, 10_000.0);
-        }
+    let length = body.base_length * stretch.factor.max(MIN_STRETCH);
+
+    // If the head is anchored, slide the tail forward/back to keep head world position fixed.
+    if let Some(anchor_z) = head_anchor_z {
+        body_tf.translation.z = anchor_z - length;
     }
 
-    // Modulate friction in phase with the wave: contracting segments anchor harder, relaxing segments slip easier.
-    for (idx, mut fric) in &mut frictions {
-        let wave = (omega * t + phase_step * idx.0 as f32).sin();
-        let scale = if wave > 0.0 { anchor_on } else { anchor_off };
-        fric.coefficient = control.friction * scale;
+    let spacing = length / body.ring_count as f32;
+    let ring_half_height = spacing * 0.45;
+
+    // Update head transform to new tip position.
+    if let Ok(mut head_tf) = transforms.p0().single_mut() {
+        head_tf.translation = Vec3::new(0.0, 0.0, length);
+    }
+
+    // Update visual skin.
+    if let Ok(mut vis_tf) = transforms.p1().single_mut() {
+        vis_tf.translation = Vec3::new(0.0, 0.0, length * 0.5);
+        vis_tf.scale = Vec3::new(1.0, stretch.factor, 1.0);
+    }
+
+    // Tail friction spikes when anchored; head friction spikes when head balloon is on.
+    if let Ok(mut tail_fric) = transforms.p3().single_mut() {
+        let tail_anchor = if balloon.tail_inflated { 8.0 } else { 1.0 };
+        tail_fric.coefficient = control.friction * tail_anchor;
+    }
+
+    // Update rings to cover the stretched length and adjust friction gradient.
+    for (ring, mut tf, mut collider, mut fric) in transforms.p2().iter_mut() {
+        tf.translation = Vec3::new(0.0, 0.0, ring.index as f32 * spacing);
+        *collider = ring_shell_collider(body.base_radius, ring_half_height);
+
+        let t = ring.index as f32 / body.ring_count as f32;
+        let anchor_scale = match (balloon.tail_inflated, balloon.head_inflated) {
+            (true, false) => {
+                // Tail anchored, head free.
+                (1.0 - t) * 8.0 + t * 0.25
+            }
+            (false, true) => {
+                // Head anchored, tail free (for retraction).
+                t * 8.0 + (1.0 - t) * 0.25
+            }
+            (true, true) => {
+                // Both anchored; clamp both ends.
+                ((1.0 - t) * 8.0 + t * 8.0).max(1.0)
+            }
+            _ => 1.0,
+        };
+        fric.coefficient = control.friction * anchor_scale;
     }
 }
 
 pub fn distributed_thrust(
-    keys: Res<ButtonInput<KeyCode>>,
-    control: Res<ControlParams>,
     balloon: Res<BalloonControl>,
     mut query: Query<
         (
@@ -187,43 +279,13 @@ pub fn distributed_thrust(
         With<ProbeSegment>,
     >,
 ) {
-    if !(balloon.head_inflated || balloon.tail_inflated) {
-        for (_, mut force, mut impulse, mut velocity) in &mut query {
-            force.force = Vec3::ZERO;
-            impulse.impulse = Vec3::ZERO;
+    // Pneumatic extension replaces thrust; keep external forces cleared.
+    let active = balloon.tail_inflated && !balloon.head_inflated;
+    for (_, mut force, mut impulse, mut velocity) in &mut query {
+        force.force = Vec3::ZERO;
+        impulse.impulse = Vec3::ZERO;
+        if !active {
             velocity.linvel = Vec3::ZERO;
-        }
-        return;
-    }
-    let impulse_strength = 1.5;
-    let thrust_links = 4usize;
-
-    let forward_pressed = keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyI);
-    let backward_pressed = keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyK);
-    let dir = if forward_pressed {
-        Vec3::Z
-    } else if backward_pressed {
-        -Vec3::Z
-    } else {
-        Vec3::ZERO
-    };
-
-    for (idx, mut force, mut impulse, mut velocity) in &mut query {
-        let weight = if idx.0 < thrust_links {
-            1.0 - idx.0 as f32 / thrust_links as f32
-        } else {
-            0.2
-        };
-
-        if dir != Vec3::ZERO {
-            let thrust = control.thrust * weight.max(0.1);
-            let target_speed = control.target_speed * weight.max(0.1);
-            force.force = dir * thrust;
-            impulse.impulse = dir * impulse_strength * weight;
-            velocity.linvel = dir * target_speed;
-        } else {
-            force.force = Vec3::ZERO;
-            impulse.impulse = Vec3::ZERO;
         }
     }
 }

@@ -13,7 +13,7 @@ use balloon_control::{
 };
 use camera::{camera_controller, setup_camera};
 use controls::{control_inputs_and_apply, spawn_controls_ui, update_controls_ui, ControlParams};
-use probe::{distributed_thrust, peristaltic_drive, spawn_probe};
+use probe::{distributed_thrust, peristaltic_drive, spawn_probe, StretchState};
 use tunnel::{setup_tunnel, tunnel_expansion_system};
 
 pub fn run_app() {
@@ -24,6 +24,7 @@ pub fn run_app() {
             affects_lightmapped_meshes: true,
         })
         .insert_resource(BalloonControl::default())
+        .insert_resource(StretchState::default())
         .insert_resource(ControlParams {
             tension: 0.5,
             stiffness: 500.0,

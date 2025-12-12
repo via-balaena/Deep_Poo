@@ -48,7 +48,7 @@ pub fn setup_tunnel(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Align scales with existing probe (capsule radius ~0.8). Base radius stays roomy; contraction squeezes tighter.
-    let num_rings = 180;
+    let num_rings = 360;
     let ring_spacing = 0.3;
     let start_z = -20.0;
     let base_radius = 1.2;
