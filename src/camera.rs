@@ -50,26 +50,24 @@ pub fn camera_controller(
 
         let yaw = cam.yaw;
         let pitch = cam.pitch;
-        let forward = Vec3::new(
-            yaw.cos() * pitch.cos(),
-            pitch.sin(),
-            yaw.sin() * pitch.cos(),
-        )
-        .normalize();
-        let right = forward.cross(Vec3::Y).normalize();
-        let up = Vec3::Y;
+        let rot = Quat::from_euler(EulerRot::YXZ, yaw, pitch, 0.0);
+        // Camera-relative axes (true free-fly; no world-up lock).
+        // Use -Z as forward to align with Bevy's camera look direction.
+        let forward = rot * -Vec3::Z;
+        let right = rot * Vec3::X;
+        let up = rot * Vec3::Y;
 
         let mut velocity = Vec3::ZERO;
-        if keys.pressed(KeyCode::KeyW) {
+        if keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp) {
             velocity += forward;
         }
-        if keys.pressed(KeyCode::KeyS) {
+        if keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::ArrowDown) {
             velocity -= forward;
         }
-        if keys.pressed(KeyCode::KeyD) {
+        if keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight) {
             velocity += right;
         }
-        if keys.pressed(KeyCode::KeyA) {
+        if keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft) {
             velocity -= right;
         }
         if keys.pressed(KeyCode::Space) {
@@ -83,6 +81,6 @@ pub fn camera_controller(
             transform.translation += velocity.normalize() * cam.speed * dt;
         }
 
-        transform.rotation = Quat::from_euler(EulerRot::YXZ, cam.yaw, cam.pitch, 0.0);
+        transform.rotation = rot;
     }
 }

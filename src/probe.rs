@@ -15,6 +15,8 @@ pub const MIN_STRETCH: f32 = 1.0;
 pub const MAX_STRETCH: f32 = 1.68;
 const STRETCH_RATE: f32 = 0.2; // slowed to ~1/3 speed
 const RETRACT_RATE: f32 = 0.3;
+pub const PROBE_BASE_LENGTH: f32 = 25.0;
+pub const PROBE_START_TAIL_Z: f32 = -10.0;
 
 #[derive(Resource, Default)]
 pub struct StretchState {
@@ -98,12 +100,12 @@ pub fn spawn_probe(
 ) {
     // Elastic probe tube built from ring colliders (like the tunnel) driven by stretch.
     let base_radius = 0.8;
-    let base_length = 25.0;
+    let base_length = PROBE_BASE_LENGTH;
     let ring_count = 24usize;
     let ring_spacing = base_length / ring_count as f32;
     let ring_half_height = ring_spacing * 0.45;
     // Keep similar placement to previous chain: tail back near -16, tip ahead in the straight.
-    let tail_z = -10.0;
+    let tail_z = PROBE_START_TAIL_Z;
     let (tail_center, tail_tangent) = tunnel_centerline(tail_z);
 
     let visual_mesh = meshes.add(Mesh::from(Cylinder {

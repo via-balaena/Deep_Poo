@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::tunnel::{advance_centerline, tunnel_tangent_rotation, TUNNEL_LENGTH, TUNNEL_START_Z};
-use crate::probe::ProbeHead;
+use crate::probe::{ProbeHead, PROBE_BASE_LENGTH, PROBE_START_TAIL_Z};
 
 #[derive(Component)]
 pub struct Polyp {
@@ -39,6 +39,8 @@ pub fn spawn_polyps(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    // Keep all polyps ahead of the initial probe head.
+    let (_, _, head_start_z) = advance_centerline(PROBE_START_TAIL_Z, PROBE_BASE_LENGTH);
     let count = 14;
     let margin = 6.0;
     let usable_length = TUNNEL_LENGTH - margin * 2.0;
@@ -50,6 +52,11 @@ pub fn spawn_polyps(
     for i in 0..count {
         let z_offset = margin + spacing * i as f32;
         let (center, tangent, _) = advance_centerline(TUNNEL_START_Z, z_offset);
+
+        // Skip any position that would spawn behind the initial head.
+        if center.z < head_start_z {
+            continue;
+        }
         let basis = tunnel_tangent_rotation(tangent);
         let right = basis * Vec3::X;
         let up = basis * Vec3::Y;

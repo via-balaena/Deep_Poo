@@ -1,11 +1,11 @@
-# Mission Impossibowel
+# Deep Poo
 
 This is a simplified demonstration of United States patent: [Pub. No.: US 2007/024.9906 A1](https://patentimages.storage.googleapis.com/6b/ce/a2/051225b0d2ff0a/US20070249906A1.pdf)
 
 *you can legally **demonstrate or prototype** patented technologies in a **non-commercial, research or educational context**, including within a physics engine like Bevy + Rapier, as long as you don’t monetize, distribute, or sell the resulting product.*
 
-![demo](media/Endotics_Probe_Demo1.gif)
-![demo](media/Endotics_Probe_Demo2.gif)
+**Video of auto probe in action**
+https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
 
 Simple Bevy + Rapier sandbox with a soft, pneumatic “probe” navigating a snug tunnel.
 
