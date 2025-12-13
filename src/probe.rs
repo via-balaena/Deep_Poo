@@ -300,54 +300,77 @@ pub fn peristaltic_drive(
     let front_start = (length - feel_length).max(0.0);
 
     // Sense wall pressure on the front few rings and nudge the head away from it.
-    let mut pressure = Vec3::ZERO;
-    let mut steering_blend = 0.0;
-    let mut steered_head = head_tangent;
-
-    if !balloon.head_inflated {
-        let Ok(ctx) = rapier.single() else {
-            return;
-        };
-        let front_start_index = body
-            .ring_count
-            .saturating_sub((feel_length / spacing).ceil() as usize + 1);
-        for (entity, ring, _) in front_rings.iter() {
-            if ring.index < front_start_index {
-                continue;
-            }
-            for pair in ctx.contact_pairs_with(entity) {
-                let Some((manifold, contact)) = pair.find_deepest_contact() else {
-                    continue;
-                };
+    let mut pressure_raw = Vec3::ZERO;
+    let Ok(ctx) = rapier.single() else {
+        return;
+    };
+    let front_start_index = body
+        .ring_count
+        .saturating_sub((feel_length / spacing).ceil() as usize + 1);
+    for (entity, ring, _) in front_rings.iter() {
+        if ring.index < front_start_index {
+            continue;
+        }
+        for pair in ctx.contact_pairs_with(entity) {
+            for manifold in pair.manifolds() {
                 let normal: Vec3 = if pair.collider1() == Some(entity) {
                     manifold.normal().into()
                 } else {
                     (-manifold.normal()).into()
                 };
 
-                // Distance is negative when penetrating; treat penetration as pressure magnitude.
-                let penetration = (-contact.dist()).max(0.0);
-                if penetration > 0.0 {
-                    pressure += normal * penetration;
+                for contact in manifold.points() {
+                    // Small bias so light touches register; also include solver impulse so resting contact shows up.
+                    let penetration = (-contact.dist() + 0.01).max(0.0);
+                    let impulse = contact.impulse().max(0.0);
+                    let weight = penetration + impulse * 0.5;
+                    if weight > 0.0 {
+                        pressure_raw += normal * weight;
+                    }
                 }
             }
         }
-
-        let steering_dir = if pressure.length_squared() > 1e-6 {
-            (-pressure).normalize_or_zero()
-        } else {
-            Vec3::ZERO
-        };
-
-        steering_blend = (pressure.length() * 2.0).clamp(0.0, 0.6);
-        steered_head = if steering_blend > 0.0 {
-            head_tangent
-                .lerp(steering_dir, steering_blend)
-                .normalize_or_zero()
-        } else {
-            head_tangent
-        };
     }
+
+    // Apply deadband + low-pass filtering so readings and steering don't flicker.
+    let deadband = 0.02;
+    let target_pressure = if pressure_raw.length() < deadband {
+        Vec3::ZERO
+    } else {
+        pressure_raw
+    };
+
+    // Use previous sensed pressure for filtering.
+    let prev_pressure = sense.pressure_world;
+    let alpha_rise = 1.0 - f32::exp(-8.0 * dt);
+    let alpha_fall = 1.0 - f32::exp(-5.0 * dt);
+    let alpha = if target_pressure.length_squared() >= prev_pressure.length_squared() {
+        alpha_rise
+    } else {
+        alpha_fall
+    };
+    let pressure = prev_pressure.lerp(target_pressure, alpha);
+
+    let steering_dir = if pressure.length_squared() > 1e-6 {
+        (-pressure).normalize_or_zero()
+    } else {
+        Vec3::ZERO
+    };
+
+    // Softer response: lower gain, plus slew limit to avoid snap.
+    let target_blend = (pressure.length() * 0.8).clamp(0.0, 0.35);
+    let prev_blend = sense.steer_strength;
+    let max_delta = 1.5 * dt;
+    let blend_delta = (target_blend - prev_blend).clamp(-max_delta, max_delta);
+    let smoothed_blend = (prev_blend + blend_delta).clamp(0.0, 0.35);
+    let steering_blend = if balloon.head_inflated { 0.0 } else { smoothed_blend };
+    let steered_head = if steering_blend > 0.0 {
+        head_tangent
+            .lerp(steering_dir, steering_blend)
+            .normalize_or_zero()
+    } else {
+        head_tangent
+    };
     let head_rot = tunnel_tangent_rotation(head_tangent);
     sense.pressure_world = pressure;
     sense.pressure_local = head_rot.inverse() * pressure;
