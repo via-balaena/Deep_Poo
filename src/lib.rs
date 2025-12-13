@@ -20,7 +20,7 @@ use controls::{control_inputs_and_apply, ControlParams};
 use hud::{spawn_controls_ui, update_controls_ui};
 use polyp::{polyp_detection_system, polyp_removal_system, spawn_polyps, PolypRemoval, PolypTelemetry};
 use probe::{distributed_thrust, peristaltic_drive, spawn_probe, StretchState, TipSense};
-use tunnel::{setup_tunnel, tunnel_expansion_system};
+use tunnel::{setup_tunnel, tunnel_expansion_system, cecum_detection, start_detection, CecumState};
 
 pub fn run_app() {
     App::new()
@@ -35,6 +35,7 @@ pub fn run_app() {
         .insert_resource(PolypTelemetry::default())
         .insert_resource(PolypRemoval::default())
         .insert_resource(AutoDrive::default())
+        .insert_resource(CecumState::default())
         .insert_resource(ControlParams {
             tension: 0.5,
             stiffness: 500.0,
@@ -67,12 +68,14 @@ pub fn run_app() {
             (
                 balloon_control_input,
                 balloon_body_update,
-                balloon_marker_update,
                 auto_toggle,
                 auto_inchworm,
+                balloon_marker_update,
                 camera_controller,
                 control_inputs_and_apply,
                 update_controls_ui,
+                cecum_detection,
+                start_detection,
                 tunnel_expansion_system,
                 polyp_detection_system,
                 polyp_removal_system.after(polyp_detection_system),

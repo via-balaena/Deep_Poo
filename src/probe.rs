@@ -250,10 +250,16 @@ pub fn peristaltic_drive(
     // - Retract/deflate: Down/K always shrinks length, regardless of anchor state.
     // - Head balloon on locks length from auto change, but manual deflate still works.
     let interlocked = balloon.tail_inflated && balloon.head_inflated;
-    let extend_command = !interlocked
+    let manual_extend_forward = !interlocked
         && balloon.tail_inflated
         && !balloon.head_inflated
         && (keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyI));
+    // Allow reverse-style extension when head is anchored and tail free (front clamp engaged).
+    let manual_extend_reverse = !interlocked
+        && balloon.head_inflated
+        && !balloon.tail_inflated
+        && (keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyI));
+    let extend_command = manual_extend_forward || manual_extend_reverse;
     let retract_command = !interlocked
         && (keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyK));
 
@@ -261,7 +267,7 @@ pub fn peristaltic_drive(
     // Pause manual length changes while removing a polyp.
     let autopause = removal.in_progress;
 
-    // Slow extend as we approach a detected polyp to avoid overshooting.
+    // Slow extend as we approach a detected polyp or the cecum to avoid overshooting.
     let slow_factor = if auto.enabled && polyp.detected {
         polyp
             .nearest_distance
@@ -270,6 +276,7 @@ pub fn peristaltic_drive(
     } else {
         1.0
     };
+
 
     if (extend_command || auto.enabled && auto.extend) && !autopause {
         stretch.factor = (stretch.factor + STRETCH_RATE * dt * slow_factor).min(MAX_STRETCH);

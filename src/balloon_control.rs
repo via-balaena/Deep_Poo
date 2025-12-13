@@ -50,9 +50,15 @@ pub fn balloon_control_input(
     };
 
     let tip_pos = tip_tf.translation();
-    let tip_forward = tip_tf.forward();
+    let mut tip_forward = (tip_tf.rotation() * Vec3::Z).normalize_or_zero();
+    if tip_forward.length_squared() == 0.0 {
+        tip_forward = Vec3::Z;
+    }
     let tail_pos = tail_tf.translation();
-    let tail_forward = tail_tf.forward();
+    let mut tail_forward = (tail_tf.rotation() * Vec3::Z).normalize_or_zero();
+    if tail_forward.length_squared() == 0.0 {
+        tail_forward = Vec3::Z;
+    }
 
     if !balloon.initialized {
         balloon.initialized = true;
@@ -65,10 +71,10 @@ pub fn balloon_control_input(
         balloon.tail_inflated = !balloon.tail_inflated;
     }
 
-    // Place head balloon slightly ahead of the probe tip along its facing direction.
-    balloon.position = tip_pos + tip_forward * 3.5;
-    // Offset rear balloon toward the distal end (behind the tail) along the probe direction.
-    balloon.rear_position = tail_pos - tail_forward * 1.0;
+    // Place head balloon behind the tip along its facing direction.
+    balloon.position = tip_pos - tip_forward * 3.5;
+    // Offset rear balloon ahead of the tail along the probe direction.
+    balloon.rear_position = tail_pos + tail_forward * 1.0;
 }
 
 #[derive(Component)]

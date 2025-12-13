@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use smallvec::{smallvec, SmallVec};
 
-use crate::probe::ProbeHead;
+use crate::probe::{ProbeHead, CapsuleProbe};
 use crate::balloon_control::BalloonControl;
 
 pub const TUNNEL_START_Z: f32 = -20.0;
@@ -21,6 +21,22 @@ pub struct TunnelRing {
 
 #[derive(Component)]
 pub struct TunnelRingVisual;
+
+#[derive(Component)]
+pub struct CecumMarker;
+
+#[derive(Component)]
+pub struct StartMarker;
+
+#[derive(Resource, Default)]
+pub struct CecumState {
+    pub reached: bool,
+}
+
+#[derive(Resource, Default)]
+pub struct StartState {
+    pub reached: bool,
+}
 
 // Simple lerp helper for smooth transitions.
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
@@ -205,6 +221,63 @@ pub fn setup_tunnel(
             ));
         });
     }
+
+    // Cecum marker at tunnel end to confirm arrival.
+    let (end_center, end_tangent) = tunnel_centerline(TUNNEL_START_Z + TUNNEL_LENGTH);
+    let marker_mesh = meshes.add(Mesh::from(bevy::math::primitives::Sphere { radius: 0.5 }));
+    let marker_mat = materials.add(StandardMaterial {
+        base_color: Color::srgba(1.0, 0.9, 0.2, 0.9),
+        emissive: Color::srgba(1.0, 0.8, 0.1, 1.0).into(),
+        alpha_mode: AlphaMode::Blend,
+        unlit: true,
+        ..default()
+    });
+
+    commands.spawn((
+        CecumMarker,
+        Sensor,
+        Collider::ball(0.5),
+        CollisionGroups::new(Group::GROUP_3, Group::GROUP_1 | Group::GROUP_2),
+        Mesh3d(marker_mesh),
+        MeshMaterial3d(marker_mat),
+        Transform {
+            translation: end_center,
+            rotation: tunnel_tangent_rotation(end_tangent),
+            ..default()
+        },
+        GlobalTransform::default(),
+        Visibility::default(),
+    ));
+
+    // Start marker near tunnel entrance for reverse stop.
+    let (start_center, start_tangent) = tunnel_centerline(TUNNEL_START_Z);
+    let start_mesh = meshes.add(Mesh::from(bevy::math::primitives::Sphere { radius: 0.5 }));
+    let start_mat = materials.add(StandardMaterial {
+        base_color: Color::srgba(0.2, 0.8, 1.0, 0.9),
+        emissive: Color::srgba(0.1, 0.6, 1.0, 1.0).into(),
+        alpha_mode: AlphaMode::Blend,
+        unlit: true,
+        ..default()
+    });
+
+    commands.spawn((
+        StartMarker,
+        Sensor,
+        Collider::ball(0.5),
+        CollisionGroups::new(Group::GROUP_3, Group::GROUP_1 | Group::GROUP_2),
+        Mesh3d(start_mesh),
+        MeshMaterial3d(start_mat),
+        Transform {
+            translation: start_center,
+            rotation: tunnel_tangent_rotation(start_tangent),
+            ..default()
+        },
+        GlobalTransform::default(),
+        Visibility::default(),
+    ));
+
+    commands.insert_resource(CecumState::default());
+    commands.insert_resource(StartState::default());
 }
 
 pub fn tunnel_expansion_system(
@@ -298,5 +371,64 @@ pub fn tunnel_expansion_system(
             / (ring.base_radius - ring.contracted_radius))
             .clamp(0.0, 1.0);
         friction.coefficient = lerp(relaxed_friction, contracted_friction, contraction_factor);
+    }
+}
+
+pub fn cecum_detection(
+    mut state: ResMut<CecumState>,
+    head_q: Query<&GlobalTransform, With<ProbeHead>>,
+    marker_q: Query<&GlobalTransform, With<CecumMarker>>,
+) {
+    let Ok(head_tf) = head_q.single() else {
+        return;
+    };
+    let Ok(marker_tf) = marker_q.single() else {
+        return;
+    };
+
+    let dist = head_tf.translation().distance(marker_tf.translation());
+    let head_z = head_tf.translation().z;
+    let end_z = TUNNEL_START_Z + TUNNEL_LENGTH;
+    // Check angle so we only flag when looking toward the end; allow some buffer before contact.
+    let head_forward = (head_tf.rotation() * Vec3::Z).normalize_or_zero();
+    let to_marker = (marker_tf.translation() - head_tf.translation()).normalize_or_zero();
+    let facing_ok = head_forward.dot(to_marker) > 0.3;
+    if (dist < 3.0 && facing_ok) || head_z >= end_z - 2.0 {
+        state.reached = true;
+    }
+}
+
+pub fn start_detection(
+    mut start: ResMut<StartState>,
+    mut cecum: ResMut<CecumState>,
+    mut exit: MessageWriter<AppExit>,
+    head_q: Query<&GlobalTransform, With<ProbeHead>>,
+    tail_q: Query<&GlobalTransform, (With<CapsuleProbe>, Without<ProbeHead>)>,
+    marker_q: Query<&GlobalTransform, With<StartMarker>>,
+) {
+    let Ok(head_tf) = head_q.single() else {
+        return;
+    };
+    let Ok(tail_tf) = tail_q.single() else {
+        return;
+    };
+    let Ok(marker_tf) = marker_q.single() else {
+        return;
+    };
+
+    let head_dist = head_tf.translation().distance(marker_tf.translation());
+    let tail_dist = tail_tf.translation().distance(marker_tf.translation());
+    let dist = head_dist.min(tail_dist);
+    let head_z = head_tf.translation().z;
+    let tail_z = tail_tf.translation().z;
+    let start_z = TUNNEL_START_Z;
+    // On the return leg (cecum already reached), stop the app as soon as either end brushes the start marker.
+    if cecum.reached && (dist < 3.0 || head_z <= start_z + 2.5 || tail_z <= start_z + 2.5) {
+        start.reached = true;
+        exit.write(AppExit::Success);
+        cecum.reached = false; // reset cecum flag to allow reruns
+    } else if dist < 3.0 || head_z <= start_z + 2.5 || tail_z <= start_z + 2.5 {
+        // Mark start reached for any future logic, even if we haven't yet hit the cecum.
+        start.reached = true;
     }
 }
