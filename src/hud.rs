@@ -7,6 +7,7 @@ use bevy::ui::{
 use crate::controls::ControlParams;
 use crate::probe::TipSense;
 use crate::polyp::PolypTelemetry;
+use crate::vision::{BurnInferenceState, FrontCameraState};
 
 #[derive(Component)]
 pub struct ControlText;
@@ -132,6 +133,22 @@ pub fn spawn_controls_ui(mut commands: Commands) {
                 TextColor(soft),
             ),
             (
+                TextSpan::from("VISION :: cam=OFF burn=--\n"),
+                TextFont {
+                    font_size: 15.0,
+                    ..default()
+                },
+                TextColor(soft),
+            ),
+            (
+                TextSpan::from("CONSENSUS :: hold"),
+                TextFont {
+                    font_size: 15.0,
+                    ..default()
+                },
+                TextColor(accent),
+            ),
+            (
                 TextSpan::from("REMOVAL :: idle"),
                 TextFont {
                     font_size: 15.0,
@@ -147,10 +164,17 @@ pub fn update_controls_ui(
     control: Res<ControlParams>,
     sense: Res<TipSense>,
     polyps: Res<PolypTelemetry>,
+    front_cam: Res<FrontCameraState>,
+    burn: Res<BurnInferenceState>,
     ui: Single<Entity, (With<ControlText>, With<Text>)>,
     mut writer: TextUiWriter,
 ) {
-    if control.is_changed() || sense.is_changed() || polyps.is_changed() {
+    if control.is_changed()
+        || sense.is_changed()
+        || polyps.is_changed()
+        || front_cam.is_changed()
+        || burn.is_changed()
+    {
         *writer.text(*ui, 1) = format!("TNS :: {:.2} [ [ ] ]\n", control.tension);
         *writer.text(*ui, 2) = format!("STF :: {:.0} [ ; ' ]\n", control.stiffness);
         *writer.text(*ui, 3) = format!("DMP :: {:.1} [ , . ]\n", control.damping);
@@ -174,11 +198,34 @@ pub fn update_controls_ui(
             .map(|d| format!("{:.2} m", d))
             .unwrap_or_else(|| "--".into());
         *writer.text(*ui, 11) = format!("NEAREST :: {}", nearest_str);
+        let cam_state = if front_cam.active { "ON" } else { "OFF" };
+        let burn_state = burn
+            .last_result
+            .as_ref()
+            .map(|r| {
+                if r.positive {
+                    format!("ON ({:.0}%)", r.confidence * 100.0)
+                } else {
+                    format!("off ({:.0}%)", r.confidence * 100.0)
+                }
+            })
+            .unwrap_or_else(|| "--".to_string());
+        *writer.text(*ui, 12) = format!("VISION :: cam={} burn={}", cam_state, burn_state);
+        let consensus = if polyps.consensus_ready {
+            "go"
+        } else if polyps.vision_detected {
+            "wait classic"
+        } else if polyps.classic_detected {
+            "wait vision"
+        } else {
+            "hold"
+        };
+        *writer.text(*ui, 13) = format!("CONSENSUS :: {}", consensus);
         let removal_str = if polyps.removing {
             format!("REMOVAL :: {:.0}%", polyps.remove_progress * 100.0)
         } else {
             "REMOVAL :: idle".to_string()
         };
-        *writer.text(*ui, 12) = removal_str;
+        *writer.text(*ui, 14) = removal_str;
     }
 }

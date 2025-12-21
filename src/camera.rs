@@ -9,12 +9,21 @@ pub struct Flycam {
     pub mouse_sensitivity: f32,
 }
 
+#[derive(Component)]
+pub struct ProbePovCamera;
+
+#[derive(Resource, Default)]
+pub struct PovState {
+    pub use_probe: bool,
+}
+
 pub fn setup_camera(mut commands: Commands) {
     let transform = Transform::from_xyz(-6.0, 4.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y);
     let (yaw, pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
 
     commands.spawn((
         Camera3d::default(),
+        Camera::default(),
         transform,
         Flycam {
             yaw,
@@ -82,5 +91,27 @@ pub fn camera_controller(
         }
 
         transform.rotation = rot;
+    }
+}
+
+pub fn pov_toggle_system(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut state: ResMut<PovState>,
+    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<ProbePovCamera>)>,
+    mut probe_cams: Query<&mut Camera, With<ProbePovCamera>>,
+) {
+    if !keys.just_pressed(KeyCode::KeyC) {
+        return;
+    }
+
+    state.use_probe = !state.use_probe;
+    let use_probe = state.use_probe;
+    let use_free = !use_probe;
+
+    for mut cam in &mut free_cams {
+        cam.is_active = use_free;
+    }
+    for mut cam in &mut probe_cams {
+        cam.is_active = use_probe;
     }
 }

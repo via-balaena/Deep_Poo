@@ -10,6 +10,7 @@ use crate::balloon_control::BalloonControl;
 pub const TUNNEL_START_Z: f32 = -20.0;
 pub const TUNNEL_LENGTH: f32 = 108.0;
 pub const TUNNEL_BEND_AMPLITUDE: f32 = 10.0;
+pub const TUNNEL_BASE_RADIUS: f32 = 1.2;
 
 #[derive(Component)]
 pub struct TunnelRing {
@@ -36,6 +37,11 @@ pub struct CecumState {
 #[derive(Resource, Default)]
 pub struct StartState {
     pub reached: bool,
+}
+
+pub fn wall_base_color() -> Color {
+    // Brighter, mucosa-like pinkish tone with some translucency.
+    Color::srgba(0.86, 0.62, 0.58, 0.42)
 }
 
 // Simple lerp helper for smooth transitions.
@@ -160,7 +166,7 @@ pub fn setup_tunnel(
     // Align scales with existing probe (capsule radius ~0.8). Base radius stays roomy; contraction squeezes tighter.
     let num_rings = 360;
     let ring_spacing = TUNNEL_LENGTH / (num_rings - 1) as f32;
-    let base_radius = 1.2;
+    let base_radius = TUNNEL_BASE_RADIUS;
     let contracted_radius = 0.9;
     let half_height = 0.15;
 
@@ -169,7 +175,7 @@ pub fn setup_tunnel(
         half_height,
     }));
 
-    let base_color = Color::srgba(0.25, 0.22, 0.18, 0.28);
+    let base_color = wall_base_color();
     let mat = materials.add(StandardMaterial {
         base_color,
         alpha_mode: AlphaMode::Blend,
@@ -314,7 +320,7 @@ pub fn tunnel_expansion_system(
     let soft_contract_radius = 0.75;
     let contract_speed = 6.5;
 
-    let base_color = Color::srgba(0.25, 0.22, 0.18, 0.28);
+    let base_color = wall_base_color();
     let balloon_color = Color::srgba(1.0, 0.85, 0.35, 0.6);
     let relaxed_friction = 1.2;
     let contracted_friction = 1.8;

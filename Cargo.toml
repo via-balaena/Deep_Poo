@@ -7,3 +7,5 @@ edition = "2024"
 bevy = "0.17.3"
 bevy_rapier3d = { version = "0.32", features = [ "simd-stable", "debug-render-3d" ] }
 smallvec = "1.13"
+bevy_mesh = "0.17.3"
+futures-lite = "2.3"

@@ -19,9 +19,13 @@ https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
 
 ## Controls
 - `P` begin automated process
+- `C` toggle camera between free-fly and probe POV
 
 
 ## Running
 ```bash
 cargo run --release
 ```
+
+## Debug collider view
+- Set `RAPIER_DEBUG_WIREFRAMES` in `src/lib.rs` to `true` to show collider wireframes (orange), or `false` to hide them. Rebuild/run after changing.

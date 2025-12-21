@@ -6,21 +6,32 @@ pub mod autopilot;
 pub mod polyp;
 pub mod probe;
 pub mod tunnel;
+pub mod vision;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+
+const RAPIER_DEBUG_WIREFRAMES: bool = true;
 
 use balloon_control::{
     balloon_body_update, balloon_control_input, balloon_marker_update, spawn_balloon_body,
     spawn_balloon_marker, BalloonControl,
 };
 use autopilot::{auto_inchworm, auto_toggle, AutoDrive};
-use camera::{camera_controller, setup_camera};
+use camera::{camera_controller, pov_toggle_system, setup_camera, PovState};
 use controls::{control_inputs_and_apply, ControlParams};
 use hud::{spawn_controls_ui, update_controls_ui};
-use polyp::{polyp_detection_system, polyp_removal_system, spawn_polyps, PolypRemoval, PolypTelemetry};
+use polyp::{
+    apply_detection_votes, polyp_detection_system, polyp_removal_system, spawn_polyps,
+    PolypDetectionVotes, PolypRemoval, PolypTelemetry,
+};
 use probe::{distributed_thrust, peristaltic_drive, spawn_probe, StretchState, TipSense};
 use tunnel::{setup_tunnel, tunnel_expansion_system, cecum_detection, start_detection, CecumState};
+use vision::{
+    capture_front_camera_frame, poll_burn_inference, schedule_burn_inference,
+    track_front_camera_state, BurnDetector, BurnInferenceState, FrontCameraFrameBuffer,
+    FrontCameraState,
+};
 
 pub fn run_app() {
     App::new()
@@ -33,9 +44,15 @@ pub fn run_app() {
         .insert_resource(StretchState::default())
         .insert_resource(TipSense::default())
         .insert_resource(PolypTelemetry::default())
+        .insert_resource(PolypDetectionVotes::default())
         .insert_resource(PolypRemoval::default())
         .insert_resource(AutoDrive::default())
         .insert_resource(CecumState::default())
+        .insert_resource(PovState::default())
+        .insert_resource(FrontCameraState::default())
+        .insert_resource(FrontCameraFrameBuffer::default())
+        .insert_resource(BurnDetector::default())
+        .insert_resource(BurnInferenceState::default())
         .insert_resource(ControlParams {
             tension: 0.5,
             stiffness: 500.0,
@@ -47,7 +64,7 @@ pub fn run_app() {
         })
         .add_plugins(DefaultPlugins)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(ConditionalRapierDebug)
         .add_systems(
             Startup,
             (
@@ -72,13 +89,23 @@ pub fn run_app() {
                 auto_inchworm,
                 balloon_marker_update,
                 camera_controller,
+                pov_toggle_system,
+                track_front_camera_state,
+                capture_front_camera_frame.after(track_front_camera_state),
+                schedule_burn_inference.after(capture_front_camera_frame),
+                poll_burn_inference.after(schedule_burn_inference),
+                apply_detection_votes
+                    .after(polyp_detection_system)
+                    .after(poll_burn_inference),
                 control_inputs_and_apply,
                 update_controls_ui,
                 cecum_detection,
                 start_detection,
                 tunnel_expansion_system,
                 polyp_detection_system,
-                polyp_removal_system.after(polyp_detection_system),
+                polyp_removal_system
+                    .after(polyp_detection_system)
+                    .after(apply_detection_votes),
             ),
         )
         .add_systems(
@@ -105,5 +132,14 @@ fn spawn_environment(mut commands: Commands) {
 fn disable_gravity(mut configs: Query<&mut RapierConfiguration, With<DefaultRapierContext>>) {
     for mut config in &mut configs {
         config.gravity = Vec3::new(0.0, -0.5, 0.0);
+    }
+}
+
+struct ConditionalRapierDebug;
+impl Plugin for ConditionalRapierDebug {
+    fn build(&self, app: &mut App) {
+        if RAPIER_DEBUG_WIREFRAMES {
+            app.add_plugins(RapierDebugRenderPlugin::default());
+        }
     }
 }
