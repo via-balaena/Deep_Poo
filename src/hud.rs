@@ -7,7 +7,7 @@ use bevy::ui::{
 use crate::controls::ControlParams;
 use crate::probe::TipSense;
 use crate::polyp::PolypTelemetry;
-use crate::vision::{BurnInferenceState, FrontCameraState};
+use crate::vision::{BurnInferenceState, FrontCameraState, RecorderState};
 
 #[derive(Component)]
 pub struct ControlText;
@@ -149,6 +149,14 @@ pub fn spawn_controls_ui(mut commands: Commands) {
                 TextColor(accent),
             ),
             (
+                TextSpan::from("REC :: off\n"),
+                TextFont {
+                    font_size: 15.0,
+                    ..default()
+                },
+                TextColor(soft),
+            ),
+            (
                 TextSpan::from("REMOVAL :: idle"),
                 TextFont {
                     font_size: 15.0,
@@ -166,6 +174,7 @@ pub fn update_controls_ui(
     polyps: Res<PolypTelemetry>,
     front_cam: Res<FrontCameraState>,
     burn: Res<BurnInferenceState>,
+    recorder: Res<RecorderState>,
     ui: Single<Entity, (With<ControlText>, With<Text>)>,
     mut writer: TextUiWriter,
 ) {
@@ -174,6 +183,7 @@ pub fn update_controls_ui(
         || polyps.is_changed()
         || front_cam.is_changed()
         || burn.is_changed()
+        || recorder.is_changed()
     {
         *writer.text(*ui, 1) = format!("TNS :: {:.2} [ [ ] ]\n", control.tension);
         *writer.text(*ui, 2) = format!("STF :: {:.0} [ ; ' ]\n", control.stiffness);
@@ -221,11 +231,17 @@ pub fn update_controls_ui(
             "hold"
         };
         *writer.text(*ui, 13) = format!("CONSENSUS :: {}", consensus);
+        let rec_state = if recorder.enabled {
+            format!("REC :: on (#{})", recorder.frame_idx)
+        } else {
+            "REC :: off".to_string()
+        };
+        *writer.text(*ui, 14) = rec_state;
         let removal_str = if polyps.removing {
             format!("REMOVAL :: {:.0}%", polyps.remove_progress * 100.0)
         } else {
             "REMOVAL :: idle".to_string()
         };
-        *writer.text(*ui, 14) = removal_str;
+        *writer.text(*ui, 15) = removal_str;
     }
 }

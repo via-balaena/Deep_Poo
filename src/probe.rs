@@ -1,5 +1,6 @@
 use bevy::math::primitives::Cylinder;
 use bevy::prelude::*;
+use bevy::camera::RenderTarget;
 use bevy_rapier3d::prelude::*;
 use bevy_rapier3d::plugin::ReadRapierContext;
 use std::f32::consts::FRAC_PI_2;
@@ -10,7 +11,7 @@ use crate::balloon_control::BalloonControl;
 use crate::autopilot::AutoDrive;
 use crate::polyp::{PolypRemoval, PolypTelemetry};
 use crate::tunnel::{advance_centerline, tunnel_centerline, tunnel_tangent_rotation};
-use crate::vision::FrontCamera;
+use crate::vision::{FrontCamera, FrontCaptureCamera, FrontCaptureTarget};
 
 pub const MIN_STRETCH: f32 = 1.0;
 // Allow stretching up to +68% of the deflated length.
@@ -99,6 +100,7 @@ pub fn spawn_probe(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     control: Res<ControlParams>,
+    capture: Res<FrontCaptureTarget>,
 ) {
     // Elastic probe tube built from ring colliders (like the tunnel) driven by stretch.
     let base_radius = 0.8;
@@ -175,16 +177,33 @@ pub fn spawn_probe(
             ))
             .with_children(|head_child| {
                 head_child.spawn((
-                ProbePovCamera,
-                FrontCamera,
-                Camera3d::default(),
-                Camera {
-                    is_active: false,
-                    ..default()
-                },
+                    ProbePovCamera,
+                    FrontCamera,
+                    Camera3d::default(),
+                    Camera {
+                        is_active: false,
+                        ..default()
+                    },
                     Transform {
                         translation: Vec3::new(0.0, 0.0, 0.35),
                         // Flip so camera forward (-Z) points down the probe's forward tangent.
+                        rotation: Quat::from_rotation_y(std::f32::consts::PI),
+                        ..default()
+                    },
+                    GlobalTransform::default(),
+                    Visibility::default(),
+                    InheritedVisibility::default(),
+                ));
+                head_child.spawn((
+                    FrontCaptureCamera,
+                    Camera3d::default(),
+                    Camera {
+                        is_active: true,
+                        target: RenderTarget::Image(capture.handle.clone().into()),
+                        ..default()
+                    },
+                    Transform {
+                        translation: Vec3::new(0.0, 0.0, 0.35),
                         rotation: Quat::from_rotation_y(std::f32::consts::PI),
                         ..default()
                     },

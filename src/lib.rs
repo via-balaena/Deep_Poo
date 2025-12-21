@@ -28,9 +28,10 @@ use polyp::{
 use probe::{distributed_thrust, peristaltic_drive, spawn_probe, StretchState, TipSense};
 use tunnel::{setup_tunnel, tunnel_expansion_system, cecum_detection, start_detection, CecumState};
 use vision::{
-    capture_front_camera_frame, poll_burn_inference, schedule_burn_inference,
-    track_front_camera_state, BurnDetector, BurnInferenceState, FrontCameraFrameBuffer,
-    FrontCameraState,
+    capture_front_camera_frame, on_front_capture_readback, poll_burn_inference,
+    schedule_burn_inference, setup_front_capture, track_front_camera_state, BurnDetector,
+    BurnInferenceState, FrontCameraFrameBuffer, FrontCaptureReadback, FrontCameraState,
+    RecorderConfig, RecorderState, record_front_camera_metadata, recorder_toggle_hotkey,
 };
 
 pub fn run_app() {
@@ -51,8 +52,11 @@ pub fn run_app() {
         .insert_resource(PovState::default())
         .insert_resource(FrontCameraState::default())
         .insert_resource(FrontCameraFrameBuffer::default())
+        .insert_resource(FrontCaptureReadback::default())
         .insert_resource(BurnDetector::default())
         .insert_resource(BurnInferenceState::default())
+        .insert_resource(RecorderConfig::default())
+        .insert_resource(RecorderState::default())
         .insert_resource(ControlParams {
             tension: 0.5,
             stiffness: 500.0,
@@ -69,6 +73,7 @@ pub fn run_app() {
             Startup,
             (
                 setup_camera,
+                setup_front_capture,
                 spawn_environment,
                 disable_gravity,
                 setup_tunnel,
@@ -80,6 +85,7 @@ pub fn run_app() {
             )
                 .chain(),
         )
+        .add_observer(on_front_capture_readback)
         .add_systems(
             Update,
             (
@@ -97,6 +103,13 @@ pub fn run_app() {
                 apply_detection_votes
                     .after(polyp_detection_system)
                     .after(poll_burn_inference),
+            ),
+        )
+        .add_systems(
+            Update,
+            (
+                recorder_toggle_hotkey,
+                record_front_camera_metadata.after(capture_front_camera_frame),
                 control_inputs_and_apply,
                 update_controls_ui,
                 cecum_detection,

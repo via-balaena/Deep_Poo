@@ -27,5 +27,18 @@ https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
 cargo run --release
 ```
 
+## Capturing + overlays
+- Toggle to probe camera: press `C` until HUD shows `VISION :: cam=ON`.
+- Start/stop recording: press `L` (HUD shows `REC :: on`). Frames + JSON labels saved under `assets/datasets/captures/run_<timestamp>/`.
+- PNGs are raw; boxes live in the JSON (`labels/frame_XXXXX.json`).
+- Render boxes onto PNGs (writes to `<run>/overlays` by default):
+  ```bash
+  cargo run --release --bin overlay_labels -- assets/datasets/captures/run_<timestamp>
+  ```
+  Or pick an output dir:
+  ```bash
+  cargo run --release --bin overlay_labels -- assets/datasets/captures/run_<timestamp> /tmp/overlays
+  ```
+
 ## Debug collider view
 - Set `RAPIER_DEBUG_WIREFRAMES` in `src/lib.rs` to `true` to show collider wireframes (orange), or `false` to hide them. Rebuild/run after changing.
