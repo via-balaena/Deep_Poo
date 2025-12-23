@@ -59,6 +59,8 @@ pub struct DatasetConfig {
     pub max_boxes: usize,
     /// Shuffle samples before iteration.
     pub shuffle: bool,
+    /// Seed for reproducible shuffling.
+    pub seed: Option<u64>,
 }
 
 impl Default for DatasetConfig {
@@ -69,6 +71,7 @@ impl Default for DatasetConfig {
             flip_horizontal_prob: 0.0,
             max_boxes: 16,
             shuffle: true,
+            seed: None,
         }
     }
 }
@@ -159,6 +162,7 @@ pub fn load_run_dataset(
                 flip_horizontal_prob: 0.0,
                 max_boxes: usize::MAX,
                 shuffle: false,
+                seed: None,
             },
         )?;
         samples.push(sample);
@@ -412,6 +416,7 @@ pub struct BatchIter {
     indices: Vec<SampleIndex>,
     cursor: usize,
     cfg: DatasetConfig,
+    rng: rand::rngs::StdRng,
 }
 
 #[cfg(feature = "burn_runtime")]
@@ -428,15 +433,19 @@ impl BatchIter {
         mut indices: Vec<SampleIndex>,
         cfg: DatasetConfig,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        use rand::seq::SliceRandom;
+        let mut rng = match cfg.seed {
+            Some(seed) => rand::rngs::StdRng::seed_from_u64(seed),
+            None => rand::rngs::StdRng::from_entropy(),
+        };
         if cfg.shuffle {
-            use rand::seq::SliceRandom;
-            let mut rng = rand::thread_rng();
             indices.shuffle(&mut rng);
         }
         Ok(Self {
             indices,
             cursor: 0,
             cfg,
+            rng,
         })
     }
 
