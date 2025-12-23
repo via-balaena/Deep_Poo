@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 
 use crate::balloon_control::BalloonControl;
+use crate::camera::{Flycam, PovState, ProbePovCamera};
+use crate::cli::RunMode;
 use crate::polyp::PolypRemoval;
-use crate::probe::StretchState;
 use crate::probe::ProbeHead;
+use crate::probe::StretchState;
 use crate::tunnel::{CecumState, TUNNEL_LENGTH, TUNNEL_START_Z};
+use crate::vision::{AutoRecordTimer, RecorderState};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AutoStage {
@@ -51,7 +54,6 @@ impl Default for AutoDrive {
     }
 }
 
-
 pub fn auto_toggle(keys: Res<ButtonInput<KeyCode>>, mut auto: ResMut<AutoDrive>) {
     if keys.just_pressed(KeyCode::KeyP) {
         auto.enabled = !auto.enabled;
@@ -63,6 +65,99 @@ pub fn auto_toggle(keys: Res<ButtonInput<KeyCode>>, mut auto: ResMut<AutoDrive>)
         auto.last_head_z = 0.0;
         auto.stuck_time = 0.0;
         auto.primed_reverse = false;
+    }
+}
+
+#[derive(Resource, Default)]
+pub struct DataRun {
+    pub active: bool,
+}
+
+#[derive(Resource, Default)]
+pub struct DatagenInit {
+    pub started: bool,
+    pub elapsed: f32,
+}
+
+pub fn data_run_toggle(
+    keys: Res<ButtonInput<KeyCode>>,
+    mut auto: ResMut<AutoDrive>,
+    mut pov: ResMut<PovState>,
+    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<ProbePovCamera>)>,
+    mut probe_cams: Query<&mut Camera, With<ProbePovCamera>>,
+    mut auto_timer: ResMut<AutoRecordTimer>,
+    recorder: Res<RecorderState>,
+    mut data_run: ResMut<DataRun>,
+) {
+    if !keys.just_pressed(KeyCode::KeyO) {
+        return;
+    }
+
+    let enabling = !data_run.active;
+    data_run.active = enabling;
+
+    // Toggle autopilot to match data run state.
+    auto.enabled = enabling;
+    auto.stage = AutoStage::AnchorTail;
+    auto.timer = 0.2;
+    auto.extend = false;
+    auto.retract = false;
+    auto.dir = AutoDir::Forward;
+    auto.last_head_z = 0.0;
+    auto.stuck_time = 0.0;
+    auto.primed_reverse = false;
+
+    // Force probe POV active when starting.
+    if enabling {
+        pov.use_probe = true;
+        for mut cam in &mut free_cams {
+            cam.is_active = false;
+        }
+        for mut cam in &mut probe_cams {
+            cam.is_active = true;
+        }
+    }
+
+    // Reset/arm auto-record timer when starting a data run.
+    if enabling && !recorder.enabled {
+        auto_timer.timer = Timer::from_seconds(8.0, TimerMode::Once);
+    } else {
+        auto_timer.timer.reset();
+    }
+}
+
+pub fn datagen_autostart(
+    mode: Res<RunMode>,
+    mut init: ResMut<DatagenInit>,
+    mut auto: ResMut<AutoDrive>,
+    mut data_run: ResMut<DataRun>,
+    mut pov: ResMut<PovState>,
+    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<ProbePovCamera>)>,
+    mut probe_cams: Query<&mut Camera, With<ProbePovCamera>>,
+) {
+    if *mode != RunMode::Datagen || init.started {
+        return;
+    }
+    init.started = true;
+    init.elapsed = 0.0;
+    data_run.active = true;
+
+    auto.enabled = true;
+    auto.stage = AutoStage::AnchorTail;
+    auto.timer = 0.2;
+    auto.extend = false;
+    auto.retract = false;
+    auto.dir = AutoDir::Forward;
+    auto.last_head_z = 0.0;
+    auto.stuck_time = 0.0;
+    auto.primed_reverse = false;
+
+    pov.use_probe = true;
+    for mut cam in &mut free_cams {
+        cam.is_active = false;
+    }
+    for mut cam in &mut probe_cams {
+        cam.is_active = true;
     }
 }
 

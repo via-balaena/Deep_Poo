@@ -1,14 +1,17 @@
+use bevy::camera::RenderTarget;
 use bevy::math::primitives::Cylinder;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 use bevy_rapier3d::plugin::ReadRapierContext;
+use bevy_rapier3d::prelude::*;
 use std::f32::consts::FRAC_PI_2;
 
-use crate::controls::ControlParams;
-use crate::balloon_control::BalloonControl;
 use crate::autopilot::AutoDrive;
+use crate::balloon_control::BalloonControl;
+use crate::camera::ProbePovCamera;
+use crate::controls::ControlParams;
 use crate::polyp::{PolypRemoval, PolypTelemetry};
 use crate::tunnel::{advance_centerline, tunnel_centerline, tunnel_tangent_rotation};
+use crate::vision::{FrontCamera, FrontCaptureCamera, FrontCaptureTarget};
 
 pub const MIN_STRETCH: f32 = 1.0;
 // Allow stretching up to +68% of the deflated length.
@@ -86,7 +89,11 @@ fn ring_shell_collider(radius: f32, half_height: f32) -> Collider {
         let dir = Vec2::new(angle.cos(), angle.sin());
         let center = Vec3::new(dir.x * radius, dir.y * radius, 0.0);
         let rot = Quat::from_rotation_z(angle);
-        shapes.push((center, rot, Collider::cuboid(wall_half, tangent_half, half_height)));
+        shapes.push((
+            center,
+            rot,
+            Collider::cuboid(wall_half, tangent_half, half_height),
+        ));
     }
 
     Collider::compound(shapes)
@@ -97,6 +104,7 @@ pub fn spawn_probe(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     control: Res<ControlParams>,
+    capture: Res<FrontCaptureTarget>,
 ) {
     // Elastic probe tube built from ring colliders (like the tunnel) driven by stretch.
     let base_radius = 0.8;
@@ -144,32 +152,75 @@ pub fn spawn_probe(
         },
         GlobalTransform::default(),
         Visibility::default(),
+        InheritedVisibility::default(),
     ));
 
     root.with_children(|child| {
         // Head marker and collider.
         let (head_center, head_tangent, _) = advance_centerline(tail_z, base_length);
-        child.spawn((
-            ProbeHead,
-            ProbeTip,
-            Collider::ball(base_radius * 0.9),
-            Friction {
-                coefficient: control.friction,
-                combine_rule: CoefficientCombineRule::Average,
-                ..default()
-            },
-            CollisionGroups::new(Group::GROUP_1, Group::ALL),
-            Transform {
-                translation: head_center - tail_center,
-                rotation: tunnel_tangent_rotation(head_tangent),
-                ..default()
-            },
-            GlobalTransform::default(),
-        ));
+        let head_rot = tunnel_tangent_rotation(head_tangent);
+        child
+            .spawn((
+                ProbeHead,
+                ProbeTip,
+                Collider::ball(base_radius * 0.9),
+                Friction {
+                    coefficient: control.friction,
+                    combine_rule: CoefficientCombineRule::Average,
+                    ..default()
+                },
+                CollisionGroups::new(Group::GROUP_1, Group::ALL),
+                Transform {
+                    translation: head_center - tail_center,
+                    rotation: head_rot,
+                    ..default()
+                },
+                GlobalTransform::default(),
+                Visibility::default(),
+                InheritedVisibility::default(),
+            ))
+            .with_children(|head_child| {
+                head_child.spawn((
+                    ProbePovCamera,
+                    FrontCamera,
+                    Camera3d::default(),
+                    Camera {
+                        is_active: false,
+                        ..default()
+                    },
+                    Transform {
+                        translation: Vec3::new(0.0, 0.0, 0.35),
+                        // Flip so camera forward (-Z) points down the probe's forward tangent.
+                        rotation: Quat::from_rotation_y(std::f32::consts::PI),
+                        ..default()
+                    },
+                    GlobalTransform::default(),
+                    Visibility::default(),
+                    InheritedVisibility::default(),
+                ));
+                head_child.spawn((
+                    FrontCaptureCamera,
+                    Camera3d::default(),
+                    Camera {
+                        is_active: true,
+                        target: RenderTarget::Image(capture.handle.clone().into()),
+                        ..default()
+                    },
+                    Transform {
+                        translation: Vec3::new(0.0, 0.0, 0.35),
+                        rotation: Quat::from_rotation_y(std::f32::consts::PI),
+                        ..default()
+                    },
+                    GlobalTransform::default(),
+                    Visibility::default(),
+                    InheritedVisibility::default(),
+                ));
+            });
 
         // Body rings for collision hull.
         for i in 0..=ring_count {
-            let (ring_center, ring_tangent, _) = advance_centerline(tail_z, i as f32 * ring_spacing);
+            let (ring_center, ring_tangent, _) =
+                advance_centerline(tail_z, i as f32 * ring_spacing);
             child.spawn((
                 ProbeRing { index: i },
                 ring_shell_collider(base_radius, ring_half_height),
@@ -185,6 +236,8 @@ pub fn spawn_probe(
                     ..default()
                 },
                 GlobalTransform::default(),
+                Visibility::default(),
+                InheritedVisibility::default(),
             ));
         }
 
@@ -199,11 +252,13 @@ pub fn spawn_probe(
                 MeshMaterial3d(material_handle.clone()),
                 Transform {
                     translation: seg_center - tail_center,
-                    rotation: tunnel_tangent_rotation(seg_tangent) * Quat::from_rotation_x(FRAC_PI_2),
+                    rotation: tunnel_tangent_rotation(seg_tangent)
+                        * Quat::from_rotation_x(FRAC_PI_2),
                     scale: Vec3::new(1.0, length_scale, 1.0),
                 },
                 GlobalTransform::default(),
                 Visibility::default(),
+                InheritedVisibility::default(),
             ));
         }
     });
@@ -222,20 +277,60 @@ pub fn peristaltic_drive(
     mut stretch: ResMut<StretchState>,
     mut tail_body: Query<(&ProbeBody, Entity, &mut RigidBody, &mut ProbeParam), With<CapsuleProbe>>,
     front_rings: Query<(Entity, &ProbeRing, &GlobalTransform)>,
+    mut body_tf_q: Query<
+        &mut Transform,
+        (
+            With<CapsuleProbe>,
+            Without<ProbePovCamera>,
+            Without<ProbeHead>,
+        ),
+    >,
     mut transforms: ParamSet<(
-        Query<&mut Transform, (With<ProbeHead>, Without<ProbeVisualSegment>)>,
-        Query<(&ProbeVisualSegment, &mut Transform)>,
-        Query<(&ProbeRing, &mut Transform, &mut Collider, &mut Friction)>,
+        Query<
+            &mut Transform,
+            (
+                With<ProbeHead>,
+                Without<ProbeVisualSegment>,
+                Without<ProbePovCamera>,
+                Without<CapsuleProbe>,
+            ),
+        >,
+        Query<
+            (&ProbeVisualSegment, &mut Transform),
+            (
+                Without<ProbePovCamera>,
+                Without<CapsuleProbe>,
+                Without<ProbeHead>,
+                Without<ProbeRing>,
+            ),
+        >,
+        Query<
+            (&ProbeRing, &mut Transform, &mut Collider, &mut Friction),
+            (
+                Without<ProbePovCamera>,
+                Without<ProbeHead>,
+                Without<ProbeVisualSegment>,
+                Without<CapsuleProbe>,
+            ),
+        >,
         Query<&mut Friction, With<CapsuleProbe>>,
-        Query<&mut Transform, With<CapsuleProbe>>,
+        Query<
+            &mut Transform,
+            (
+                With<ProbePovCamera>,
+                Without<ProbeHead>,
+                Without<CapsuleProbe>,
+                Without<ProbeVisualSegment>,
+                Without<ProbeRing>,
+            ),
+        >,
     )>,
 ) {
     let Ok((body, tail_entity, mut body_rb, mut params)) = tail_body.single_mut() else {
         return;
     };
 
-    let mut tail_tf_query = transforms.p4();
-    let Ok(mut body_tf) = tail_tf_query.get_mut(tail_entity) else {
+    let Ok(mut body_tf) = body_tf_q.get_mut(tail_entity) else {
         return;
     };
 
@@ -262,23 +357,23 @@ pub fn peristaltic_drive(
         && !balloon.tail_inflated
         && (keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyI));
     let extend_command = manual_extend_forward || manual_extend_reverse;
-    let retract_command = !interlocked
-        && (keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyK));
+    let retract_command =
+        !interlocked && (keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyK));
 
     let dt = time.delta_secs();
-    // Pause manual length changes while removing a polyp.
-    let autopause = removal.in_progress;
+    // Pause manual length changes while removing a polyp or when very close to a target.
+    let autopause = removal.in_progress
+        || (polyp.detected && polyp.nearest_distance.map_or(false, |d| d < 1.2));
 
     // Slow extend as we approach a detected polyp or the cecum to avoid overshooting.
     let slow_factor = if auto.enabled && polyp.detected {
         polyp
             .nearest_distance
-            .map(|d| (d / 3.5).clamp(0.2, 1.0))
-            .unwrap_or(0.5)
+            .map(|d| (d / 5.0).clamp(0.05, 0.35))
+            .unwrap_or(0.2)
     } else {
         1.0
     };
-
 
     if (extend_command || auto.enabled && auto.extend) && !autopause {
         stretch.factor = (stretch.factor + STRETCH_RATE * dt * slow_factor).min(MAX_STRETCH);
@@ -299,8 +394,7 @@ pub fn peristaltic_drive(
     // If the head is anchored, slide the tail forward/back along the curve to keep head world position fixed.
     if let Some(anchor_pos) = head_anchor_pos {
         let max_z = crate::tunnel::TUNNEL_START_Z + crate::tunnel::TUNNEL_LENGTH;
-        let mut low = (anchor_pos.z - length - 5.0)
-            .clamp(crate::tunnel::TUNNEL_START_Z, max_z);
+        let mut low = (anchor_pos.z - length - 5.0).clamp(crate::tunnel::TUNNEL_START_Z, max_z);
         let mut high = (anchor_pos.z + 5.0).clamp(crate::tunnel::TUNNEL_START_Z, max_z);
         let head_at = |tail_z: f32| advance_centerline(tail_z, length).0;
         for _ in 0..18 {
@@ -390,7 +484,11 @@ pub fn peristaltic_drive(
     let max_delta = 1.5 * dt;
     let blend_delta = (target_blend - prev_blend).clamp(-max_delta, max_delta);
     let smoothed_blend = (prev_blend + blend_delta).clamp(0.0, 0.35);
-    let steering_blend = if balloon.head_inflated { 0.0 } else { smoothed_blend };
+    let steering_blend = if balloon.head_inflated {
+        0.0
+    } else {
+        smoothed_blend
+    };
     let steered_head = if steering_blend > 0.0 {
         head_tangent
             .lerp(steering_dir, steering_blend)
@@ -405,9 +503,31 @@ pub fn peristaltic_drive(
     sense.steer_strength = steering_blend;
 
     // Update head transform to new tip position.
+    let head_translation = head_center - tail_center;
+    let head_rotation = tunnel_tangent_rotation(steered_head);
     if let Ok(mut head_tf) = transforms.p0().single_mut() {
-        head_tf.translation = head_center - tail_center;
-        head_tf.rotation = tunnel_tangent_rotation(steered_head);
+        head_tf.translation = head_translation;
+        head_tf.rotation = head_rotation;
+    }
+
+    // Keep the POV camera oriented down the tunnel centerline ahead of the tip.
+    if let Ok(mut cam_tf) = transforms.p4().single_mut() {
+        let max_arc = (crate::tunnel::TUNNEL_START_Z + crate::tunnel::TUNNEL_LENGTH
+            - params.tail_z)
+            .max(length);
+        let look_ahead = 0.5;
+        let look_arc = (length + look_ahead).min(max_arc);
+        let look_point = advance_centerline(params.tail_z, look_arc).0;
+        let mut target_dir = (look_point - head_center).normalize_or_zero();
+        if target_dir.length_squared() < 1e-6 {
+            target_dir = steered_head;
+        }
+
+        let parent_rot = body_tf.rotation * head_rotation;
+        let target_world_rot = Quat::from_rotation_arc(-Vec3::Z, target_dir);
+        let target_local_rot = parent_rot.inverse() * target_world_rot;
+        let blend = 1.0 - f32::exp(-8.0 * dt);
+        cam_tf.rotation = cam_tf.rotation.slerp(target_local_rot, blend);
     }
 
     // Update visual skin segments along the curved centerline.
@@ -421,8 +541,7 @@ pub fn peristaltic_drive(
             tangent
         };
         vis_tf.translation = center - tail_center;
-        vis_tf.rotation =
-            tunnel_tangent_rotation(forward) * Quat::from_rotation_x(FRAC_PI_2);
+        vis_tf.rotation = tunnel_tangent_rotation(forward) * Quat::from_rotation_x(FRAC_PI_2);
         vis_tf.scale = Vec3::new(1.0, spacing / body.base_length, 1.0);
     }
 

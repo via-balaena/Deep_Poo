@@ -88,9 +88,7 @@ pub fn spawn_balloon_marker(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh = meshes.add(Mesh::from(bevy::math::primitives::Sphere {
-        radius: 1.0,
-    }));
+    let mesh = meshes.add(Mesh::from(bevy::math::primitives::Sphere { radius: 1.0 }));
     let mat = materials.add(StandardMaterial {
         base_color: Color::srgba(0.55, 1.0, 0.55, 0.15),
         alpha_mode: AlphaMode::Blend,
@@ -152,7 +150,10 @@ pub fn spawn_balloon_body(mut commands: Commands) {
         RigidBody::KinematicPositionBased,
         Collider::capsule_z(0.5, 0.3),
         Sensor,
-        CollisionGroups::new(Group::GROUP_2, Group::ALL ^ (Group::GROUP_1 | Group::GROUP_3)),
+        CollisionGroups::new(
+            Group::GROUP_2,
+            Group::ALL ^ (Group::GROUP_1 | Group::GROUP_3),
+        ),
     ));
 
     commands.spawn((
