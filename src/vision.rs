@@ -69,6 +69,7 @@ pub struct BurnDetectionResult {
     pub frame_id: u64,
     pub positive: bool,
     pub confidence: f32,
+    pub boxes: Vec<[f32; 4]>,
 }
 
 struct HeuristicDetector;
@@ -78,6 +79,7 @@ impl vision_interfaces::Detector for HeuristicDetector {
             frame_id: frame.id,
             positive: true,
             confidence: 0.8,
+            boxes: Vec::new(),
         }
     }
 }
@@ -183,18 +185,20 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
                     frame_id: frame.id,
                     positive: false,
                     confidence: 0.0,
+                    boxes: Vec::new(),
                 }
             }
         };
         let input = self.rgba_to_tensor(rgba, frame.size);
         let (obj_logits, box_logits) = {
-            if let Ok(mut guard) = self.model.lock() {
+            if let Ok(guard) = self.model.lock() {
                 guard.forward(input)
             } else {
                 return DetectionResult {
                     frame_id: frame.id,
                     positive: false,
                     confidence: 0.0,
+                    boxes: Vec::new(),
                 };
             }
         };
@@ -205,6 +209,7 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
                     frame_id: frame.id,
                     positive: false,
                     confidence: 0.0,
+                    boxes: Vec::new(),
                 }
             }
         };
@@ -215,6 +220,7 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
                     frame_id: frame.id,
                     positive: false,
                     confidence: 0.0,
+                    boxes: Vec::new(),
                 }
             }
         };
@@ -224,6 +230,7 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
                 frame_id: frame.id,
                 positive: false,
                 confidence: 0.0,
+                boxes: Vec::new(),
             };
         }
         let (_b, _c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
@@ -249,6 +256,7 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
                 frame_id: frame.id,
                 positive: false,
                 confidence: 0.0,
+                boxes: Vec::new(),
             };
         }
         preds.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
@@ -262,6 +270,7 @@ impl vision_interfaces::Detector for BurnTinyDetDetector {
             frame_id: frame.id,
             positive: best.0 > 0.5,
             confidence: best.0 as f32,
+            boxes: keep.iter().map(|&i| boxes_only[i]).collect(),
         }
     }
 }
@@ -505,6 +514,7 @@ pub fn schedule_burn_inference(
         frame_id: result.frame_id,
         positive: result.positive,
         confidence: result.confidence,
+        boxes: result.boxes,
     });
 }
 

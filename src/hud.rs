@@ -213,10 +213,11 @@ pub fn update_controls_ui(
             .last_result
             .as_ref()
             .map(|r| {
+                let boxes = r.boxes.len();
                 if r.positive {
-                    format!("ON ({:.0}%)", r.confidence * 100.0)
+                    format!("ON ({:.0}% ; {} boxes)", r.confidence * 100.0, boxes)
                 } else {
-                    format!("off ({:.0}%)", r.confidence * 100.0)
+                    format!("off ({:.0}% ; {} boxes)", r.confidence * 100.0, boxes)
                 }
             })
             .unwrap_or_else(|| "--".to_string());
