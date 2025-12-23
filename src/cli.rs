@@ -5,7 +5,12 @@ use clap::{Parser, ValueEnum};
 
 /// Command line configuration for the simulator / data generator.
 #[derive(Parser, Debug, Clone)]
-#[command(author, version, about, long_about = None)]
+#[command(
+    author,
+    version,
+    about,
+    long_about = "Deep Poo simulator / data generator — licensed under AGPL-3.0. Source: https://github.com/via-balaena/Deep_Poo"
+)]
 pub struct AppArgs {
     /// Run mode: interactive sim or headless data generation.
     #[arg(long, value_enum, default_value_t = RunMode::Sim)]
