@@ -44,6 +44,12 @@ mod real {
         /// Checkpoint directory.
         #[arg(long, default_value = "checkpoints")]
         ckpt_dir: String,
+        /// Validation objectness threshold for metric matching.
+        #[arg(long, default_value_t = 0.3)]
+        val_obj_thresh: f32,
+        /// Validation IoU threshold for metric matching/NMS.
+        #[arg(long, default_value_t = 0.5)]
+        val_iou_thresh: f32,
     }
 
     type Backend = NdArray<f32>;
@@ -148,7 +154,8 @@ mod real {
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
             {
                 let (v_obj, v_boxes) = model.forward(val_batch.images.clone());
-                let val_iou = mean_iou_nms(&v_obj, &v_boxes, &val_batch, 0.3, 0.5);
+                let val_iou =
+                    mean_iou_nms(&v_obj, &v_boxes, &val_batch, args.val_obj_thresh, args.val_iou_thresh);
                 val_sum += val_iou;
                 val_batches += 1;
             }
