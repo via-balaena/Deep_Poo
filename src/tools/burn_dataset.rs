@@ -3,6 +3,7 @@ use rand::{seq::SliceRandom, Rng};
 #[cfg(feature = "burn_runtime")]
 use rand::SeedableRng;
 use serde::Deserialize;
+use std::cmp::max;
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -48,6 +49,50 @@ pub fn split_runs(
     (train, val)
 }
 
+/// Stratified split by box count buckets (0,1,2+ boxes), seeded shuffle. Does not group by run.
+pub fn split_runs_stratified(
+    indices: Vec<SampleIndex>,
+    val_ratio: f32,
+    seed: Option<u64>,
+) -> (Vec<SampleIndex>, Vec<SampleIndex>) {
+    let mut buckets: [Vec<SampleIndex>; 3] = [Vec::new(), Vec::new(), Vec::new()];
+    for idx in indices {
+        let count = count_boxes(&idx).unwrap_or(0);
+        let bucket_idx = if count == 0 {
+            0
+        } else if count == 1 {
+            1
+        } else {
+            2
+        };
+        buckets[bucket_idx].push(idx);
+    }
+    let mut rng: Box<dyn rand::RngCore> = match seed {
+        Some(s) => Box::new(rand::rngs::StdRng::seed_from_u64(s)),
+        None => Box::new(rand::thread_rng()),
+    };
+    let mut train = Vec::new();
+    let mut val = Vec::new();
+    for bucket in buckets.iter_mut() {
+        bucket.shuffle(&mut rng);
+        let total = bucket.len();
+        if total == 0 {
+            continue;
+        }
+        let val_count = ((val_ratio.clamp(0.0, 1.0) * total as f32).round() as usize).min(total);
+        let (val_bucket, train_bucket) = bucket.split_at(val_count);
+        val.extend_from_slice(val_bucket);
+        train.extend_from_slice(train_bucket);
+    }
+    (train, val)
+}
+
+fn count_boxes(idx: &SampleIndex) -> Result<usize, Box<dyn Error + Send + Sync>> {
+    let raw = fs::read(&idx.label_path)?;
+    let meta: LabelEntry = serde_json::from_slice(&raw)?;
+    Ok(meta.polyp_labels.len())
+}
+
 #[derive(Debug, Clone)]
 pub struct DatasetConfig {
     /// Resize all images to this (width, height). If None, images must already share shape.
@@ -60,12 +105,28 @@ pub struct DatasetConfig {
     pub color_jitter_prob: f32,
     /// Max jitter scale for brightness/contrast.
     pub color_jitter_strength: f32,
+    /// Probability of applying a scale jitter (zoom in/out with bbox-safe padding/cropping).
+    pub scale_jitter_prob: f32,
+    /// Min scale factor for scale jitter.
+    pub scale_jitter_min: f32,
+    /// Max scale factor for scale jitter.
+    pub scale_jitter_max: f32,
+    /// Probability of adding uniform noise per channel.
+    pub noise_prob: f32,
+    /// Max absolute noise added (0-1 range).
+    pub noise_strength: f32,
+    /// Probability of applying a blur.
+    pub blur_prob: f32,
+    /// Blur sigma (passed to image::imageops::blur).
+    pub blur_sigma: f32,
     /// Cap on boxes per image; extras are dropped, padding uses zeros with mask.
     pub max_boxes: usize,
     /// Shuffle samples before iteration.
     pub shuffle: bool,
     /// Seed for reproducible shuffling.
     pub seed: Option<u64>,
+    /// Skip frames with no bounding boxes.
+    pub skip_empty_labels: bool,
 }
 
 impl Default for DatasetConfig {
@@ -76,9 +137,17 @@ impl Default for DatasetConfig {
             flip_horizontal_prob: 0.0,
             color_jitter_prob: 0.0,
             color_jitter_strength: 0.1,
+            scale_jitter_prob: 0.0,
+            scale_jitter_min: 0.8,
+            scale_jitter_max: 1.2,
+            noise_prob: 0.0,
+            noise_strength: 0.02,
+            blur_prob: 0.0,
+            blur_sigma: 1.0,
             max_boxes: 16,
             shuffle: true,
             seed: None,
+            skip_empty_labels: true,
         }
     }
 }
@@ -167,9 +236,19 @@ pub fn load_run_dataset(
                 target_size: None,
                 resize_mode: ResizeMode::Force,
                 flip_horizontal_prob: 0.0,
+                color_jitter_prob: 0.0,
+                color_jitter_strength: 0.0,
+                scale_jitter_prob: 0.0,
+                scale_jitter_min: 1.0,
+                scale_jitter_max: 1.0,
+                noise_prob: 0.0,
+                noise_strength: 0.0,
+                blur_prob: 0.0,
+                blur_sigma: 0.0,
                 max_boxes: usize::MAX,
                 shuffle: false,
                 seed: None,
+                skip_empty_labels: true,
             },
         )?;
         samples.push(sample);
@@ -182,6 +261,7 @@ fn load_sample(
     idx: &SampleIndex,
     cfg: &DatasetConfig,
 ) -> Result<DatasetSample, Box<dyn Error + Send + Sync>> {
+    static ONCE: std::sync::Once = std::sync::Once::new();
     let raw = fs::read(&idx.label_path)?;
     let meta: LabelEntry = serde_json::from_slice(&raw)?;
     if !meta.image_present {
@@ -251,6 +331,19 @@ fn load_sample(
                     cfg.color_jitter_prob,
                     cfg.color_jitter_strength,
                 );
+                maybe_scale_jitter(
+                    &mut resized_img,
+                    &mut boxes,
+                    cfg.scale_jitter_prob,
+                    cfg.scale_jitter_min,
+                    cfg.scale_jitter_max,
+                );
+                maybe_noise(
+                    &mut resized_img,
+                    cfg.noise_prob,
+                    cfg.noise_strength,
+                );
+                maybe_blur(&mut resized_img, cfg.blur_prob, cfg.blur_sigma);
 
                 if boxes.len() > cfg.max_boxes {
                     boxes.truncate(cfg.max_boxes);
@@ -276,7 +369,37 @@ fn load_sample(
         cfg.color_jitter_prob,
         cfg.color_jitter_strength,
     );
-    build_sample_from_image(img, width, height, boxes, meta.frame_id, cfg.max_boxes)
+    maybe_scale_jitter(
+        &mut img,
+        &mut boxes,
+        cfg.scale_jitter_prob,
+        cfg.scale_jitter_min,
+        cfg.scale_jitter_max,
+    );
+    maybe_noise(
+        &mut img,
+        cfg.noise_prob,
+        cfg.noise_strength,
+    );
+    maybe_blur(&mut img, cfg.blur_prob, cfg.blur_sigma);
+    let sample = build_sample_from_image(img, width, height, boxes, meta.frame_id, cfg.max_boxes)?;
+    ONCE.call_once(|| {
+        if sample.boxes.is_empty() {
+            eprintln!(
+                "Debug: first sample {} has 0 boxes (image {}x{})",
+                idx.label_path.display(),
+                width,
+                height
+            );
+        } else {
+            eprintln!(
+                "Debug: first sample {} boxes {:?}",
+                idx.label_path.display(),
+                sample.boxes
+            );
+        }
+    });
+    Ok(sample)
 }
 
 fn build_sample_from_image(
@@ -287,6 +410,7 @@ fn build_sample_from_image(
     frame_id: u64,
     max_boxes: usize,
 ) -> Result<DatasetSample, Box<dyn Error + Send + Sync>> {
+    static ONCE: std::sync::Once = std::sync::Once::new();
     let mut image_chw = vec![0.0f32; (width * height * 3) as usize];
     for (y, x, pixel) in img.enumerate_pixels() {
         let base = (y * width + x) as usize;
@@ -298,6 +422,20 @@ fn build_sample_from_image(
     if boxes.len() > max_boxes {
         boxes.truncate(max_boxes);
     }
+
+    ONCE.call_once(|| {
+        if boxes.is_empty() {
+            eprintln!(
+                "Debug: first sample had 0 boxes (image {}x{})",
+                width, height
+            );
+        } else {
+            eprintln!(
+                "Debug: first sample boxes {:?}",
+                boxes
+            );
+        }
+    });
 
     Ok(DatasetSample {
         frame_id,
@@ -428,6 +566,104 @@ pub(crate) fn maybe_jitter(
     }
 }
 
+pub(crate) fn maybe_noise(img: &mut image::RgbImage, prob: f32, strength: f32) {
+    if prob <= 0.0 || strength <= 0.0 {
+        return;
+    }
+    let mut rng = rand::thread_rng();
+    if rng.gen_range(0.0..1.0) >= prob {
+        return;
+    }
+    for pixel in img.pixels_mut() {
+        for c in 0..3 {
+            let noise = rng.gen_range(-strength..strength);
+            let v = (pixel[c] as f32 / 255.0 + noise).clamp(0.0, 1.0);
+            pixel[c] = (v * 255.0) as u8;
+        }
+    }
+}
+
+pub(crate) fn maybe_blur(img: &mut image::RgbImage, prob: f32, sigma: f32) {
+    if prob <= 0.0 || sigma <= 0.0 {
+        return;
+    }
+    let mut rng = rand::thread_rng();
+    if rng.gen_range(0.0..1.0) >= prob {
+        return;
+    }
+    let blurred = image::imageops::blur(img, sigma);
+    *img = blurred;
+}
+
+pub(crate) fn maybe_scale_jitter(
+    img: &mut image::RgbImage,
+    boxes: &mut Vec<[f32; 4]>,
+    prob: f32,
+    min_scale: f32,
+    max_scale: f32,
+) {
+    if prob <= 0.0 || min_scale <= 0.0 || max_scale <= 0.0 {
+        return;
+    }
+    let mut rng = rand::thread_rng();
+    if rng.gen_range(0.0..1.0) >= prob {
+        return;
+    }
+    let scale = rng.gen_range(min_scale..max_scale);
+    let (w, h) = img.dimensions();
+    let new_w = max(1, (w as f32 * scale).round() as u32);
+    let new_h = max(1, (h as f32 * scale).round() as u32);
+
+    let resized = image::imageops::resize(img, new_w, new_h, FilterType::Triangle);
+    let mut canvas = image::RgbImage::new(w, h);
+
+    if new_w >= w && new_h >= h {
+        // crop center
+        let x0 = ((new_w - w) / 2) as i64;
+        let y0 = ((new_h - h) / 2) as i64;
+        image::imageops::replace(&mut canvas, &resized, -x0, -y0);
+        let sx = scale;
+        let sy = scale;
+        for b in boxes.iter_mut() {
+            let mut px0 = b[0] * w as f32 * sx - x0 as f32;
+            let mut py0 = b[1] * h as f32 * sy - y0 as f32;
+            let mut px1 = b[2] * w as f32 * sx - x0 as f32;
+            let mut py1 = b[3] * h as f32 * sy - y0 as f32;
+            px0 = px0.clamp(0.0, w as f32);
+            py0 = py0.clamp(0.0, h as f32);
+            px1 = px1.clamp(px0, w as f32);
+            py1 = py1.clamp(py0, h as f32);
+            b[0] = px0 / w as f32;
+            b[1] = py0 / h as f32;
+            b[2] = px1 / w as f32;
+            b[3] = py1 / h as f32;
+        }
+    } else {
+        // pad center
+        let x0 = ((w - new_w) / 2) as i64;
+        let y0 = ((h - new_h) / 2) as i64;
+        image::imageops::replace(&mut canvas, &resized, x0, y0);
+        let sx = scale;
+        let sy = scale;
+        for b in boxes.iter_mut() {
+            let mut px0 = b[0] * w as f32 * sx + x0 as f32;
+            let mut py0 = b[1] * h as f32 * sy + y0 as f32;
+            let mut px1 = b[2] * w as f32 * sx + x0 as f32;
+            let mut py1 = b[3] * h as f32 * sy + y0 as f32;
+            px0 = px0.clamp(0.0, w as f32);
+            py0 = py0.clamp(0.0, h as f32);
+            px1 = px1.clamp(px0, w as f32);
+            py1 = py1.clamp(py0, h as f32);
+            b[0] = px0 / w as f32;
+            b[1] = py0 / h as f32;
+            b[2] = px1 / w as f32;
+            b[3] = py1 / h as f32;
+        }
+    }
+
+    *img = canvas;
+}
+
 #[cfg(test)]
 mod aug_tests {
     use super::maybe_hflip;
@@ -493,67 +729,87 @@ impl BatchIter {
         batch_size: usize,
         device: &B::Device,
     ) -> Result<Option<BurnBatch<B>>, Box<dyn Error + Send + Sync>> {
-        if self.cursor >= self.indices.len() {
-            return Ok(None);
-        }
-        let end = (self.cursor + batch_size).min(self.indices.len());
-        let slice = &self.indices[self.cursor..end];
-        self.cursor = end;
+        loop {
+            if self.cursor >= self.indices.len() {
+                return Ok(None);
+            }
+            let end = (self.cursor + batch_size).min(self.indices.len());
+            let slice = &self.indices[self.cursor..end];
+            self.cursor = end;
 
-        let mut images = Vec::new();
-        let mut boxes = Vec::new();
-        let mut box_mask = Vec::new();
-        let mut frame_ids = Vec::new();
+            let mut images = Vec::new();
+            let mut boxes = Vec::new();
+            let mut box_mask = Vec::new();
+            let mut frame_ids = Vec::new();
 
-        let mut expected_size: Option<(u32, u32)> = None;
+            let mut expected_size: Option<(u32, u32)> = None;
+            let mut skipped = 0usize;
 
-        for idx in slice {
-            let sample = load_sample(idx, &self.cfg)?;
-
-            let size = (sample.width, sample.height);
-            match expected_size {
-                None => expected_size = Some(size),
-                Some(sz) if sz != size => {
-                    return Err("batch contains varying image sizes; set a target_size to force consistency".into());
+            for idx in slice {
+                let sample = load_sample(idx, &self.cfg)?;
+                if self.cfg.skip_empty_labels && sample.boxes.is_empty() {
+                    eprintln!(
+                        "Warning: no boxes found in {} (skipping sample)",
+                        idx.label_path.display()
+                    );
+                    skipped += 1;
+                    continue;
                 }
-                _ => {}
+
+                let size = (sample.width, sample.height);
+                match expected_size {
+                    None => expected_size = Some(size),
+                    Some(sz) if sz != size => {
+                        return Err("batch contains varying image sizes; set a target_size to force consistency".into());
+                    }
+                    _ => {}
+                }
+
+                frame_ids.push(sample.frame_id as f32);
+                images.extend_from_slice(&sample.image_chw);
+
+                let mut padded = vec![0.0f32; self.cfg.max_boxes * 4];
+                let mut mask = vec![0.0f32; self.cfg.max_boxes];
+                for (i, b) in sample.boxes.iter().take(self.cfg.max_boxes).enumerate() {
+                    padded[i * 4] = b[0];
+                    padded[i * 4 + 1] = b[1];
+                    padded[i * 4 + 2] = b[2];
+                    padded[i * 4 + 3] = b[3];
+                    mask[i] = 1.0;
+                }
+                boxes.extend_from_slice(&padded);
+                box_mask.extend_from_slice(&mask);
             }
 
-            frame_ids.push(sample.frame_id as f32);
-            images.extend_from_slice(&sample.image_chw);
-
-            let mut padded = vec![0.0f32; self.cfg.max_boxes * 4];
-            let mut mask = vec![0.0f32; self.cfg.max_boxes];
-            for (i, b) in sample.boxes.iter().take(self.cfg.max_boxes).enumerate() {
-                padded[i * 4] = b[0];
-                padded[i * 4 + 1] = b[1];
-                padded[i * 4 + 2] = b[2];
-                padded[i * 4 + 3] = b[3];
-                mask[i] = 1.0;
+            if images.is_empty() {
+                if skipped > 0 {
+                    continue;
+                } else {
+                    return Ok(None);
+                }
             }
-            boxes.extend_from_slice(&padded);
-            box_mask.extend_from_slice(&mask);
+
+            let (width, height) = expected_size.expect("batch size > 0 ensures size is set");
+            let batch_len = frame_ids.len();
+            let image_shape = [batch_len, 3, height as usize, width as usize];
+            let boxes_shape = [batch_len, self.cfg.max_boxes, 4];
+            let mask_shape = [batch_len, self.cfg.max_boxes];
+
+            let images = burn::tensor::Tensor::<B, 1>::from_floats(images.as_slice(), device)
+                .reshape(image_shape);
+            let boxes = burn::tensor::Tensor::<B, 1>::from_floats(boxes.as_slice(), device)
+                .reshape(boxes_shape);
+            let box_mask = burn::tensor::Tensor::<B, 1>::from_floats(box_mask.as_slice(), device)
+                .reshape(mask_shape);
+            let frame_ids = burn::tensor::Tensor::<B, 1>::from_floats(frame_ids.as_slice(), device)
+                .reshape([batch_len]);
+
+            return Ok(Some(BurnBatch {
+                images,
+                boxes,
+                box_mask,
+                frame_ids,
+            }));
         }
-
-        let (width, height) = expected_size.expect("batch size > 0 ensures size is set");
-        let image_shape = [slice.len(), 3, height as usize, width as usize];
-        let boxes_shape = [slice.len(), self.cfg.max_boxes, 4];
-        let mask_shape = [slice.len(), self.cfg.max_boxes];
-
-        let images = burn::tensor::Tensor::<B, 4>::from_floats(images.as_slice(), device)
-            .reshape(image_shape);
-        let boxes = burn::tensor::Tensor::<B, 3>::from_floats(boxes.as_slice(), device)
-            .reshape(boxes_shape);
-        let box_mask = burn::tensor::Tensor::<B, 2>::from_floats(box_mask.as_slice(), device)
-            .reshape(mask_shape);
-        let frame_ids = burn::tensor::Tensor::<B, 1>::from_floats(frame_ids.as_slice(), device)
-            .reshape([slice.len()]);
-
-        Ok(Some(BurnBatch {
-            images,
-            boxes,
-            box_mask,
-            frame_ids,
-        }))
     }
 }

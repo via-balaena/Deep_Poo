@@ -72,27 +72,32 @@ impl<B: Backend> TinyDet<B> {
         device: &B::Device,
     ) -> Tensor<B, 1> {
         // Objectness: BCE with logits.
-        let one = Tensor::from_floats([1.0], device);
-        let eps = Tensor::from_floats([1e-6], device);
-        let prob = sigmoid(obj_logits.clone());
-        let obj_loss = (target_obj.clone() * (prob.clone() + eps.clone()).log()
-            + (one.clone() - target_obj.clone()) * (one.clone() - prob + eps.clone()).log())
+        let obj_shape = obj_logits.dims();
+        let ones_obj = Tensor::<B, 4>::ones(obj_shape.clone(), device);
+        let prob = sigmoid(obj_logits.clone())
+            .clamp_min(1e-6)
+            .clamp_max(1.0 - 1e-6);
+        let one_minus = (ones_obj.clone() - prob.clone()).clamp_min(1e-6);
+        let obj_loss = (target_obj.clone() * prob.clone().log()
+            + (ones_obj.clone() - target_obj.clone()) * one_minus.log())
         .neg()
         .mean();
 
         // Box regression: Huber masked by presence.
         let diff = (box_preds.clone() - target_boxes.clone()).abs();
-        let delta = Tensor::from_floats([1.0], device);
+        let ones_boxes = Tensor::<B, 4>::ones(diff.dims().clone(), device);
+        let delta = ones_boxes.clone();
         let mask_small = diff.clone().lower(delta.clone());
-        let pow_two = Tensor::from_floats([2.0], device);
-        let small = Tensor::from_floats([0.5], device) * diff.clone().powf(pow_two);
-        let large = diff - Tensor::from_floats([0.5], device);
+        let diff_sq = diff.clone() * diff.clone();
+        let small = diff_sq.mul_scalar(0.5);
+        let large = diff.sub_scalar(0.5);
         let mask_float = mask_small.clone().float();
         let per_elem =
-            small * mask_float.clone() + large * (Tensor::from_floats([1.0], device) - mask_float);
+            small * mask_float.clone() + large * (ones_boxes.clone() - mask_float);
 
         let masked = per_elem * box_mask.clone();
-        let denom = box_mask.clone().sum() + Tensor::from_floats([1e-6], device);
+        let eps_scalar = Tensor::<B, 1>::from_floats([1e-6], device);
+        let denom = box_mask.clone().sum() + eps_scalar;
         let box_loss = masked.sum() / denom;
 
         let ciou_loss = self.ciou_loss(box_preds, target_boxes, box_mask, device);
@@ -107,7 +112,6 @@ impl<B: Backend> TinyDet<B> {
         mask: Tensor<B, 4>,
         device: &B::Device,
     ) -> Tensor<B, 1> {
-        let eps = Tensor::from_floats([1e-6], device);
         let p = sigmoid(pred).clamp(0.0, 1.0);
         let t = target.clamp(0.0, 1.0);
         let obj_mask = mask.narrow(1, 0, 1);
@@ -143,18 +147,15 @@ impl<B: Backend> TinyDet<B> {
             * (py1.clone() - py0.clone()).clamp_min(0.0);
         let area_t = (tx1.clone() - tx0.clone()).clamp_min(0.0)
             * (ty1.clone() - ty0.clone()).clamp_min(0.0);
-        let union = area_p + area_t - inter.clone() + eps.clone();
+        let union = (area_p + area_t - inter.clone()).clamp_min(1e-6);
         let iou = inter / union;
 
-        let half = Tensor::from_floats([0.5], device);
-        let two = Tensor::from_floats([2.0], device);
+        let cx_p = (px0.clone() + px1.clone()).mul_scalar(0.5);
+        let cy_p = (py0.clone() + py1.clone()).mul_scalar(0.5);
+        let cx_t = (tx0.clone() + tx1.clone()).mul_scalar(0.5);
+        let cy_t = (ty0.clone() + ty1.clone()).mul_scalar(0.5);
 
-        let cx_p = (px0.clone() + px1.clone()) * half.clone();
-        let cy_p = (py0.clone() + py1.clone()) * half.clone();
-        let cx_t = (tx0.clone() + tx1.clone()) * half.clone();
-        let cy_t = (ty0.clone() + ty1.clone()) * half;
-
-        let rho2 = (cx_p - cx_t).powf(two.clone()) + (cy_p - cy_t).powf(two.clone());
+        let rho2 = (cx_p - cx_t).powf_scalar(2.0) + (cy_p - cy_t).powf_scalar(2.0);
 
         let enc_x0 = px0.min_pair(tx0);
         let enc_y0 = py0.min_pair(ty0);
@@ -162,11 +163,11 @@ impl<B: Backend> TinyDet<B> {
         let enc_y1 = py1.max_pair(ty1);
         let c2 = (enc_x1 - enc_x0)
             .clamp_min(1e-6)
-            .powf(two.clone())
-            + (enc_y1 - enc_y0).clamp_min(1e-6).powf(two);
+            .powf_scalar(2.0)
+            + (enc_y1 - enc_y0).clamp_min(1e-6).powf_scalar(2.0);
 
         let diou = iou - rho2 / c2;
-        let ciou_loss = (Tensor::from_floats([1.0], device) - diou) * m.clone();
+        let ciou_loss = diou.mul_scalar(-1.0).add_scalar(1.0) * m.clone();
 
         let denom = m.sum().clamp_min(1e-6);
         ciou_loss.sum() / denom

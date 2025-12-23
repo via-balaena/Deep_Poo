@@ -1,14 +1,25 @@
 # Current weak points / risks
 
-- Model maturity: TinyDet is minimal, uses host-side CIoU, limited augmentation (flip/letterbox), and no robust target assignment or mAP computation.
+- Model maturity: TinyDet is minimal, uses host-side CIoU, limited augmentation ✅(flip/letterbox), and no robust target assignment or mAP computation.
   - Next steps:
-    - Tensorize CIoU in the loss
+    - Tensorize CIoU in the loss ✅
     - Add stronger augmentations ✅ (color jitter added; consider scale/crop jitter next)
-    - Improve target assignment
-    - Add mAP/PR metrics in validation
-- Data quality: synthetic-only captures; no real-data validation; limited augmentation diversity.
+    - Improve target assignment ✅
+    - Add mAP/PR metrics in validation ✅
+- Data quality: synthetic-only captures; limited augmentation diversity.
+  - Track metrics on synthetic val to guide aug/realism tweaks.✅
+  - Expand aug: stronger color jitter, blur/noise, scale/crop with bbox-safe transforms.✅
+  - Increase synthetic realism: lighting/texture noise/camera jitter sweeps; see if metrics improve.✅
+  - Enforce split hygiene: seeded shuffles and stratified sampling to balance box sizes/classes across train/val.✅
 - Checkpointing & reproducibility: no bundled demo weights; splits not persisted (seeded shuffles exist but not enforced across runs).
+  - Persist splits: save/load a split manifest (train/val indices or run IDs) so reruns reuse the same split. ✅ (`--split-manifest`)
+  - Enforce seeds: default to a fixed seed or log the seed used per run for repeatability. ✅ (default seed logged)
+  - Bundle a demo checkpoint and document how to load it (or a CLI flag to download/load if present). ✅ (flag `--demo-checkpoint` added; need actual weights)
 - Validation metrics: only mean IoU + precision/recall; no mAP/PR curves; NMS/threshold assumptions may not match deployment.
+  - Add proper PR/mAP computation across thresholds (beyond the current approximate sweep). ✅ (objectness sweep 0.05..0.95 + multiple IoU thresholds)
+  - Expose evaluation thresholds (obj/IoU) to align with deployment and allow multi-threshold eval. ✅ (`--val-iou-sweep`)
+  - Persist val metrics per epoch (JSON/CSV) for tracking. ✅ (`--metrics-out` JSONL)
+  - Add an eval-only command to score a checkpoint on a dataset without training. ✅ (`bin/eval`)
 - Runtime UX: HUD overlays are basic; thresholds require flags (no live toggle); heuristic fallback only logged.
 - Performance: CPU NdArray backend and CPU NMS; no batching/GPU path, potential real-time bottleneck.
 - Testing gaps: no end-to-end inference test in the sim; no HUD overlay tests; Burn training harness lacks a sanity test beyond a single-batch run.

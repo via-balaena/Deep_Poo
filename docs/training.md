@@ -17,8 +17,15 @@ Common flags:
 - `--seed <u64>`: deterministic shuffle/splits; omit for random
 - `--ckpt-dir <path>`: where model/optim/scheduler checkpoints are read/written (default `checkpoints`)
 - `--val-obj-thresh <f32>`: objectness threshold for val matching (default 0.3)
-- `--val-iou-thresh <f32>`: IoU threshold for NMS/matching (default 0.5)
+- `--val-iou-thresh <f32>`: IoU threshold for NMS/matching (default 0.5); mAP is computed over objectness thresholds 0.05..0.95.
 - `--patience <usize>` / `--patience-min-delta <f32>`: optional early stop on val IoU plateau
+- `--real-val-dir <path>`: optional separate validation root; if set, uses all runs under this path for validation instead of a split.
+- `--input-root <path>`: capture root to train from (default `assets/datasets/captures`); point to a filtered/pruned root if desired.
+- `--stratify-split`: stratify train/val by box count buckets (0/1/2+ boxes) instead of a pure run-level split.
+- `--split-manifest <path>`: optional JSON manifest; if present, load train/val label lists from it; if absent, save the current split for reuse.
+- Seeds: if `--seed` is omitted, a default seed (42) is used and logged for repeatability.
+- `--demo-checkpoint <path>`: optional model checkpoint to load at startup (model only; skips optimizer/scheduler). Use to run with a bundled/demo weight file if available.
+- `--metrics-out <path>`: optional JSONL output; if set, appends per-epoch val metrics (IoU/PR/mAP, tp/fp/fn) with seed and thresholds.
 
 Sample run:
 ```bash
@@ -31,22 +38,27 @@ cargo run --features burn_runtime --bin train -- \
   --val-ratio 0.2 \
   --ckpt-every-epochs 1 \
   --val-obj-thresh 0.3 \
-  --val-iou-thresh 0.5
+  --val-iou-thresh 0.5 \
+  --real-val-dir assets/datasets/real_val \
+  --input-root assets/datasets/captures_filtered \
+  --stratify-split \
+  --demo-checkpoint assets/checkpoints/tinydet_demo.bin
 ```
 
 What it does today:
 - Loads capture runs via `BatchIter` (train with aug; val without), builds TinyDet, AdamW, and a linear LR scheduler.
 - Runs epoch/batch loop with per-step optimizer updates; logs loss and mean IoU each log interval.
-- Validation: decodes per-cell predictions, applies sigmoid + NMS, matches to GT boxes with IoU threshold, and reports mean IoU plus precision/recall (tp/fp/fn).
+- Validation: decodes per-cell predictions, applies sigmoid + NMS, matches to GT boxes with IoU threshold, and reports mean IoU plus precision/recall and an approximate mAP via a small PR sweep (tp/fp/fn).
 - Checkpoints: on start, loads model/optim/scheduler from `ckpt_dir` if present; saves them per configured cadence (steps/epochs). Optional early stop tracks best val IoU.
 
 Notes:
 - Requires `--features burn_runtime` to pull in Burn and the training harness.
 - Val metric thresholds are tunable via CLI; adjust to trade off recall/precision during evaluation.
 - Runtime inference will attempt to load `checkpoints/tinydet.bin`; if missing or failed, it logs a warning and falls back to the heuristic detector.
+- Eval-only: use `cargo run --features burn_runtime --bin eval -- --checkpoint <path> --input-root <val_root> [--val-iou-sweep ...] [--metrics-out ...]` to score a checkpoint without training.
 
 Next steps (nice-to-haves):
 - Expose predicted boxes/confidence to HUD/`DetectionResult` so runtime shows actual detections, not just a bool. ✅
 - Bundle a small demo checkpoint or fall back to the heuristic detector with a clear log when no Burn model is available. ✅ (warns + heuristic fallback when checkpoint missing)
-- Tighten validation metrics with per-image precision/recall or mAP in addition to mean IoU (precision/recall now logged; mAP still TODO).
+- Tighten validation metrics with per-image precision/recall or mAP in addition to mean IoU. ✅ (mean IoU + precision/recall + approximate mAP sweep logged)
 - Add a sample `train` command here with typical flags, and expose inference thresholds via CLI/env.

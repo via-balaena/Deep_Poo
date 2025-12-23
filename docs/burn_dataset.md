@@ -26,6 +26,11 @@ Note: `BatchIter`/`BurnBatch` require the `burn_runtime` feature enabled (e.g., 
 
 Augmentation:
 - `DatasetConfig::flip_horizontal_prob` applies an optional horizontal flip and updates boxes accordingly (after resize/letterbox).
+- `DatasetConfig::scale_jitter_prob` / `scale_jitter_min` / `scale_jitter_max`: optional zoom in/out with bbox-safe padding/cropping.
+- `DatasetConfig::color_jitter_prob` / `color_jitter_strength`: optional brightness/contrast jitter.
+- `DatasetConfig::noise_prob` / `noise_strength`: optional uniform noise per channel.
+- `DatasetConfig::blur_prob` / `blur_sigma`: optional blur.
+- `DatasetConfig::skip_empty_labels` (default: true) drops frames with no bounding boxes; empty-label samples are skipped with a warning instead of feeding zero targets.
 
 Reproducibility:
 - `DatasetConfig::seed` is used for shuffling indices in `BatchIter` to make splits/batches deterministic when set.

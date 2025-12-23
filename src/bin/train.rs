@@ -1,6 +1,7 @@
 #[cfg(feature = "burn_runtime")]
 mod real {
     use std::fs;
+    use std::io::Write;
     use std::path::Path;
 
     use anyhow::Result;
@@ -18,8 +19,9 @@ mod real {
     use clap::Parser;
     use colon_sim::burn_model::{nms, assign_targets_to_grid, TinyDet, TinyDetConfig};
     use colon_sim::tools::burn_dataset::{
-        BatchIter, BurnBatch, DatasetConfig, split_runs,
+        BatchIter, BurnBatch, DatasetConfig, split_runs, split_runs_stratified,
     };
+    use serde::{Deserialize, Serialize};
 
     #[derive(Parser, Debug)]
     #[command(name = "train", about = "TinyDet training harness")]
@@ -63,12 +65,36 @@ mod real {
         /// Validation IoU threshold for metric matching/NMS.
         #[arg(long, default_value_t = 0.5)]
         val_iou_thresh: f32,
+        /// Optional comma-separated list of additional IoU thresholds for evaluation (e.g., "0.5,0.75").
+        #[arg(long)]
+        val_iou_sweep: Option<String>,
         /// Early stop after N epochs without val IoU improvement (0 disables).
         #[arg(long, default_value_t = 0)]
         patience: usize,
         /// Minimum delta to consider val IoU improved.
         #[arg(long, default_value_t = 0.0)]
         patience_min_delta: f32,
+        /// Optional separate validation root; when set, uses all runs under this path for val.
+        #[arg(long)]
+        real_val_dir: Option<String>,
+        /// Print debug info for the first batch (targets and decoded preds).
+        #[arg(long, default_value_t = false)]
+        debug_batch: bool,
+        /// Input root containing capture runs (default: assets/datasets/captures).
+        #[arg(long, default_value = "assets/datasets/captures")]
+        input_root: String,
+        /// Use stratified split by box count (0/1/2+) instead of run-level random split.
+        #[arg(long, default_value_t = false)]
+        stratify_split: bool,
+        /// Optional split manifest path; if present, load/save train/val label lists here for repeatable splits.
+        #[arg(long)]
+        split_manifest: Option<String>,
+        /// Optional demo checkpoint path; if set, load this model at startup (skips optimizer/scheduler).
+        #[arg(long)]
+        demo_checkpoint: Option<String>,
+        /// Optional metrics output path (JSONL); if set, appends per-epoch val metrics.
+        #[arg(long)]
+        metrics_out: Option<String>,
     }
 
     type Backend = NdArray<f32>;
@@ -88,18 +114,54 @@ mod real {
     pub fn main_impl() -> Result<()> {
         let args = TrainArgs::parse();
         let device = <ADBackend as burn::tensor::backend::Backend>::Device::default();
+        let effective_seed = args.seed.or(Some(42));
+        println!("Using seed {:?}", effective_seed);
+        let batch_size = if args.batch_size > 1 {
+            println!("Batch size >1 not yet supported for target assignment; forcing batch_size=1");
+            1
+        } else {
+            args.batch_size.max(1)
+        };
         let cfg = DatasetConfig {
             target_size: Some((128, 128)),
             flip_horizontal_prob: 0.5,
             max_boxes: 8,
-            seed: args.seed,
+            seed: effective_seed,
             ..Default::default()
         };
 
-        let root = Path::new("assets/datasets/captures");
+        let root = Path::new(&args.input_root);
         let indices = colon_sim::tools::burn_dataset::index_runs(root)
             .map_err(|e| anyhow::anyhow!("{:?}", e))?;
-        let (train_idx, val_idx) = split_runs(indices, args.val_ratio);
+        let (train_idx, default_val_idx) = {
+            if let Some(manifest_path) = &args.split_manifest {
+                let manifest_path = Path::new(manifest_path);
+                if manifest_path.exists() {
+                    println!("Loading split from {}", manifest_path.display());
+                    load_split_manifest(manifest_path)?
+                } else {
+                    let split = if args.stratify_split {
+                        split_runs_stratified(indices, args.val_ratio, args.seed)
+                    } else {
+                        split_runs(indices, args.val_ratio)
+                    };
+                    save_split_manifest(manifest_path, &split.0, &split.1, args.seed)?;
+                    split
+                }
+            } else if args.stratify_split {
+                split_runs_stratified(indices, args.val_ratio, args.seed)
+            } else {
+                split_runs(indices, args.val_ratio)
+            }
+        };
+        let (val_idx, val_root) = if let Some(real_val_dir) = args.real_val_dir.as_ref() {
+            let val_path = Path::new(real_val_dir).to_path_buf();
+            let val_indices = colon_sim::tools::burn_dataset::index_runs(&val_path)
+                .map_err(|e| anyhow::anyhow!("{:?}", e))?;
+            (val_indices, val_path)
+        } else {
+            (default_val_idx, root.to_path_buf())
+        };
         let val_cfg = DatasetConfig {
             flip_horizontal_prob: 0.0,
             shuffle: false,
@@ -123,20 +185,35 @@ mod real {
                     .init(),
             ),
         };
-        load_checkpoint(
-            &args.ckpt_dir,
-            "tinydet",
-            "tinydet_optim",
-            "tinydet_sched",
-            &device,
-            &mut model,
-            &mut optim,
-            &mut scheduler,
-        );
+        if let Some(demo) = &args.demo_checkpoint {
+            let recorder = BinFileRecorder::<FullPrecisionSettings>::new();
+            let path = Path::new(demo);
+            match model.clone().load_file(path, &recorder, &device) {
+                Ok(m) => {
+                    model = m;
+                    println!("Loaded demo checkpoint from {}", path.display());
+                }
+                Err(err) => {
+                    eprintln!("Failed to load demo checkpoint {}: {:?}", path.display(), err);
+                }
+            }
+        } else {
+            load_checkpoint(
+                &args.ckpt_dir,
+                "tinydet",
+                "tinydet_optim",
+                "tinydet_sched",
+                &device,
+                &mut model,
+                &mut optim,
+                &mut scheduler,
+            );
+        }
 
         let mut best_val = f32::NEG_INFINITY;
         let mut no_improve = 0usize;
         let mut stop_early = false;
+        let mut debug_printed = false;
         for epoch in 0..args.epochs {
             println!("epoch {}", epoch + 1);
             let mut train = BatchIter::from_indices(train_idx.clone(), cfg.clone())
@@ -145,7 +222,7 @@ mod real {
             let mut global_step = 0usize;
 
             while let Some(batch) = train
-                .next_batch::<ADBackend>(args.batch_size, &device)
+                .next_batch::<ADBackend>(batch_size, &device)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
             {
                 step += 1;
@@ -153,6 +230,10 @@ mod real {
                 let (obj_logits, box_logits) = model.forward(batch.images.clone());
                 let (t_obj, t_boxes, t_mask) =
                     build_targets(&batch, obj_logits.dims()[2], obj_logits.dims()[3], &device)?;
+                if args.debug_batch && !debug_printed {
+                    debug_printed = true;
+                    print_debug_batch(&obj_logits, &box_logits, &t_obj, &t_boxes, &t_mask)?;
+                }
                 let loss = model.loss(
                     obj_logits,
                     box_logits.clone(),
@@ -168,17 +249,17 @@ mod real {
                     .first()
                     .copied()
                     .unwrap_or(0.0);
+                let mean_iou_batch = mean_iou_host(&box_logits, &t_boxes, &t_obj);
                 let grads = loss.backward();
                 let grads = GradientsParams::from_grads(grads, &model);
                 let lr = scheduler_step(&mut scheduler);
                 model = optim.step(lr, model, grads);
 
                 if step % args.log_every == 0 {
-                    let mean_iou = mean_iou_host(&box_logits, &t_boxes, &t_obj);
                     println!(
                         "step {step}: loss={:.4}, mean_iou={:.4}",
                         loss_scalar,
-                        mean_iou
+                        mean_iou_batch
                     );
                 }
 
@@ -196,69 +277,167 @@ mod real {
                 }
             }
 
-            let mut val = BatchIter::from_indices(val_idx.clone(), val_cfg.clone())
-                .map_err(|e| anyhow::anyhow!("{:?}", e))?;
-            let mut val_sum = 0.0f32;
-            let mut val_batches = 0usize;
-            let mut tp = 0usize;
-            let mut fp = 0usize;
-            let mut fn_ = 0usize;
-            let mut matched = 0usize;
-            while let Some(val_batch) = val
-                .next_batch::<ADBackend>(args.batch_size, &device)
-                .map_err(|e| anyhow::anyhow!("{:?}", e))?
-            {
-                let (v_obj, v_boxes) = model.forward(val_batch.images.clone());
+        let mut val = BatchIter::from_indices(val_idx.clone(), val_cfg.clone())
+            .map_err(|e| anyhow::anyhow!("{:?}", e))?;
+        let mut iou_thresholds: Vec<f32> = vec![args.val_iou_thresh];
+        if let Some(extra) = &args.val_iou_sweep {
+            for part in extra.split(',') {
+                if let Ok(v) = part.trim().parse::<f32>() {
+                    iou_thresholds.push(v);
+                }
+            }
+        }
+        iou_thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        iou_thresholds.dedup();
+        struct ValAccum {
+            iou: f32,
+            val_sum: f32,
+            batches: usize,
+            tp: usize,
+            fp: usize,
+            fn_: usize,
+            matched: usize,
+            pr_curve: Vec<(f32, usize, usize, usize)>,
+        }
+        let mut val_accum: Vec<ValAccum> = iou_thresholds
+            .iter()
+            .map(|iou| ValAccum {
+                iou: *iou,
+                val_sum: 0.0,
+                batches: 0,
+                tp: 0,
+                fp: 0,
+                fn_: 0,
+                matched: 0,
+                pr_curve: (1..=19)
+                    .map(|i| (i as f32 * 0.05, 0usize, 0usize, 0usize))
+                    .collect(),
+            })
+            .collect();
+        while let Some(val_batch) = val
+            .next_batch::<ADBackend>(batch_size, &device)
+            .map_err(|e| anyhow::anyhow!("{:?}", e))?
+        {
+            let (v_obj, v_boxes) = model.forward(val_batch.images.clone());
+            for accum in val_accum.iter_mut() {
                 let (iou_sum, matched_count, batch_tp, batch_fp, batch_fn) = val_metrics_nms(
                     &v_obj,
                     &v_boxes,
                     &val_batch,
                     args.val_obj_thresh,
-                    args.val_iou_thresh,
+                    accum.iou,
                 );
-                val_sum += iou_sum;
-                matched += matched_count;
-                tp += batch_tp;
-                fp += batch_fp;
-                fn_ += batch_fn;
-                val_batches += 1;
+                accum.val_sum += iou_sum;
+                accum.matched += matched_count;
+                accum.tp += batch_tp;
+                accum.fp += batch_fp;
+                accum.fn_ += batch_fn;
+                for entry in accum.pr_curve.iter_mut() {
+                    let th = entry.0;
+                    let (btp, bfp, bfn) =
+                        val_pr_threshold(&v_obj, &v_boxes, &val_batch, th, accum.iou);
+                    entry.1 += btp;
+                    entry.2 += bfp;
+                    entry.3 += bfn;
+                }
+                accum.batches += 1;
             }
-            if val_batches > 0 {
-                let val_mean = if matched > 0 {
-                    val_sum / matched as f32
-                } else {
-                    0.0
-                };
-                let precision = if tp + fp > 0 {
-                    tp as f32 / (tp + fp) as f32
-                } else {
-                    0.0
-                };
-                let recall = if tp + fn_ > 0 {
-                    tp as f32 / (tp + fn_) as f32
-                } else {
-                    0.0
-                };
-                println!(
-                    "val mean IoU = {:.4}, precision = {:.3}, recall = {:.3} (tp/fp/fn = {}/{}/{})",
-                    val_mean, precision, recall, tp, fp, fn_
-                );
-                if val_mean > best_val + args.patience_min_delta {
-                    best_val = val_mean;
-                    no_improve = 0;
-                } else {
-                    no_improve += 1;
-                    if args.patience > 0 && no_improve >= args.patience {
-                        println!(
-                            "Early stopping: no val improvement for {} epochs (best {:.4})",
-                            args.patience, best_val
-                        );
-                        stop_early = true;
+        }
+        if val_accum.iter().any(|a| a.batches > 0) {
+            if let Some(path) = &args.metrics_out {
+                if let Some(parent) = Path::new(path).parent() {
+                    let _ = fs::create_dir_all(parent);
+                }
+                let mut line = serde_json::json!({
+                    "epoch": epoch + 1,
+                    "seed": effective_seed,
+                    "val_metrics": []
+                });
+                if let Some(arr) = line.get_mut("val_metrics").and_then(|v| v.as_array_mut()) {
+                    for accum in val_accum.iter() {
+                        if accum.batches == 0 {
+                            continue;
+                        }
+                        let val_mean = if accum.matched > 0 {
+                            accum.val_sum / accum.matched as f32
+                        } else {
+                            0.0
+                        };
+                        let precision = if accum.tp + accum.fp > 0 {
+                            accum.tp as f32 / (accum.tp + accum.fp) as f32
+                        } else {
+                            0.0
+                        };
+                        let recall = if accum.tp + accum.fn_ > 0 {
+                            accum.tp as f32 / (accum.tp + accum.fn_) as f32
+                        } else {
+                            0.0
+                        };
+                        let mut pr_points: Vec<(f32, usize, usize, usize)> = accum.pr_curve.clone();
+                        pr_points.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+                        let map = compute_map(&pr_points);
+                        arr.push(serde_json::json!({
+                            "iou": accum.iou,
+                            "mean_iou": val_mean,
+                            "precision": precision,
+                            "recall": recall,
+                            "map": map,
+                            "tp": accum.tp,
+                            "fp": accum.fp,
+                            "fn": accum.fn_,
+                            "batches": accum.batches
+                        }));
                     }
                 }
-            } else {
-                println!("No val batches found under {:?}", root);
+                if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(path) {
+                    let _ = writeln!(f, "{}", line);
+                }
             }
+            for accum in val_accum.iter() {
+                if accum.batches == 0 {
+                    continue;
+                }
+                let val_mean = if accum.matched > 0 {
+                    accum.val_sum / accum.matched as f32
+                } else {
+                    0.0
+                };
+                let precision = if accum.tp + accum.fp > 0 {
+                    accum.tp as f32 / (accum.tp + accum.fp) as f32
+                } else {
+                    0.0
+                };
+                let recall = if accum.tp + accum.fn_ > 0 {
+                    accum.tp as f32 / (accum.tp + accum.fn_) as f32
+                } else {
+                    0.0
+                };
+                let mut pr_points: Vec<(f32, usize, usize, usize)> = accum.pr_curve.clone();
+                pr_points.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+                let map = compute_map(&pr_points);
+                println!(
+                    "val@IoU{:.2} mean IoU = {:.4}, precision = {:.3}, recall = {:.3}, mAP ~= {:.3} (tp/fp/fn = {}/{}/{})",
+                    accum.iou, val_mean, precision, recall, map, accum.tp, accum.fp, accum.fn_
+                );
+                if accum.iou == args.val_iou_thresh {
+                    if val_mean > best_val + args.patience_min_delta {
+                        best_val = val_mean;
+                        no_improve = 0;
+                    } else {
+                        no_improve += 1;
+                        if args.patience > 0 && no_improve >= args.patience {
+                            println!(
+                                "Early stopping: no val improvement for {} epochs (best {:.4})",
+                                args.patience, best_val
+                            );
+                            stop_early = true;
+                        }
+                    }
+                }
+            }
+        } else {
+            println!("No val batches found under {:?}", val_root);
+        }
 
             if args.ckpt_every_epochs > 0 && (epoch + 1) % args.ckpt_every_epochs == 0 {
                 save_checkpoint(
@@ -278,6 +457,72 @@ mod real {
             }
         }
 
+        Ok(())
+    }
+
+    fn print_debug_batch(
+        obj_logits: &burn::tensor::Tensor<ADBackend, 4>,
+        box_logits: &burn::tensor::Tensor<ADBackend, 4>,
+        tgt_obj: &burn::tensor::Tensor<ADBackend, 4>,
+        tgt_boxes: &burn::tensor::Tensor<ADBackend, 4>,
+        tgt_mask: &burn::tensor::Tensor<ADBackend, 4>,
+    ) -> Result<(), anyhow::Error> {
+        let obj = obj_logits.to_data().to_vec::<f32>().unwrap_or_default();
+        let boxes = box_logits.to_data().to_vec::<f32>().unwrap_or_default();
+        let _tobj = tgt_obj.to_data().to_vec::<f32>().unwrap_or_default();
+        let tboxes = tgt_boxes.to_data().to_vec::<f32>().unwrap_or_default();
+        let tmask = tgt_mask.to_data().to_vec::<f32>().unwrap_or_default();
+        let dims = obj_logits.dims();
+        let hw = dims[2] * dims[3];
+        let first_obj: Vec<f32> = obj.iter().take(hw).map(|v| 1.0 / (1.0 + (-v).exp())).collect();
+        let first_boxes: Vec<[f32; 4]> = (0..4)
+            .map(|c| {
+                (0..hw)
+                    .map(|i| {
+                        let v = boxes[c * hw + i];
+                        1.0 / (1.0 + (-v).exp())
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
+            .chunks_exact(4)
+            .next()
+            .map(|c| {
+                (0..hw)
+                    .take(4)
+                    .map(|i| [c[0][i], c[1][i], c[2][i], c[3][i]])
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        let tgt_boxes_first: Vec<[f32; 4]> = (0..hw)
+            .take(4)
+            .map(|i| {
+                [
+                    tboxes[i],
+                    tboxes[hw + i],
+                    tboxes[2 * hw + i],
+                    tboxes[3 * hw + i],
+                ]
+            })
+            .collect();
+        println!(
+            "DEBUG batch: obj min/max={:.3}/{:.3}, first obj cells (sigmoid) {:?}",
+            first_obj
+                .iter()
+                .cloned()
+                .fold(f32::INFINITY, f32::min),
+            first_obj
+                .iter()
+                .cloned()
+                .fold(f32::NEG_INFINITY, f32::max),
+            &first_obj[..first_obj.len().min(8)]
+        );
+        println!(
+            "DEBUG batch: first few pred boxes (sigmoid) {:?}, targets {:?}, target mask sum {:.1}",
+            first_boxes,
+            tgt_boxes_first,
+            tmask.iter().sum::<f32>()
+        );
         Ok(())
     }
 
@@ -318,11 +563,11 @@ mod real {
         }
 
         let (obj, tgt, mask) = assign_targets_to_grid(&valid_boxes, grid_h, grid_w);
-        let obj_t = burn::tensor::Tensor::<ADBackend, 4>::from_floats(obj.as_slice(), device)
+        let obj_t = burn::tensor::Tensor::<ADBackend, 1>::from_floats(obj.as_slice(), device)
             .reshape([1, 1, grid_h, grid_w]);
-        let boxes_t = burn::tensor::Tensor::<ADBackend, 4>::from_floats(tgt.as_slice(), device)
+        let boxes_t = burn::tensor::Tensor::<ADBackend, 1>::from_floats(tgt.as_slice(), device)
             .reshape([1, 4, grid_h, grid_w]);
-        let mask_t = burn::tensor::Tensor::<ADBackend, 4>::from_floats(mask.as_slice(), device)
+        let mask_t = burn::tensor::Tensor::<ADBackend, 1>::from_floats(mask.as_slice(), device)
             .reshape([1, 4, grid_h, grid_w]);
         Ok((obj_t, boxes_t, mask_t))
     }
@@ -650,6 +895,111 @@ mod real {
         } else {
             (all_iou / all_matched as f32, all_matched, tp, fp, fn_total)
         }
+    }
+
+    fn val_pr_threshold(
+        obj_logits: &burn::tensor::Tensor<ADBackend, 4>,
+        box_logits: &burn::tensor::Tensor<ADBackend, 4>,
+        batch: &BurnBatch<ADBackend>,
+        obj_thresh: f32,
+        iou_thresh: f32,
+    ) -> (usize, usize, usize) {
+        let (_, _, tp, fp, fn_) =
+            val_metrics_nms(obj_logits, box_logits, batch, obj_thresh, iou_thresh);
+        (tp, fp, fn_)
+    }
+
+    fn compute_map(points: &[(f32, usize, usize, usize)]) -> f32 {
+        if points.is_empty() {
+            return 0.0;
+        }
+        let mut pr: Vec<(f32, f32)> = points
+            .iter()
+            .map(|(_th, tp, fp, fn_)| {
+                let tp = *tp as f32;
+                let fp = *fp as f32;
+                let fn_ = *fn_ as f32;
+                let precision = if tp + fp > 0.0 { tp / (tp + fp) } else { 0.0 };
+                let recall = if tp + fn_ > 0.0 { tp / (tp + fn_) } else { 0.0 };
+                (recall, precision)
+            })
+            .collect();
+        pr.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+        let mut ap = 0.0f32;
+        let mut prev_r = 0.0f32;
+        for (r, p) in pr {
+            let delta = (r - prev_r).max(0.0);
+            ap += p * delta;
+            prev_r = r;
+        }
+        ap
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct SplitManifest {
+        train: Vec<String>,
+        val: Vec<String>,
+        seed: Option<u64>,
+    }
+
+    fn save_split_manifest(
+        path: &Path,
+        train: &[colon_sim::tools::burn_dataset::SampleIndex],
+        val: &[colon_sim::tools::burn_dataset::SampleIndex],
+        seed: Option<u64>,
+    ) -> Result<()> {
+        let manifest = SplitManifest {
+            train: train.iter().map(|s| s.label_path.display().to_string()).collect(),
+            val: val.iter().map(|s| s.label_path.display().to_string()).collect(),
+            seed,
+        };
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let json = serde_json::to_string_pretty(&manifest)?;
+        fs::write(path, json)?;
+        println!("Saved split manifest to {}", path.display());
+        Ok(())
+    }
+
+    fn load_split_manifest(
+        path: &Path,
+    ) -> Result<(Vec<colon_sim::tools::burn_dataset::SampleIndex>, Vec<colon_sim::tools::burn_dataset::SampleIndex>)> {
+        let raw = fs::read_to_string(path)?;
+        let manifest: SplitManifest = serde_json::from_str(&raw)?;
+        let train = manifest
+            .train
+            .iter()
+            .map(|p| {
+                let label_path = Path::new(p).to_path_buf();
+                let run_dir = label_path
+                    .parent()
+                    .and_then(|p| p.parent())
+                    .unwrap_or_else(|| Path::new(""))
+                    .to_path_buf();
+                colon_sim::tools::burn_dataset::SampleIndex {
+                    run_dir,
+                    label_path,
+                }
+            })
+            .collect();
+        let val = manifest
+            .val
+            .iter()
+            .map(|p| {
+                let label_path = Path::new(p).to_path_buf();
+                let run_dir = label_path
+                    .parent()
+                    .and_then(|p| p.parent())
+                    .unwrap_or_else(|| Path::new(""))
+                    .to_path_buf();
+                colon_sim::tools::burn_dataset::SampleIndex {
+                    run_dir,
+                    label_path,
+                }
+            })
+            .collect();
+        Ok((train, val))
     }
 
     #[allow(dead_code)]
