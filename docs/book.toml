@@ -1,0 +1,8 @@
+[book]
+title = "colon_sim Docs"
+authors = ["colon_sim"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
