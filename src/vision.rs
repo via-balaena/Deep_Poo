@@ -19,6 +19,21 @@ use crate::polyp::PolypTelemetry;
 use crate::tunnel::CecumState;
 use crate::vision_interfaces::{self, DetectionResult, Frame, FrameRecord, Label, Recorder};
 
+#[cfg(feature = "burn_runtime")]
+use burn::backend::ndarray::NdArray;
+#[cfg(feature = "burn_runtime")]
+use burn::tensor::backend::Backend;
+#[cfg(feature = "burn_runtime")]
+use burn::tensor::Tensor;
+#[cfg(feature = "burn_runtime")]
+use crate::burn_model::{nms, TinyDet, TinyDetConfig};
+#[cfg(feature = "burn_runtime")]
+use burn::record::{BinFileRecorder, FullPrecisionSettings};
+#[cfg(feature = "burn_runtime")]
+use burn::module::Module;
+#[cfg(feature = "burn_runtime")]
+use std::sync::{Arc, Mutex};
+
 #[derive(Component)]
 pub struct FrontCamera;
 
@@ -91,8 +106,162 @@ pub struct DetectorHandle {
 
 impl Default for DetectorHandle {
     fn default() -> Self {
+        #[cfg(feature = "burn_runtime")]
+        {
+            return Self {
+                detector: Box::new(BurnTinyDetDetector::from_default_or_random()),
+            };
+        }
+        #[cfg(not(feature = "burn_runtime"))]
+        {
+            Self {
+                detector: Box::new(HeuristicDetector),
+            }
+        }
+    }
+}
+
+#[cfg(feature = "burn_runtime")]
+struct BurnTinyDetDetector {
+    model: Arc<Mutex<TinyDet<NdArray<f32>>>>,
+    device: <NdArray<f32> as Backend>::Device,
+}
+
+#[cfg(feature = "burn_runtime")]
+impl BurnTinyDetDetector {
+    fn load_from_checkpoint(path: &Path) -> anyhow::Result<Self> {
+        let device = <NdArray<f32> as Backend>::Device::default();
+        let recorder = BinFileRecorder::<FullPrecisionSettings>::new();
+        let model = TinyDet::<NdArray<f32>>::new(TinyDetConfig::default(), &device)
+            .load_file(path, &recorder, &device)?;
+        Ok(Self {
+            model: Arc::new(Mutex::new(model)),
+            device,
+        })
+    }
+
+    fn from_default_or_random() -> Self {
+        let device = <NdArray<f32> as Backend>::Device::default();
+        let default_path = Path::new("checkpoints").join("tinydet.bin");
+        if let Ok(det) = Self::load_from_checkpoint(&default_path) {
+            return det;
+        }
         Self {
-            detector: Box::new(HeuristicDetector),
+            model: Arc::new(Mutex::new(TinyDet::<NdArray<f32>>::new(
+                TinyDetConfig::default(),
+                &device,
+            ))),
+            device,
+        }
+    }
+
+    fn rgba_to_tensor(&self, rgba: &[u8], size: (u32, u32)) -> Tensor<NdArray<f32>, 4> {
+        let (w, h) = size;
+        let mut data = vec![0.0f32; (w * h * 3) as usize];
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * 4) as usize;
+                let dst = ((y * w + x) * 3) as usize;
+                data[dst] = rgba[idx] as f32 / 255.0;
+                data[dst + 1] = rgba[idx + 1] as f32 / 255.0;
+                data[dst + 2] = rgba[idx + 2] as f32 / 255.0;
+                // alpha ignored
+            }
+        }
+        Tensor::<NdArray<f32>, 4>::from_floats(data.as_slice(), &self.device)
+            .reshape([1, 3, h as usize, w as usize])
+    }
+}
+
+#[cfg(feature = "burn_runtime")]
+impl vision_interfaces::Detector for BurnTinyDetDetector {
+    fn detect(&mut self, frame: &Frame) -> DetectionResult {
+        let rgba = match &frame.rgba {
+            Some(buf) => buf,
+            None => {
+                return DetectionResult {
+                    frame_id: frame.id,
+                    positive: false,
+                    confidence: 0.0,
+                }
+            }
+        };
+        let input = self.rgba_to_tensor(rgba, frame.size);
+        let (obj_logits, box_logits) = {
+            if let Ok(mut guard) = self.model.lock() {
+                guard.forward(input)
+            } else {
+                return DetectionResult {
+                    frame_id: frame.id,
+                    positive: false,
+                    confidence: 0.0,
+                };
+            }
+        };
+        let obj = match obj_logits.to_data().to_vec::<f32>() {
+            Ok(v) => v,
+            Err(_) => {
+                return DetectionResult {
+                    frame_id: frame.id,
+                    positive: false,
+                    confidence: 0.0,
+                }
+            }
+        };
+        let boxes = match box_logits.to_data().to_vec::<f32>() {
+            Ok(v) => v,
+            Err(_) => {
+                return DetectionResult {
+                    frame_id: frame.id,
+                    positive: false,
+                    confidence: 0.0,
+                }
+            }
+        };
+        let dims = obj_logits.dims();
+        if dims.len() != 4 {
+            return DetectionResult {
+                frame_id: frame.id,
+                positive: false,
+                confidence: 0.0,
+            };
+        }
+        let (_b, _c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
+        let hw = h * w;
+        let mut preds = Vec::new();
+        for yi in 0..h {
+            for xi in 0..w {
+                let idx = yi * w + xi;
+                let score = 1.0 / (1.0 + (-obj[idx]).exp());
+                if score < 0.3 {
+                    continue;
+                }
+                let base = yi * w + xi;
+                let b0 = 1.0 / (1.0 + (-boxes[base]).exp());
+                let b1 = 1.0 / (1.0 + (-boxes[base + hw]).exp());
+                let b2 = 1.0 / (1.0 + (-boxes[base + 2 * hw]).exp());
+                let b3 = 1.0 / (1.0 + (-boxes[base + 3 * hw]).exp());
+                preds.push((score, [b0, b1, b2, b3]));
+            }
+        }
+        if preds.is_empty() {
+            return DetectionResult {
+                frame_id: frame.id,
+                positive: false,
+                confidence: 0.0,
+            };
+        }
+        preds.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+        let boxes_only: Vec<[f32; 4]> = preds.iter().map(|p| p.1).collect();
+        let scores_only: Vec<f32> = preds.iter().map(|p| p.0).collect();
+        let keep = nms(boxes_only.clone(), scores_only, 0.5);
+        let best_idx = keep.first().copied().unwrap_or(0);
+        let best = preds.get(best_idx).cloned().unwrap_or((0.0, [0.0; 4]));
+
+        DetectionResult {
+            frame_id: frame.id,
+            positive: best.0 > 0.5,
+            confidence: best.0 as f32,
         }
     }
 }
@@ -311,6 +480,7 @@ pub fn schedule_burn_inference(
     mut buffer: ResMut<FrontCameraFrameBuffer>,
     mut handle: ResMut<DetectorHandle>,
     capture: Res<FrontCaptureTarget>,
+    mut readback: ResMut<FrontCaptureReadback>,
 ) {
     jobs.debounce.tick(time.delta());
     if jobs.pending.is_some() || !jobs.debounce.is_finished() {
@@ -321,10 +491,11 @@ pub fn schedule_burn_inference(
     };
 
     // Run detection via the vision interface (sync for now).
+    let rgba = readback.latest.take();
     let f = Frame {
         id: frame.id,
         timestamp: frame.captured_at,
-        rgba: None,
+        rgba,
         size: (capture.size.x, capture.size.y),
         path: None,
     };

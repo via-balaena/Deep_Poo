@@ -27,4 +27,4 @@ Recommended steps to flesh out the training harness:
   - First, make val IoU more faithful (per-box matching with NMS) so it reflects real quality.
   - Then expand the loop: multiple steps per epoch, configurable checkpoint cadence (per N steps/epochs), and a cosine scheduler option (val thresholds are now CLI flags: `--val-obj-thresh`, `--val-iou-thresh`).
   - After the metric is trustworthy, add a `--patience` early-stop flag.
-  - Finally, wire Burn inference into the runtime pipeline (`DetectionResult`) to exercise the model end-to-end.
+  - Finally, wire Burn inference into the runtime pipeline (`DetectionResult`) to exercise the model end-to-end. ✅ (Burn TinyDet now loads from `checkpoints/tinydet.bin` if present and runs NMS-based detection on live frames.)
