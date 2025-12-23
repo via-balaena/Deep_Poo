@@ -33,9 +33,21 @@ fn main() -> Result<()> {
         let (obj_logits, box_logits) = model.forward(batch.images.clone());
         let (t_obj, t_boxes, t_mask) =
             build_targets(&batch, obj_logits.dims()[2], obj_logits.dims()[3], &device)?;
-        let loss = model.loss(obj_logits, box_logits, t_obj, t_boxes, t_mask, &device);
+        let loss = model.loss(
+            obj_logits,
+            box_logits.clone(),
+            t_obj.clone(),
+            t_boxes.clone(),
+            t_mask,
+            &device,
+        );
         let loss_val = loss.to_data().to_vec::<f32>().unwrap_or_default();
-        println!("dummy training step, loss={:?}", loss_val.first());
+        let mean_iou = mean_iou_host(&box_logits, &t_boxes, &t_obj);
+        println!(
+            "dummy training step, loss={:?}, mean_iou={:?}",
+            loss_val.first(),
+            mean_iou
+        );
     } else {
         println!("No training batches found under {:?}", root);
     }
@@ -89,7 +101,79 @@ fn build_targets(
     Ok((obj_t, boxes_t, mask_t))
 }
 
-#[cfg(not(feature = "burn_runtime"))]
-fn main() {
-    eprintln!("Enable --features burn_runtime to run the training harness.");
+fn mean_iou_host(
+    pred_boxes: &burn::tensor::Tensor<Backend, 4>,
+    target_boxes: &burn::tensor::Tensor<Backend, 4>,
+    target_obj: &burn::tensor::Tensor<Backend, 4>,
+) -> f32 {
+    fn fast_sigmoid(x: f32) -> f32 {
+        1.0 / (1.0 + (-x).exp())
+    }
+
+    let pb = match pred_boxes.to_data().to_vec::<f32>() {
+        Ok(v) => v,
+        Err(_) => return 0.0,
+    };
+    let tb = match target_boxes.to_data().to_vec::<f32>() {
+        Ok(v) => v,
+        Err(_) => return 0.0,
+    };
+    let tobj = match target_obj.to_data().to_vec::<f32>() {
+        Ok(v) => v,
+        Err(_) => return 0.0,
+    };
+    let dims = pred_boxes.dims();
+    if dims.len() != 4 {
+        return 0.0;
+    }
+    let (b, _c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
+    let hw = h * w;
+    let mut sum = 0.0f32;
+    let mut count = 0.0f32;
+    for bi in 0..b {
+        for yi in 0..h {
+            for xi in 0..w {
+                let idx = bi * hw + yi * w + xi;
+                if tobj[idx] <= 0.5 {
+                    continue;
+                }
+                let base = bi * 4 * hw + yi * w + xi;
+                let mut pb_vals = [
+                    fast_sigmoid(pb[base]),
+                    fast_sigmoid(pb[base + hw]),
+                    fast_sigmoid(pb[base + 2 * hw]),
+                    fast_sigmoid(pb[base + 3 * hw]),
+                ];
+                pb_vals[0] = pb_vals[0].clamp(0.0, 1.0);
+                pb_vals[1] = pb_vals[1].clamp(0.0, 1.0);
+                pb_vals[2] = pb_vals[2].clamp(pb_vals[0], 1.0);
+                pb_vals[3] = pb_vals[3].clamp(pb_vals[1], 1.0);
+
+                let tb_vals = [
+                    tb[base].clamp(0.0, 1.0),
+                    tb[base + hw].clamp(0.0, 1.0),
+                    tb[base + 2 * hw].clamp(0.0, 1.0),
+                    tb[base + 3 * hw].clamp(0.0, 1.0),
+                ];
+
+                let inter_x0 = pb_vals[0].max(tb_vals[0]);
+                let inter_y0 = pb_vals[1].max(tb_vals[1]);
+                let inter_x1 = pb_vals[2].min(tb_vals[2]);
+                let inter_y1 = pb_vals[3].min(tb_vals[3]);
+                let inter_w = (inter_x1 - inter_x0).max(0.0);
+                let inter_h = (inter_y1 - inter_y0).max(0.0);
+                let inter = inter_w * inter_h;
+
+                let area_p =
+                    (pb_vals[2] - pb_vals[0]).max(0.0) * (pb_vals[3] - pb_vals[1]).max(0.0);
+                let area_t =
+                    (tb_vals[2] - tb_vals[0]).max(0.0) * (tb_vals[3] - tb_vals[1]).max(0.0);
+                let union = (area_p + area_t - inter).max(1e-6);
+                let iou = inter / union;
+                sum += iou;
+                count += 1.0;
+            }
+        }
+    }
+    if count == 0.0 { 0.0 } else { sum / count }
 }
