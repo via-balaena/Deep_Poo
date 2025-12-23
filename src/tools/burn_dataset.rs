@@ -56,6 +56,10 @@ pub struct DatasetConfig {
     pub resize_mode: ResizeMode,
     /// Probability of applying a horizontal flip augmentation.
     pub flip_horizontal_prob: f32,
+    /// Probability of applying a light color jitter (brightness/contrast).
+    pub color_jitter_prob: f32,
+    /// Max jitter scale for brightness/contrast.
+    pub color_jitter_strength: f32,
     /// Cap on boxes per image; extras are dropped, padding uses zeros with mask.
     pub max_boxes: usize,
     /// Shuffle samples before iteration.
@@ -70,6 +74,8 @@ impl Default for DatasetConfig {
             target_size: Some((512, 512)),
             resize_mode: ResizeMode::Letterbox,
             flip_horizontal_prob: 0.0,
+            color_jitter_prob: 0.0,
+            color_jitter_strength: 0.1,
             max_boxes: 16,
             shuffle: true,
             seed: None,
@@ -240,6 +246,11 @@ fn load_sample(
                     .collect::<Vec<_>>();
 
                 maybe_hflip(&mut resized_img, &mut boxes, cfg.flip_horizontal_prob);
+                maybe_jitter(
+                    &mut resized_img,
+                    cfg.color_jitter_prob,
+                    cfg.color_jitter_strength,
+                );
 
                 if boxes.len() > cfg.max_boxes {
                     boxes.truncate(cfg.max_boxes);
@@ -260,6 +271,11 @@ fn load_sample(
     let mut boxes = normalize_boxes(&meta.polyp_labels, width, height);
     let mut img = img;
     maybe_hflip(&mut img, &mut boxes, cfg.flip_horizontal_prob);
+    maybe_jitter(
+        &mut img,
+        cfg.color_jitter_prob,
+        cfg.color_jitter_strength,
+    );
     build_sample_from_image(img, width, height, boxes, meta.frame_id, cfg.max_boxes)
 }
 
@@ -384,6 +400,30 @@ pub(crate) fn maybe_hflip(img: &mut image::RgbImage, boxes: &mut Vec<[f32; 4]>, 
             let x1 = b[2];
             b[0] = (1.0 - x1).clamp(0.0, 1.0);
             b[2] = (1.0 - x0).clamp(0.0, 1.0);
+        }
+    }
+}
+
+pub(crate) fn maybe_jitter(
+    img: &mut image::RgbImage,
+    prob: f32,
+    strength: f32,
+) {
+    if prob <= 0.0 || strength <= 0.0 {
+        return;
+    }
+    let mut rng = rand::thread_rng();
+    if rng.gen_range(0.0..1.0) >= prob {
+        return;
+    }
+    let bright = 1.0 + rng.gen_range(-strength..strength);
+    let contrast = 1.0 + rng.gen_range(-strength..strength);
+    for pixel in img.pixels_mut() {
+        for c in 0..3 {
+            let v = pixel[c] as f32 / 255.0;
+            let mut v = (v - 0.5) * contrast + 0.5;
+            v *= bright;
+            pixel[c] = (v.clamp(0.0, 1.0) * 255.0) as u8;
         }
     }
 }

@@ -3,7 +3,7 @@
 - Model maturity: TinyDet is minimal, uses host-side CIoU, limited augmentation (flip/letterbox), and no robust target assignment or mAP computation.
   - Next steps:
     - Tensorize CIoU in the loss
-    - Add stronger augmentations
+    - Add stronger augmentations ✅ (color jitter added; consider scale/crop jitter next)
     - Improve target assignment
     - Add mAP/PR metrics in validation
 - Data quality: synthetic-only captures; no real-data validation; limited augmentation diversity.
