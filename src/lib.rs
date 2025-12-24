@@ -9,6 +9,7 @@ pub mod hud;
 pub mod polyp;
 pub mod probe;
 pub mod seed;
+pub mod service;
 pub mod tools;
 pub mod tunnel;
 pub mod vision;

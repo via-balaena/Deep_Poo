@@ -8,6 +8,7 @@ license = "AGPL-3.0-only"
 burn_runtime = ["burn", "burn/ndarray", "burn/autodiff", "burn-ndarray"]
 burn_wgpu = ["burn", "burn/autodiff", "burn-wgpu"]
 burn_runtime_wgpu = ["burn_runtime", "burn_wgpu"]
+tui = ["ratatui", "crossterm", "sysinfo"]
 
 [[bin]]
 name = "sim_view"
@@ -28,6 +29,11 @@ path = "src/bin/train.rs"
 name = "eval"
 path = "src/bin/eval.rs"
 
+[[bin]]
+name = "tui"
+path = "src/bin/tui.rs"
+required-features = ["tui"]
+
 [dependencies]
 bevy = "0.17.3"
 bevy_rapier3d = { version = "0.32", features = [ "simd-stable", "debug-render-3d" ] }
@@ -43,6 +49,9 @@ burn = { version = "0.14", optional = true }
 anyhow = "1.0"
 burn-ndarray = { version = "0.14", optional = true }
 burn-wgpu = { version = "0.14", optional = true, default-features = true }
+ratatui = { version = "0.26", optional = true, default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.27", optional = true }
+sysinfo = { version = "0.30", optional = true, default-features = false, features = ["multithread"] }
 
 [dev-dependencies]
 tempfile = "3.10"

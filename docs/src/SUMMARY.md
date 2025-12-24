@@ -9,3 +9,4 @@
 - [Burn Patch Notes](burn_patch.md)
 - [ML Pipeline](ml_pipeline.md)
 - [Checklist](checklist.md)
+- [TUI](tui.md)

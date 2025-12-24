@@ -102,6 +102,9 @@ mod real {
         /// Optional metrics output path (JSONL); if set, appends per-epoch val metrics.
         #[arg(long)]
         metrics_out: Option<String>,
+        /// Optional training status file (JSON) to report progress for UIs.
+        #[arg(long)]
+        status_file: Option<String>,
     }
 
     #[cfg(feature = "burn_wgpu")]
@@ -226,6 +229,17 @@ mod real {
         let mut debug_printed = false;
         for epoch in 0..args.epochs {
             println!("epoch {}", epoch + 1);
+            if let Some(path) = args.status_file.as_ref() {
+                let _ = write_status(
+                    path,
+                    serde_json::json!({
+                        "epoch": epoch + 1,
+                        "epochs": args.epochs,
+                        "seed": effective_seed,
+                        "status": "running"
+                    }),
+                );
+            }
             let mut train = BatchIter::from_indices(train_idx.clone(), cfg.clone())
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?;
             let mut step = 0usize;
@@ -451,6 +465,17 @@ mod real {
             } else {
                 println!("No val batches found under {:?}", val_root);
             }
+            if let Some(path) = args.status_file.as_ref() {
+                let _ = write_status(
+                    path,
+                    serde_json::json!({
+                        "epoch": epoch + 1,
+                        "epochs": args.epochs,
+                        "seed": effective_seed,
+                        "status": "running"
+                    }),
+                );
+            }
 
             if args.ckpt_every_epochs > 0 && (epoch + 1) % args.ckpt_every_epochs == 0 {
                 save_checkpoint(
@@ -469,7 +494,28 @@ mod real {
                 break;
             }
         }
+        if let Some(path) = args.status_file.as_ref() {
+            let _ = write_status(
+                path,
+                serde_json::json!({
+                    "epoch": args.epochs,
+                    "epochs": args.epochs,
+                    "seed": effective_seed,
+                    "status": "done"
+                }),
+            );
+        }
 
+        Ok(())
+    }
+
+    fn write_status(path: &str, value: serde_json::Value) -> std::io::Result<()> {
+        if let Some(parent) = std::path::Path::new(path).parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let mut f = std::fs::File::create(path)?;
+        use std::io::Write;
+        f.write_all(serde_json::to_string(&value)?.as_bytes())?;
         Ok(())
     }
 
