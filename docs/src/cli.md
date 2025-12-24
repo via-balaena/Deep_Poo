@@ -22,6 +22,16 @@ The simulator ships multiple binaries (interactive, headless data-gen, overlay t
 - `B`: toggle between Burn and heuristic detectors; HUD shows the active mode/box stats.
 - Burn checkpoint: place model at `checkpoints/tinydet.bin` (runtime loads automatically). If missing or load fails, sim falls back to the heuristic detector and shows a fallback banner in the HUD.
 
+## Runtime inference (Burn)
+- Enable Burn: run with `--features burn_runtime` (CPU), `--features "burn_runtime,burn_wgpu"` (GPU), or the alias `--features burn_runtime_wgpu` (CPU+GPU).
+  - Example (CPU): `cargo run --release --features burn_runtime --bin sim_view`
+  - Example (GPU): `cargo run --release --features "burn_runtime,burn_wgpu" --bin sim_view`
+    - Example (alias): `cargo run --release --features burn_runtime_wgpu --bin sim_view`
+
+- Checkpoint: place model at `checkpoints/tinydet.bin` (expected at startup). If missing, sim falls back to the heuristic detector.
+- Toggle detector: press `B` to switch between Burn and heuristic; HUD shows active mode and box stats.
+- Thresholds: `-`/`=` lower/raise objectness; `[`/`]` lower/raise IoU. HUD shows current values and inference latency when Burn is active.
+
 ## Command gallery (covers every flag)
 
 ### How to Run the Simulator (By Scenario)
