@@ -6,7 +6,7 @@ param(
     [string[]] $Args
 )
 
-$repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\\..")
 Push-Location $repoRoot
 Write-Host "Working dir:" (Get-Location)
 
