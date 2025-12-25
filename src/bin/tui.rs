@@ -220,9 +220,19 @@ fn tick(state: &mut AppState) {
     if let Ok(lines) = service::read_log_tail(Path::new("logs/train.log"), 5) {
         state.logs = lines;
     }
-    if let Some(status) = service::read_status(Path::new("logs/train_status.json")) {
+    if let Some(status) = read_train_status() {
         state.train_status = Some(status);
     }
+}
+
+fn read_train_status() -> Option<serde_json::Value> {
+    const PATHS: &[&str] = &["logs/train_hp_status.json", "logs/train_status.json"];
+    for path in PATHS {
+        if let Some(status) = service::read_status(Path::new(path)) {
+            return Some(status);
+        }
+    }
+    None
 }
 
 fn draw_ui(f: &mut ratatui::Frame<'_>, state: &AppState) {
