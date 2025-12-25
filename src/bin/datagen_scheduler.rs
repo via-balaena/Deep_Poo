@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 use std::process::Command;
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use clap::Parser;
 use colon_sim::service::{self, DatagenOptions};
+#[cfg(target_os = "macos")]
 use serde::Deserialize;
 use sysinfo::System;
 
@@ -296,8 +297,8 @@ fn sample_nvidia_nvml() -> Option<GpuStats> {
     use nvml_wrapper::Nvml;
     let nvml = Nvml::init().ok()?;
     let device = nvml.device_by_index(0).ok()?;
-    let util = nvml.utilization_rates(&device).ok()?;
-    let mem = nvml.memory_info(&device).ok()?;
+    let util = device.utilization_rates().ok()?;
+    let mem = device.memory_info().ok()?;
     Some(GpuStats {
         utilization: util.gpu as f32,
         mem_used_mb: Some(mem.used / (1024 * 1024)),
