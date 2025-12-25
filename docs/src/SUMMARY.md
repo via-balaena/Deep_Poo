@@ -10,3 +10,4 @@
 - [ML Pipeline](ml_pipeline.md)
 - [Checklist](checklist.md)
 - [TUI](tui.md)
+- [Datagen Scheduler](datagen_scheduler.md)

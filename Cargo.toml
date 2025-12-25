@@ -9,6 +9,11 @@ burn_runtime = ["burn", "burn/ndarray", "burn/autodiff", "burn-ndarray"]
 burn_wgpu = ["burn", "burn/autodiff", "burn-wgpu"]
 burn_runtime_wgpu = ["burn_runtime", "burn_wgpu"]
 tui = ["ratatui", "crossterm", "sysinfo"]
+scheduler = ["sysinfo"]
+gpu_macos_helper = []
+gpu_nvidia = ["nvml-wrapper"]
+gpu_amd = []
+gpu_intel = []
 
 [[bin]]
 name = "sim_view"
@@ -21,6 +26,7 @@ path = "src/bin/datagen.rs"
 [[bin]]
 name = "overlay_labels"
 path = "src/bin/overlay_labels.rs"
+
 [[bin]]
 name = "train"
 path = "src/bin/train.rs"
@@ -33,6 +39,16 @@ path = "src/bin/eval.rs"
 name = "tui"
 path = "src/bin/tui.rs"
 required-features = ["tui"]
+
+[[bin]]
+name = "gpu_macos_helper"
+path = "src/bin/gpu_macos_helper.rs"
+required-features = ["gpu_macos_helper"]
+
+[[bin]]
+name = "datagen_scheduler"
+path = "src/bin/datagen_scheduler.rs"
+required-features = ["scheduler"]
 
 [dependencies]
 bevy = "0.17.3"
@@ -53,6 +69,10 @@ ratatui = { version = "0.26", optional = true, default-features = false, feature
 crossterm = { version = "0.27", optional = true }
 sysinfo = { version = "0.30", optional = true, default-features = false, features = ["multithread"] }
 thiserror = "1.0"
+nvml-wrapper = { version = "0.8", optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+metal = "0.29"
 
 [dev-dependencies]
 tempfile = "3.10"

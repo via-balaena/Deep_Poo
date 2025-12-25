@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command};
 
 use serde::Deserialize;
-#[cfg(feature = "tui")]
+#[cfg(any(feature = "tui", feature = "scheduler"))]
 use sysinfo::{Pid, ProcessRefreshKind, RefreshKind, System};
 use thiserror::Error;
 
@@ -225,7 +225,7 @@ pub fn read_log_tail(path: &Path, limit: usize) -> Result<Vec<String>, ServiceEr
     Ok(lines)
 }
 
-#[cfg(feature = "tui")]
+#[cfg(any(feature = "tui", feature = "scheduler"))]
 pub fn is_process_running(pid: u32) -> bool {
     let mut sys =
         System::new_with_specifics(RefreshKind::new().with_processes(ProcessRefreshKind::new()));
@@ -233,7 +233,7 @@ pub fn is_process_running(pid: u32) -> bool {
     sys.refresh_process(pid)
 }
 
-#[cfg(feature = "tui")]
+#[cfg(any(feature = "tui", feature = "scheduler"))]
 pub fn read_status(path: &Path) -> Option<serde_json::Value> {
     let data = std::fs::read(path).ok()?;
     serde_json::from_slice(&data).ok()
