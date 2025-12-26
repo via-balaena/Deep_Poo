@@ -9,5 +9,3 @@
 - **Friction** `[ 7 8 ]`: 0.1–3.0 surface friction for the probe.
 
 Values update live and are mirrored in the top-left HUD. Press the keys to tighten/loosen and adjust movement to suit different tunnel sections.
-
-Goal: tune controls to properly mimic biological peristalsis.

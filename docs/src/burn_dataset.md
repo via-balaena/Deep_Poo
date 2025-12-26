@@ -102,6 +102,7 @@ let (mut train_iter, mut val_iter) = build_train_val_iters(
 )?;
 ```
 Validation defaults: no shuffle, no aug, drop_last=false, flip_prob=0 unless overridden via `val_cfg`.
+- Requires `burn_runtime` feature (same as `BatchIter`).
 
 <details>
 <summary>Improvement roadmap (ranked)</summary>

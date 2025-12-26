@@ -41,6 +41,36 @@ If DX12 picks WARP/CPU, try `WGPU_BACKEND="vulkan"` and set `WGPU_ADAPTER_NAME` 
 
 </details>
 
+<details>
+<summary>Apple (Metal)</summary>
+
+```bash
+WGPU_POWER_PREF=high-performance WGPU_BACKEND=metal cargo train_hp
+```
+If Metal falls back or you want logging, add `RUST_LOG=info,wgpu_core=info`.
+
+</details>
+
+<details>
+<summary>Linux (Vulkan)</summary>
+
+```bash
+WGPU_POWER_PREF=high-performance WGPU_BACKEND=vulkan WGPU_ADAPTER_NAME="NVIDIA" RUST_LOG=info,wgpu_core=info cargo train_hp
+```
+Adjust `WGPU_ADAPTER_NAME` to match your GPU vendor/name (e.g., "AMD", "Intel") or omit to auto-pick.
+
+</details>
+
+<details>
+<summary>Linux (Mesa/GL fallback)</summary>
+
+```bash
+WGPU_POWER_PREF=high-performance WGPU_BACKEND=gl RUST_LOG=info,wgpu_core=info cargo train_hp
+```
+Use only if Vulkan isn’t available; performance may be lower.
+
+</details>
+
 ## End-to-end workflow
 - Capture/prune data: run `sim_view --mode datagen` to create runs under `assets/datasets/captures`, then prune empties with `cargo run --bin prune_empty -- --input assets/datasets/captures --output assets/datasets/captures_filtered`. Repeat for any real-val root (`assets/datasets/real_val_filtered`).
 - Point training at filtered roots: e.g., `--input-root assets/datasets/captures_filtered` and `--real-val-dir assets/datasets/real_val_filtered`, or rely on the split manifest/seed for repeatable splits.
@@ -96,6 +126,11 @@ cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
   --val-ratio 0.2
 ```
 
+Validation thresholds:
+- `--val-obj-thresh <f32>`: objectness threshold for val matching (default 0.3).
+- `--val-iou-thresh <f32>` / `--val-iou-sweep`: IoU threshold(s) for val matching/NMS (default 0.5).
+Runtime inference thresholds are adjusted via hotkeys in the sim (`-`/`=` for objectness, `[`/`]` for IoU).
+
 ## What it does today
 - Loads capture runs via `BatchIter` (train with aug; val without), builds TinyDet, AdamW, and a linear LR scheduler.
 - Runs epoch/batch loop with per-step optimizer updates; logs loss and mean IoU each log interval.
@@ -110,8 +145,4 @@ cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
 - Runtime knobs: during sim, adjust thresholds with `-`/`=` (objectness) and `[`/`]` (IoU); press `B` to toggle between Burn and heuristic detectors. The HUD shows mode, box count, inference latency, and fallback banners.
 - Eval-only: `cargo run --features burn_runtime --bin eval -- --checkpoint <path> --input-root <val_root> [--val-iou-sweep ...] [--metrics-out ...]`.
 
-## Next steps (nice-to-haves)
-- Expose predicted boxes/confidence to HUD/`DetectionResult` so runtime shows actual detections, not just a bool. ✅
-- Bundle a small demo checkpoint or fall back to the heuristic detector with a clear log when no Burn model is available. ✅ (warns + heuristic fallback when checkpoint missing)
-- Tighten validation metrics with per-image precision/recall or mAP in addition to mean IoU. ✅ (mean IoU + precision/recall + approximate mAP sweep logged)
-- Add a sample `train` command here with typical flags, and expose inference thresholds via CLI/env.
+
