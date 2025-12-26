@@ -2377,6 +2377,7 @@ dependencies = [
  "nvml-wrapper 0.8.0",
  "rand 0.8.5",
  "ratatui",
+ "rayon",
  "serde",
  "serde_json",
  "smallvec",

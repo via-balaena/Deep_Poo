@@ -106,6 +106,18 @@ mod real {
         /// Optional training status file (JSON) to report progress for UIs.
         #[arg(long)]
         status_file: Option<String>,
+        /// Optional val target size (e.g., 256x256). Defaults to train target_size.
+        #[arg(long, value_parser = parse_target_size)]
+        val_target_size: Option<(u32, u32)>,
+        /// Optional val resize mode (force|letterbox). Defaults to train resize_mode.
+        #[arg(long, value_parser = ["force", "letterbox"])]
+        val_resize_mode: Option<String>,
+        /// Optional val flip prob (defaults to 0.0).
+        #[arg(long)]
+        val_flip_prob: Option<f32>,
+        /// Optional val max boxes (defaults to train max_boxes).
+        #[arg(long)]
+        val_max_boxes: Option<usize>,
     }
 
     #[cfg(feature = "burn_wgpu")]
@@ -123,6 +135,25 @@ mod real {
     enum Scheduler {
         Linear(LinearLrScheduler),
         Cosine(CosineAnnealingLrScheduler),
+    }
+
+    fn parse_target_size(s: &str) -> Result<(u32, u32), String> {
+        let parts: Vec<&str> = s.split(['x', 'X']).collect();
+        if parts.len() != 2 {
+            return Err("expected WxH (e.g., 256x256)".into());
+        }
+        let w = parts[0]
+            .trim()
+            .parse::<u32>()
+            .map_err(|_| "invalid width".to_string())?;
+        let h = parts[1]
+            .trim()
+            .parse::<u32>()
+            .map_err(|_| "invalid height".to_string())?;
+        if w == 0 || h == 0 {
+            return Err("width/height must be > 0".into());
+        }
+        Ok((w, h))
     }
 
     fn count_nonempty_samples(indices: &[SampleIndex]) -> usize {
@@ -153,6 +184,8 @@ mod real {
             drop_last: args.drop_last,
             ..Default::default()
         };
+        let pipeline = colon_sim::tools::burn_dataset::TransformPipeline::from_config(&cfg);
+        println!("Transforms (train): {}", pipeline.describe());
 
         let root = Path::new(&args.input_root);
         println!("Indexing dataset under {} ...", root.display());
@@ -179,6 +212,32 @@ mod real {
                 split_runs(indices, args.val_ratio)
             }
         };
+        if let Ok(summary) = colon_sim::tools::burn_dataset::summarize_runs(&indices) {
+            println!(
+                "Dataset summary: runs={} frames={} non_empty={} empty={} missing_image={} missing_file={} invalid={}",
+                summary.runs.len(),
+                summary.totals.total,
+                summary.totals.non_empty,
+                summary.totals.empty,
+                summary.totals.missing_image,
+                summary.totals.missing_file,
+                summary.totals.invalid
+            );
+            for run in summary.runs.iter() {
+                println!(
+                    " - {}: total={} non_empty={} empty={} missing_image={} missing_file={} invalid={}",
+                    run.run_dir.display(),
+                    run.total,
+                    run.non_empty,
+                    run.empty,
+                    run.missing_image,
+                    run.missing_file,
+                    run.invalid
+                );
+            }
+        } else {
+            eprintln!("Dataset summary: failed to compute");
+        }
         let (val_idx, val_root) = if let Some(real_val_dir) = args.real_val_dir.as_ref() {
             let val_path = Path::new(real_val_dir).to_path_buf();
             let val_indices = colon_sim::tools::burn_dataset::index_runs(&val_path)
@@ -209,12 +268,31 @@ mod real {
             "Entering training loop (log_every={}, batch_size={}, epochs={})",
             args.log_every, batch_size, args.epochs
         );
-        let val_cfg = DatasetConfig {
-            flip_horizontal_prob: 0.0,
-            shuffle: false,
-            drop_last: false,
-            ..cfg
+        let val_cfg = {
+            let mut base = cfg.clone();
+            if let Some(ts) = args.val_target_size {
+                base.target_size = Some(ts);
+            }
+            if let Some(mode) = args.val_resize_mode.as_deref() {
+                base.resize_mode = match mode {
+                    "force" => colon_sim::tools::burn_dataset::ResizeMode::Force,
+                    _ => colon_sim::tools::burn_dataset::ResizeMode::Letterbox,
+                };
+            }
+            if let Some(p) = args.val_flip_prob {
+                base.flip_horizontal_prob = p;
+            } else {
+                base.flip_horizontal_prob = 0.0;
+            }
+            if let Some(mb) = args.val_max_boxes {
+                base.max_boxes = mb;
+            }
+            base.shuffle = false;
+            base.drop_last = false;
+            base
         };
+        let val_pipeline = colon_sim::tools::burn_dataset::TransformPipeline::from_config(&val_cfg);
+        println!("Transforms (val): {}", val_pipeline.describe());
 
         let mut model = TinyDet::<ADBackend>::new(TinyDetConfig::default(), &device);
         let mut optim = AdamWConfig::new().with_weight_decay(1e-4).init();
