@@ -97,6 +97,7 @@ Use only if Vulkan isn’t available; performance may be lower.
 - `--demo-checkpoint <path>`: optional model checkpoint to load at startup (model only; skips optimizer/scheduler). Useful for bundled/demo weights.
 - `--metrics-out <path>`: append per-epoch val metrics (IoU/PR/mAP, tp/fp/fn) with seed/thresholds.
 - `--tensor-warehouse <manifest>` (or env `TENSOR_WAREHOUSE_MANIFEST`): prefer precomputed tensor shards; falls back to live loader with a warning if unavailable.
+- `--model <tiny|big>` and `--model-max-boxes <N>`: select TinyDet (default) or the wider/deeper BigDet. BigDet is heavier on VRAM/compute; bump `--batch-size` only if your GPU allows.
 
 Sample run (CPU backend):
 ```bash
@@ -154,10 +155,33 @@ cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
   --val-ratio 0.1
 ```
 
+Larger model example (BigDet, NVIDIA/DX12, warehouse, repo root):
+```pwsh
+$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; `
+$env:RUST_LOG="info,wgpu_core=info"; `
+$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v<version>/manifest.json"; `
+$env:WAREHOUSE_STORE="memory"; `
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- `
+  --model big `
+  --model-max-boxes 16 `
+  --batch-size 32 `
+  --epochs 20 `
+  --scheduler cosine `
+  --lr-start 3e-4 `
+  --lr-end 1e-5 `
+  --val-ratio 0.1
+```
+If VRAM permits, increase `--batch-size`; if you hit OOM, lower it or use `--model tiny`.
+
 Validation thresholds:
 - `--val-obj-thresh <f32>`: objectness threshold for val matching (default 0.3).
 - `--val-iou-thresh <f32>` / `--val-iou-sweep`: IoU threshold(s) for val matching/NMS (default 0.5).
 Runtime inference thresholds are adjusted via hotkeys in the sim (`-`/`=` for objectness, `[`/`]` for IoU).
+
+## Models and the bounding-box trait
+- The training loop is backed by a `BoundingBoxModel` trait (forward/loss/postprocess). Implementations today: `TinyDet` (default) and `BigDet` (wider/deeper).
+- Select via `--model {tiny|big}` and `--model-max-boxes <N>`. Checkpoints are stored per model name (`tinydet.*`, `bigdet.*`) with meta recording the model kind and max_boxes.
+- Adding a new model: implement `BoundingBoxModel` (forward returns `ModelOutputs`, loss consumes `ModelTargets`), add a config, wire it into the model enum/CLI, and add checkpoint names for load/save. Postprocess/NMS stays shared via the existing helpers.
 
 ## What it does today
 - Loads capture runs via `BatchIter` (train with aug; val without), builds TinyDet, AdamW, and a linear LR scheduler.

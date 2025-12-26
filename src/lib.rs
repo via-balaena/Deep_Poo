@@ -11,6 +11,10 @@ pub mod probe;
 pub mod seed;
 pub mod service;
 pub mod tools;
+#[cfg(feature = "burn_runtime")]
+pub mod tools_postprocess {
+    pub use crate::tools::postprocess::*;
+}
 pub mod tunnel;
 pub mod vision;
 pub mod vision_interfaces;

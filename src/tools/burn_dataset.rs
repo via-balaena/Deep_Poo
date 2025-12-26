@@ -12,7 +12,7 @@ use std::fs;
 #[cfg(feature = "burn_runtime")]
 use std::fs::File;
 #[cfg(feature = "burn_runtime")]
-use std::io::Write;
+use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 #[cfg(feature = "burn_runtime")]
 use std::thread;
@@ -947,6 +947,113 @@ fn label_has_box(meta: &LabelEntry) -> bool {
     })
 }
 
+#[cfg(all(test, feature = "burn_runtime"))]
+mod streaming_tests {
+    use super::*;
+
+    #[test]
+    fn streamed_matches_owned_for_small_shard() {
+        let tmp = tempfile::tempdir().unwrap();
+        let shard_path = tmp.path().join("shard.bin");
+        let width = 2u32;
+        let height = 1u32;
+        let channels = 3u32;
+        let max_boxes = 1usize;
+        let samples = 2usize;
+        let header_len = 64usize;
+        let img_bytes = samples * (width as usize) * (height as usize) * channels as usize * 4;
+        let box_bytes = samples * max_boxes * 4 * 4;
+        let mask_bytes = samples * max_boxes * 4;
+        let image_offset = header_len;
+        let boxes_offset = image_offset + img_bytes;
+        let mask_offset = boxes_offset + box_bytes;
+        let mut data = vec![0u8; header_len + img_bytes + box_bytes + mask_bytes];
+        data[0..4].copy_from_slice(b"TWH1");
+        data[4..8].copy_from_slice(&(1u32).to_le_bytes()); // shard_version
+        data[8..12].copy_from_slice(&(0u32).to_le_bytes()); // dtype f32
+        data[12..16].copy_from_slice(&(0u32).to_le_bytes()); // endianness little
+        data[16..20].copy_from_slice(&width.to_le_bytes());
+        data[20..24].copy_from_slice(&height.to_le_bytes());
+        data[24..28].copy_from_slice(&channels.to_le_bytes());
+        data[28..32].copy_from_slice(&(max_boxes as u32).to_le_bytes());
+        data[32..40].copy_from_slice(&(samples as u64).to_le_bytes());
+        data[40..48].copy_from_slice(&(image_offset as u64).to_le_bytes());
+        data[48..56].copy_from_slice(&(boxes_offset as u64).to_le_bytes());
+        data[56..64].copy_from_slice(&(mask_offset as u64).to_le_bytes());
+
+        // Fill images.
+        let mut cursor = image_offset;
+        for sample in 0..samples {
+            for _ in 0..(width * height * channels) {
+                let val = (sample + 1) as f32;
+                data[cursor..cursor + 4].copy_from_slice(&val.to_le_bytes());
+                cursor += 4;
+            }
+        }
+        // Fill boxes.
+        let mut cursor = boxes_offset;
+        let boxes = [[0.0f32, 0.0, 0.5, 0.5], [0.1, 0.2, 0.3, 0.4]];
+        for b in &boxes {
+            for v in b {
+                data[cursor..cursor + 4].copy_from_slice(&v.to_le_bytes());
+                cursor += 4;
+            }
+        }
+        // Fill masks.
+        let mut cursor = mask_offset;
+        for m in [1.0f32, 0.0f32] {
+            data[cursor..cursor + 4].copy_from_slice(&m.to_le_bytes());
+            cursor += 4;
+        }
+
+        std::fs::write(&shard_path, data).unwrap();
+
+        let meta = ShardMetadata {
+            id: "test".into(),
+            relative_path: shard_path
+                .strip_prefix(tmp.path())
+                .unwrap()
+                .to_string_lossy()
+                .to_string(),
+            shard_version: 1,
+            samples,
+            width,
+            height,
+            channels,
+            max_boxes,
+            checksum_sha256: None,
+            dtype: ShardDType::F32,
+            endianness: Endianness::Little,
+        };
+
+        let owned = load_shard_owned(tmp.path(), &meta).expect("owned load");
+        let streamed = load_shard_streamed(tmp.path(), &meta).expect("streamed load");
+        assert_eq!(owned.samples, streamed.samples);
+        assert_eq!(owned.width, streamed.width);
+        assert_eq!(owned.height, streamed.height);
+        assert_eq!(owned.max_boxes, streamed.max_boxes);
+
+        for idx in 0..samples {
+            let mut o_img = Vec::new();
+            let mut o_box = Vec::new();
+            let mut o_mask = Vec::new();
+            owned
+                .copy_sample(idx, &mut o_img, &mut o_box, &mut o_mask)
+                .unwrap();
+
+            let mut s_img = Vec::new();
+            let mut s_box = Vec::new();
+            let mut s_mask = Vec::new();
+            streamed
+                .copy_sample(idx, &mut s_img, &mut s_box, &mut s_mask)
+                .unwrap();
+
+            assert_eq!(o_img, s_img);
+            assert_eq!(o_box, s_box);
+            assert_eq!(o_mask, s_mask);
+        }
+    }
+}
 pub fn summarize_runs(indices: &[SampleIndex]) -> DatasetResult<DatasetSummary> {
     let mut by_run: std::collections::BTreeMap<PathBuf, RunSummary> =
         std::collections::BTreeMap::new();
@@ -1837,7 +1944,14 @@ enum ShardBacking {
         boxes_offset: usize,
         mask_offset: usize,
     },
-    Streamed, // placeholder for future extensions
+    #[allow(dead_code)]
+    Streamed {
+        path: PathBuf,
+        image_offset: usize,
+        boxes_offset: usize,
+        mask_offset: usize,
+        samples: usize,
+    }, // placeholder for future extensions
 }
 
 #[cfg(feature = "burn_runtime")]
@@ -1926,9 +2040,72 @@ impl ShardBuffer {
                 }
                 Ok(())
             }
-            ShardBacking::Streamed => Err(BurnDatasetError::Other(
-                "streamed backing not supported in copy_sample".into(),
-            )),
+            ShardBacking::Streamed {
+                path,
+                image_offset,
+                boxes_offset,
+                mask_offset,
+                samples,
+            } => {
+                if sample_idx >= *samples {
+                    return Err(BurnDatasetError::Other(format!(
+                        "sample {} out of range for {}",
+                        sample_idx,
+                        path.display()
+                    )));
+                }
+                let img_elems = 3 * w * h;
+                let box_elems = self.max_boxes * 4;
+                let mask_elems = self.max_boxes;
+                let img_bytes = img_elems * std::mem::size_of::<f32>();
+                let box_bytes = box_elems * std::mem::size_of::<f32>();
+                let mask_bytes = mask_elems * std::mem::size_of::<f32>();
+
+                let img_start = image_offset
+                    .checked_add(sample_idx * img_bytes)
+                    .ok_or_else(|| BurnDatasetError::Other("image offset overflow".into()))?;
+                let boxes_start = boxes_offset
+                    .checked_add(sample_idx * box_bytes)
+                    .ok_or_else(|| BurnDatasetError::Other("box offset overflow".into()))?;
+                let mask_start = mask_offset
+                    .checked_add(sample_idx * mask_bytes)
+                    .ok_or_else(|| BurnDatasetError::Other("mask offset overflow".into()))?;
+
+                let mut file = BufReader::new(File::open(path).map_err(|e| BurnDatasetError::Io {
+                    path: path.clone(),
+                    source: e,
+                })?);
+
+                fn read_f32s<R: Read + Seek>(
+                    file: &mut R,
+                    offset: usize,
+                    bytes: usize,
+                    out: &mut Vec<f32>,
+                    path: &Path,
+                ) -> DatasetResult<()> {
+                    file.seek(SeekFrom::Start(offset as u64))
+                        .map_err(|e| BurnDatasetError::Io {
+                            path: path.to_path_buf(),
+                            source: e,
+                        })?;
+                    let mut buf = vec![0u8; bytes];
+                    file.read_exact(&mut buf).map_err(|e| BurnDatasetError::Io {
+                        path: path.to_path_buf(),
+                        source: e,
+                    })?;
+                    for chunk in buf.chunks_exact(4) {
+                        let mut arr = [0u8; 4];
+                        arr.copy_from_slice(chunk);
+                        out.push(f32::from_le_bytes(arr));
+                    }
+                    Ok(())
+                }
+
+                read_f32s(&mut file, img_start, img_bytes, out_images, path)?;
+                read_f32s(&mut file, boxes_start, box_bytes, out_boxes, path)?;
+                read_f32s(&mut file, mask_start, mask_bytes, out_masks, path)?;
+                Ok(())
+            }
         }
     }
 }
@@ -1993,7 +2170,7 @@ impl StreamingStore {
             .enumerate()
             .map(|(i, meta)| {
                 let t0 = Instant::now();
-                let shard = load_shard_mmap(root, meta)?;
+                let shard = load_shard_streamed(root, meta)?;
                 let ms = t0.elapsed().as_millis();
                 println!(
                     "[warehouse] stream shard {} (id={}, samples={}, size={}x{}, max_boxes={}) in {} ms",
@@ -2473,6 +2650,9 @@ impl WarehouseBatchIter {
 
 #[cfg(feature = "burn_runtime")]
 impl WarehouseLoaders {
+    pub fn store_len(&self) -> usize {
+        self.store.total_shards()
+    }
     pub fn from_manifest_path(
         manifest_path: &Path,
         val_ratio: f32,
@@ -2497,12 +2677,14 @@ impl WarehouseLoaders {
                 })
             }
             WarehouseStoreMode::Streaming => {
+                let prefetch = WarehouseStoreMode::prefetch_from_env();
+                println!("[warehouse] streaming prefetch depth: {}", prefetch);
                 let store = StreamingStore::from_manifest_path(
                     manifest_path,
                     val_ratio,
                     seed,
                     drop_last,
-                    WarehouseStoreMode::prefetch_from_env(),
+                    prefetch,
                 )?;
                 Ok(WarehouseLoaders {
                     store: Box::new(store),
@@ -2753,6 +2935,120 @@ fn load_shard_mmap(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuff
             image_offset,
             boxes_offset,
             mask_offset,
+        },
+    })
+}
+
+#[cfg(feature = "burn_runtime")]
+fn load_shard_streamed(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuffer> {
+    let path = root.join(&meta.relative_path);
+    let mut file = File::open(&path).map_err(|e| BurnDatasetError::Io {
+        path: path.clone(),
+        source: e,
+    })?;
+    let mut header = vec![0u8; 64];
+    let read = file.read(&mut header).map_err(|e| BurnDatasetError::Io {
+        path: path.clone(),
+        source: e,
+    })?;
+    if read < 64 {
+        return Err(BurnDatasetError::Other(format!(
+            "shard {} too small",
+            path.display()
+        )));
+    }
+    if &header[0..4] != b"TWH1" {
+        return Err(BurnDatasetError::Other(format!(
+            "bad magic in shard {}",
+            path.display()
+        )));
+    }
+    let shard_version = read_u32_le(&header[4..8]);
+    if shard_version != meta.shard_version {
+        return Err(BurnDatasetError::Other(format!(
+            "shard version mismatch {} vs {}",
+            shard_version, meta.shard_version
+        )));
+    }
+    let dtype = read_u32_le(&header[8..12]);
+    if dtype != 0 {
+        return Err(BurnDatasetError::Other(format!(
+            "unsupported dtype {} in {}",
+            dtype,
+            path.display()
+        )));
+    }
+    let width = read_u32_le(&header[16..20]);
+    let height = read_u32_le(&header[20..24]);
+    let channels = read_u32_le(&header[24..28]);
+    if channels != 3 {
+        return Err(BurnDatasetError::Other(format!(
+            "unsupported channels {} in {}",
+            channels,
+            path.display()
+        )));
+    }
+    let max_boxes = read_u32_le(&header[28..32]) as usize;
+    let samples = read_u64_le(&header[32..40]) as usize;
+    let image_offset = read_u64_le(&header[40..48]) as usize;
+    let boxes_offset = read_u64_le(&header[48..56]) as usize;
+    let mask_offset = read_u64_le(&header[56..64]) as usize;
+
+    let img_elems = samples
+        .checked_mul(3)
+        .and_then(|v| v.checked_mul(width as usize))
+        .and_then(|v| v.checked_mul(height as usize))
+        .ok_or_else(|| BurnDatasetError::Other("overflow computing image elems".into()))?;
+    let box_elems = samples
+        .checked_mul(max_boxes)
+        .and_then(|v| v.checked_mul(4))
+        .ok_or_else(|| BurnDatasetError::Other("overflow computing box elems".into()))?;
+    let mask_elems = samples
+        .checked_mul(max_boxes)
+        .ok_or_else(|| BurnDatasetError::Other("overflow computing mask elems".into()))?;
+
+    let image_bytes = img_elems * std::mem::size_of::<f32>();
+    let box_bytes = box_elems * std::mem::size_of::<f32>();
+    let mask_bytes = mask_elems * std::mem::size_of::<f32>();
+
+    let file_len = file
+        .metadata()
+        .map_err(|e| BurnDatasetError::Io {
+            path: path.clone(),
+            source: e,
+        })?
+        .len() as usize;
+
+    if image_offset
+        .checked_add(image_bytes)
+        .map(|v| v > file_len)
+        .unwrap_or(true)
+        || boxes_offset
+            .checked_add(box_bytes)
+            .map(|v| v > file_len)
+            .unwrap_or(true)
+        || mask_offset
+            .checked_add(mask_bytes)
+            .map(|v| v > file_len)
+            .unwrap_or(true)
+    {
+        return Err(BurnDatasetError::Other(format!(
+            "shard {} truncated",
+            path.display()
+        )));
+    }
+
+    Ok(ShardBuffer {
+        samples,
+        width,
+        height,
+        max_boxes,
+        backing: ShardBacking::Streamed {
+            path,
+            image_offset,
+            boxes_offset,
+            mask_offset,
+            samples,
         },
     })
 }

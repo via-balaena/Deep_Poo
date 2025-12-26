@@ -1,8 +1,13 @@
 # Data ingestion safeguards
 
 ## Processing order (with controls)
-1) **Decode labels** from JSON into in-memory structs.
-   - Code: `load_sample` in `src/tools/burn_dataset.rs` deserializes `labels/frame_XXXXX.json` via `serde_json`.
+1) **Decode labels** from JSON into in-memory structs. 
+   - Code: `load_sample` in `src/tools/burn_dataset.rs` deserializes `labels/frame_XXXXX.json` via `serde_json`, then calls `validate_label` to enforce required fields and bbox ranges.
+   - Controls:
+     - Strict vs permissive: default is strict; permissive skips malformed labels with a warning. Toggle via `BURN_DATASET_STRICT=0`.
+     - Max invalid/missing thresholds: `BURN_DATASET_MAX_INVALID_RATIO`, `BURN_DATASET_MAX_MISSING` abort the run if exceeded.
+   - Outcomes:
+     - Valid labels proceed to normalization; empty/missing/invalid labels increment skip counters and surface in the pre-run summary and `[dataset]` progress logs.
    - CLI: `sim_view`/`datagen_headless` produce the label JSONs; no separate decode CLI needed.
 2) **Prune/clip invalid boxes** (e.g., out-of-bounds, zero-area).
    - Code: `normalize_boxes` / `normalize_boxes_with_px` clamp coords to `[0,1]`, and resize/letterbox recomputes boxes with padding.

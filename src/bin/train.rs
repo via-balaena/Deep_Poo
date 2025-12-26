@@ -21,11 +21,12 @@ mod real {
     #[cfg(feature = "burn_wgpu")]
     use burn_wgpu::Wgpu;
     use clap::Parser;
-    use colon_sim::burn_model::{TinyDet, TinyDetConfig, assign_targets_to_grid, nms};
-    use colon_sim::tools::burn_dataset::{
-        BurnBatch, SampleIndex, WarehouseLoaders, WarehouseManifest, WarehouseStoreMode,
+    use colon_sim::burn_model::{
+        BigDet, BigDetConfig, BoundingBoxModel, ModelOutputs, ModelTargets, TinyDet, TinyDetConfig,
+        assign_targets_to_grid, nms,
     };
-    use serde::{Deserialize, Serialize};
+    use colon_sim::tools::burn_dataset::{BurnBatch, WarehouseLoaders, WarehouseManifest};
+    use colon_sim::tools_postprocess::{collect_gt_boxes, decode_grid_preds};
 
     #[derive(Parser, Debug)]
     #[command(name = "train", about = "TinyDet training harness")]
@@ -111,6 +112,12 @@ mod real {
         /// Warehouse store mode: memory (default), mmap, or stream. Can also be set via WAREHOUSE_STORE.
         #[arg(long, value_parser = ["memory", "mmap", "stream"], env = "WAREHOUSE_STORE")]
         warehouse_store: Option<String>,
+        /// Model config: max boxes per sample (passed to TinyDet).
+        #[arg(long, default_value_t = 16)]
+        model_max_boxes: usize,
+        /// Model selection.
+        #[arg(long, default_value = "tiny", value_parser = ["tiny", "big"])]
+        model: String,
     }
 
     #[cfg(feature = "burn_wgpu")]
@@ -118,9 +125,278 @@ mod real {
     #[cfg(not(feature = "burn_wgpu"))]
     type Backend = NdArray<f32>;
     type ADBackend = Autodiff<Backend>;
+
+    #[derive(Clone, Debug)]
+    enum Model {
+        Tiny(TinyDet<ADBackend>),
+        Big(BigDet<ADBackend>),
+    }
+
+    type TinyRecord = <TinyDet<ADBackend> as burn::module::Module<ADBackend>>::Record;
+    type BigRecord = <BigDet<ADBackend> as burn::module::Module<ADBackend>>::Record;
+
+    enum ModelRecord {
+        Tiny(TinyRecord),
+        Big(BigRecord),
+    }
+
+    impl burn::record::Record<ADBackend> for ModelRecord {
+        type Item<S: burn::record::PrecisionSettings> = (
+            u8,
+            Option<<TinyRecord as burn::record::Record<ADBackend>>::Item<S>>,
+            Option<<BigRecord as burn::record::Record<ADBackend>>::Item<S>>,
+        );
+
+        fn into_item<S: burn::record::PrecisionSettings>(self) -> Self::Item<S> {
+            match self {
+                ModelRecord::Tiny(r) => (0, Some(r.into_item()), None),
+                ModelRecord::Big(r) => (1, None, Some(r.into_item())),
+            }
+        }
+
+        fn from_item<S: burn::record::PrecisionSettings>(
+            item: Self::Item<S>,
+            device: &<ADBackend as burn::tensor::backend::Backend>::Device,
+        ) -> Self {
+            match item {
+                (0, Some(r), _) => ModelRecord::Tiny(TinyRecord::from_item(r, device)),
+                (1, _, Some(r)) => ModelRecord::Big(BigRecord::from_item(r, device)),
+                (0, None, _) => panic!("missing tiny record payload"),
+                (1, _, None) => panic!("missing big record payload"),
+                _ => panic!("unknown model record tag"),
+            }
+        }
+    }
+
+    #[derive(Clone, Debug)]
+    enum ModelInner {
+        Tiny(<TinyDet<ADBackend> as burn::module::AutodiffModule<ADBackend>>::InnerModule),
+        Big(<BigDet<ADBackend> as burn::module::AutodiffModule<ADBackend>>::InnerModule),
+    }
+
+    impl burn::module::Module<ADBackend> for Model {
+        type Record = ModelRecord;
+
+        fn collect_devices(
+            &self,
+            devices: burn::module::Devices<ADBackend>,
+        ) -> burn::module::Devices<ADBackend> {
+            match self {
+                Model::Tiny(m) => m.collect_devices(devices),
+                Model::Big(m) => m.collect_devices(devices),
+            }
+        }
+
+        fn fork(self, device: &<ADBackend as burn::tensor::backend::Backend>::Device) -> Self {
+            match self {
+                Model::Tiny(m) => Model::Tiny(m.fork(device)),
+                Model::Big(m) => Model::Big(m.fork(device)),
+            }
+        }
+
+        fn to_device(self, device: &<ADBackend as burn::tensor::backend::Backend>::Device) -> Self {
+            match self {
+                Model::Tiny(m) => Model::Tiny(m.to_device(device)),
+                Model::Big(m) => Model::Big(m.to_device(device)),
+            }
+        }
+
+        fn visit<Visitor: burn::module::ModuleVisitor<ADBackend>>(
+            &self,
+            visitor: &mut Visitor,
+        ) {
+            match self {
+                Model::Tiny(m) => m.visit(visitor),
+                Model::Big(m) => m.visit(visitor),
+            }
+        }
+
+        fn map<Mapper: burn::module::ModuleMapper<ADBackend>>(
+            self,
+            mapper: &mut Mapper,
+        ) -> Self {
+            match self {
+                Model::Tiny(m) => Model::Tiny(m.map(mapper)),
+                Model::Big(m) => Model::Big(m.map(mapper)),
+            }
+        }
+
+        fn load_record(self, record: Self::Record) -> Self {
+            match (self, record) {
+                (Model::Tiny(m), ModelRecord::Tiny(r)) => Model::Tiny(m.load_record(r)),
+                (Model::Big(m), ModelRecord::Big(r)) => Model::Big(m.load_record(r)),
+                // If mismatched, keep original variant.
+                (m, _) => m,
+            }
+        }
+
+        fn into_record(self) -> Self::Record {
+            match self {
+                Model::Tiny(m) => ModelRecord::Tiny(m.into_record()),
+                Model::Big(m) => ModelRecord::Big(m.into_record()),
+            }
+        }
+    }
+
+    impl burn::module::AutodiffModule<ADBackend> for Model {
+        type InnerModule = ModelInner;
+
+        fn valid(&self) -> Self::InnerModule {
+            match self {
+                Model::Tiny(m) => ModelInner::Tiny(m.valid()),
+                Model::Big(m) => ModelInner::Big(m.valid()),
+            }
+        }
+    }
+
+    type InnerBackend = <ADBackend as AutodiffBackend>::InnerBackend;
+
+    type TinyInnerRecord =
+        <TinyDet<InnerBackend> as burn::module::Module<InnerBackend>>::Record;
+    type BigInnerRecord = <BigDet<InnerBackend> as burn::module::Module<InnerBackend>>::Record;
+
+    enum ModelInnerRecord {
+        Tiny(TinyInnerRecord),
+        Big(BigInnerRecord),
+    }
+
+    impl burn::record::Record<InnerBackend> for ModelInnerRecord {
+        type Item<S: burn::record::PrecisionSettings> = (
+            u8,
+            Option<<TinyInnerRecord as burn::record::Record<InnerBackend>>::Item<S>>,
+            Option<<BigInnerRecord as burn::record::Record<InnerBackend>>::Item<S>>,
+        );
+
+        fn into_item<S: burn::record::PrecisionSettings>(self) -> Self::Item<S> {
+            match self {
+                ModelInnerRecord::Tiny(r) => (0, Some(r.into_item()), None),
+                ModelInnerRecord::Big(r) => (1, None, Some(r.into_item())),
+            }
+        }
+
+        fn from_item<S: burn::record::PrecisionSettings>(
+            item: Self::Item<S>,
+            device: &<InnerBackend as burn::tensor::backend::Backend>::Device,
+        ) -> Self {
+            match item {
+                (0, Some(r), _) => ModelInnerRecord::Tiny(TinyInnerRecord::from_item(r, device)),
+                (1, _, Some(r)) => ModelInnerRecord::Big(BigInnerRecord::from_item(r, device)),
+                (0, None, _) => panic!("missing tiny record payload"),
+                (1, _, None) => panic!("missing big record payload"),
+                _ => panic!("unknown model record tag"),
+            }
+        }
+    }
+
+    impl burn::module::Module<InnerBackend> for ModelInner {
+        type Record = ModelInnerRecord;
+
+        fn collect_devices(
+            &self,
+            devices: burn::module::Devices<InnerBackend>,
+        ) -> burn::module::Devices<InnerBackend> {
+            match self {
+                ModelInner::Tiny(m) => m.collect_devices(devices),
+                ModelInner::Big(m) => m.collect_devices(devices),
+            }
+        }
+
+        fn fork(self, device: &<InnerBackend as burn::tensor::backend::Backend>::Device) -> Self {
+            match self {
+                ModelInner::Tiny(m) => ModelInner::Tiny(m.fork(device)),
+                ModelInner::Big(m) => ModelInner::Big(m.fork(device)),
+            }
+        }
+
+        fn to_device(self, device: &<InnerBackend as burn::tensor::backend::Backend>::Device) -> Self {
+            match self {
+                ModelInner::Tiny(m) => ModelInner::Tiny(m.to_device(device)),
+                ModelInner::Big(m) => ModelInner::Big(m.to_device(device)),
+            }
+        }
+
+        fn visit<Visitor: burn::module::ModuleVisitor<InnerBackend>>(
+            &self,
+            visitor: &mut Visitor,
+        ) {
+            match self {
+                ModelInner::Tiny(m) => m.visit(visitor),
+                ModelInner::Big(m) => m.visit(visitor),
+            }
+        }
+
+        fn map<Mapper: burn::module::ModuleMapper<InnerBackend>>(
+            self,
+            mapper: &mut Mapper,
+        ) -> Self {
+            match self {
+                ModelInner::Tiny(m) => ModelInner::Tiny(m.map(mapper)),
+                ModelInner::Big(m) => ModelInner::Big(m.map(mapper)),
+            }
+        }
+
+        fn load_record(self, record: Self::Record) -> Self {
+            match (self, record) {
+                (ModelInner::Tiny(m), ModelInnerRecord::Tiny(r)) => ModelInner::Tiny(m.load_record(r)),
+                (ModelInner::Big(m), ModelInnerRecord::Big(r)) => ModelInner::Big(m.load_record(r)),
+                (m, _) => m,
+            }
+        }
+
+        fn into_record(self) -> Self::Record {
+            match self {
+                ModelInner::Tiny(m) => ModelInnerRecord::Tiny(m.into_record()),
+                ModelInner::Big(m) => ModelInnerRecord::Big(m.into_record()),
+            }
+        }
+    }
+
+    impl BoundingBoxModel<ADBackend> for Model {
+        fn forward(&self, images: burn::tensor::Tensor<ADBackend, 4>) -> ModelOutputs<ADBackend> {
+            match self {
+                Model::Tiny(m) => {
+                    let (o, b) = m.forward(images);
+                    ModelOutputs {
+                        obj_logits: o,
+                        box_logits: b,
+                    }
+                }
+                Model::Big(m) => {
+                    let (o, b) = m.forward(images);
+                    ModelOutputs {
+                        obj_logits: o,
+                        box_logits: b,
+                    }
+                }
+            }
+        }
+
+        fn compute_loss(
+            &self,
+            outputs: &ModelOutputs<ADBackend>,
+            targets: &ModelTargets<ADBackend>,
+            device: &<ADBackend as burn::tensor::backend::Backend>::Device,
+        ) -> burn::tensor::Tensor<ADBackend, 1> {
+            match self {
+                Model::Tiny(m) => m.compute_loss(outputs, targets, device),
+                Model::Big(m) => m.compute_loss(outputs, targets, device),
+            }
+        }
+
+        fn postprocess(
+            &self,
+            outputs: &ModelOutputs<ADBackend>,
+            obj_thresh: f32,
+        ) -> Vec<Vec<colon_sim::burn_model::Detection>> {
+            match self {
+                Model::Tiny(m) => m.postprocess(outputs, obj_thresh),
+                Model::Big(m) => m.postprocess(outputs, obj_thresh),
+            }
+        }
+    }
     type Optim = OptimizerAdaptor<
         burn::optim::AdamW<<ADBackend as AutodiffBackend>::InnerBackend>,
-        TinyDet<ADBackend>,
+        Model,
         ADBackend,
     >;
 
@@ -167,8 +443,14 @@ mod real {
             manifest.summary.totals.missing_file,
             manifest.summary.totals.invalid
         );
-        if let Some(store) = args.warehouse_store.as_deref() {
-            println!("Warehouse store override: {}", store);
+        if let WarehouseStoreMode::Streaming = WarehouseStoreMode::from_env() {
+            println!(
+                "[warehouse] streaming mode: prefetch={} shards={} train_samples={} val_samples={}",
+                WarehouseStoreMode::prefetch_from_env(),
+                loaders.store_len(),
+                train_len,
+                val_len
+            );
         }
         let loaders = WarehouseLoaders::from_manifest_path(
             manifest_path,
@@ -191,7 +473,24 @@ mod real {
             args.log_every, batch_size, args.epochs
         );
 
-        let mut model = TinyDet::<ADBackend>::new(TinyDetConfig::default(), &device);
+        let model_id = args.model.clone();
+        let ckpt_model = model_id.as_str();
+        let ckpt_optim = format!("{ckpt_model}_optim");
+        let ckpt_sched = format!("{ckpt_model}_sched");
+        let mut model = match args.model.as_str() {
+            "big" => Model::Big(BigDet::<ADBackend>::new(
+                BigDetConfig {
+                    max_boxes: args.model_max_boxes,
+                },
+                &device,
+            )),
+            _ => Model::Tiny(TinyDet::<ADBackend>::new(
+                TinyDetConfig {
+                    max_boxes: args.model_max_boxes,
+                },
+                &device,
+            )),
+        };
         let mut optim = AdamWConfig::new().with_weight_decay(1e-4).init();
         let total_steps = {
             let per_epoch = (train_len.max(1) + args.batch_size - 1) / args.batch_size;
@@ -226,9 +525,9 @@ mod real {
         } else {
             load_checkpoint(
                 &args.ckpt_dir,
-                "tinydet",
-                "tinydet_optim",
-                "tinydet_sched",
+                ckpt_model,
+                &ckpt_optim,
+                &ckpt_sched,
                 &device,
                 &mut model,
                 &mut optim,
@@ -263,19 +562,22 @@ mod real {
             {
                 step += 1;
                 global_step += 1;
-                let (obj_logits, box_logits) = model.forward(batch.images.clone());
+                let outputs = model.forward(batch.images.clone());
+                let (obj_logits, box_logits) =
+                    (outputs.obj_logits.clone(), outputs.box_logits.clone());
                 let (t_obj, t_boxes, t_mask) =
                     build_targets(&batch, obj_logits.dims()[2], obj_logits.dims()[3], &device)?;
                 if args.debug_batch && !debug_printed {
                     debug_printed = true;
                     print_debug_batch(&obj_logits, &box_logits, &t_obj, &t_boxes, &t_mask)?;
                 }
-                let loss = model.loss(
-                    obj_logits,
-                    box_logits.clone(),
-                    t_obj.clone(),
-                    t_boxes.clone(),
-                    t_mask.clone(),
+                let loss = model.compute_loss(
+                    &outputs,
+                    &ModelTargets {
+                        obj: t_obj.clone(),
+                        boxes: t_boxes.clone(),
+                        box_mask: t_mask.clone(),
+                    },
                     &device,
                 );
                 let loss_scalar = loss
@@ -314,9 +616,9 @@ mod real {
                 if args.ckpt_every_steps > 0 && global_step % args.ckpt_every_steps == 0 {
                     save_checkpoint(
                         &args.ckpt_dir,
-                        "tinydet",
-                        "tinydet_optim",
-                        "tinydet_sched",
+                        ckpt_model,
+                        &ckpt_optim,
+                        &ckpt_sched,
                         &device,
                         &model,
                         &optim,
@@ -365,7 +667,8 @@ mod real {
                 .next_batch::<ADBackend>(batch_size, &device)
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
             {
-                let (v_obj, v_boxes) = model.forward(val_batch.images.clone());
+                let val_outputs = model.forward(val_batch.images.clone());
+                let (v_obj, v_boxes) = (val_outputs.obj_logits.clone(), val_outputs.box_logits.clone());
                 for accum in val_accum.iter_mut() {
                     let (iou_sum, matched_count, batch_tp, batch_fp, batch_fn) = val_metrics_nms(
                         &v_obj,
@@ -504,9 +807,9 @@ mod real {
             if args.ckpt_every_epochs > 0 && (epoch + 1) % args.ckpt_every_epochs == 0 {
                 save_checkpoint(
                     &args.ckpt_dir,
-                    "tinydet",
-                    "tinydet_optim",
-                    "tinydet_sched",
+                    ckpt_model,
+                    &ckpt_optim,
+                    &ckpt_sched,
                     &device,
                     &model,
                     &optim,
@@ -690,7 +993,7 @@ mod real {
         optim_name: &str,
         sched_name: &str,
         device: &<ADBackend as burn::tensor::backend::Backend>::Device,
-        model: &mut TinyDet<ADBackend>,
+        model: &mut Model,
         optim: &mut Optim,
         scheduler: &mut Scheduler,
     ) {
@@ -698,17 +1001,41 @@ mod real {
         let model_path = Path::new(dir).join(model_name);
         let optim_path = Path::new(dir).join(optim_name);
         let sched_path = Path::new(dir).join(sched_name);
+        let meta_path = Path::new(dir).join(format!("{model_name}_meta.json"));
+
+        // If meta exists, verify model kind and report stored max_boxes.
+        if meta_path.exists() {
+            if let Ok(bytes) = std::fs::read(&meta_path) {
+                if let Ok(meta) = serde_json::from_slice::<serde_json::Value>(&bytes) {
+                    let stored_model = meta.get("model").and_then(|v| v.as_str()).unwrap_or("");
+                    let stored_boxes = meta
+                        .get("max_boxes")
+                        .and_then(|v| v.as_u64())
+                        .unwrap_or(0);
+                    if stored_model != model_name {
+                        eprintln!(
+                            "Checkpoint meta mismatch: expected {}, found {}",
+                            model_name, stored_model
+                        );
+                    }
+                    println!(
+                        "Checkpoint meta: model={} max_boxes={}",
+                        stored_model, stored_boxes
+                    );
+                }
+            }
+        }
 
         if model_path.with_extension("bin").exists() {
-            if let Ok(loaded) = model.clone().load_file(model_path, &recorder, device) {
+            if let Ok(loaded) = model.clone().load_file(model_path.clone(), &recorder, device) {
                 *model = loaded;
-                println!("Loaded model checkpoint");
+                println!("Loaded model checkpoint ({})", model_path.display());
             }
         }
         if optim_path.with_extension("bin").exists() {
-            if let Ok(record) = recorder.load(optim_path, device) {
+            if let Ok(record) = recorder.load(optim_path.clone(), device) {
                 *optim = optim.clone().load_record(record);
-                println!("Loaded optimizer checkpoint");
+                println!("Loaded optimizer checkpoint ({})", optim_path.display());
             }
         }
         if sched_path.with_extension("bin").exists() {
@@ -720,7 +1047,7 @@ mod real {
                         device,
                     ) {
                         *s = burn::lr_scheduler::LrScheduler::<ADBackend>::load_record(*s, record);
-                        println!("Loaded scheduler checkpoint (linear)");
+                        println!("Loaded scheduler checkpoint (linear) ({})", sched_path.display());
                     }
                 }
                 Scheduler::Cosine(s) => {
@@ -730,7 +1057,7 @@ mod real {
                         device,
                     ) {
                         *s = burn::lr_scheduler::LrScheduler::<ADBackend>::load_record(*s, record);
-                        println!("Loaded scheduler checkpoint (cosine)");
+                        println!("Loaded scheduler checkpoint (cosine) ({})", sched_path.display());
                     }
                 }
             }
@@ -742,46 +1069,94 @@ mod real {
         model_name: &str,
         optim_name: &str,
         sched_name: &str,
-        device: &<ADBackend as burn::tensor::backend::Backend>::Device,
-        model: &TinyDet<ADBackend>,
+        _device: &<ADBackend as burn::tensor::backend::Backend>::Device,
+        model: &Model,
         optim: &Optim,
         scheduler: &Scheduler,
     ) {
         let recorder = BinFileRecorder::<FullPrecisionSettings>::new();
-        let _ = fs::create_dir_all(dir);
+        if std::fs::create_dir_all(dir).is_err() {
+            eprintln!("Failed to create checkpoint dir {}", dir);
+            return;
+        }
         let model_path = Path::new(dir).join(model_name);
         let optim_path = Path::new(dir).join(optim_name);
         let sched_path = Path::new(dir).join(sched_name);
-        if let Err(err) = recorder.record(model.clone().into_record(), model_path) {
-            eprintln!("Failed to save model checkpoint: {:?}", err);
+        let meta_path = Path::new(dir).join(format!("{model_name}_meta.json"));
+
+        let model_record = model.clone().into_record();
+        if let Err(e) =
+            burn::record::Recorder::<ADBackend>::record(&recorder, model_record, model_path.clone())
+        {
+            eprintln!(
+                "Failed to save model checkpoint to {}: {:?}",
+                model_path.display(),
+                e
+            );
         }
-        if let Err(err) = recorder.record(optim.to_record(), optim_path) {
-            eprintln!("Failed to save optimizer checkpoint: {:?}", err);
+
+        // Save lightweight meta for model selection/config.
+        let max_boxes = match model {
+            Model::Tiny(m) => m.config.0.max_boxes,
+            Model::Big(m) => m.config.0.max_boxes,
+        };
+        let meta = serde_json::json!({
+            "model": model_name,
+            "max_boxes": max_boxes
+        });
+        if let Ok(bytes) = serde_json::to_vec_pretty(&meta) {
+            if let Err(e) = std::fs::write(&meta_path, bytes) {
+                eprintln!(
+                    "Failed to write checkpoint meta to {}: {:?}",
+                    meta_path.display(),
+                    e
+                );
+            }
         }
+
+        let optim_record = optim.to_record();
+        if let Err(e) = burn::record::Recorder::<ADBackend>::record(
+            &recorder,
+            optim_record,
+            optim_path.clone(),
+        ) {
+            eprintln!(
+                "Failed to save optimizer checkpoint to {}: {:?}",
+                optim_path.display(),
+                e
+            );
+        }
+
         match scheduler {
             Scheduler::Linear(s) => {
-                let sched_record = burn::lr_scheduler::LrScheduler::<ADBackend>::to_record(s);
-                if let Err(err) = burn::record::Recorder::<ADBackend>::record(
+                let record = burn::lr_scheduler::LrScheduler::<ADBackend>::to_record(s);
+                if let Err(e) = burn::record::Recorder::<ADBackend>::record(
                     &recorder,
-                    sched_record,
+                    record,
                     sched_path.clone(),
                 ) {
-                    eprintln!("Failed to save scheduler checkpoint: {:?}", err);
+                    eprintln!(
+                        "Failed to save linear scheduler checkpoint to {}: {:?}",
+                        sched_path.display(),
+                        e
+                    );
                 }
             }
             Scheduler::Cosine(s) => {
-                let sched_record = burn::lr_scheduler::LrScheduler::<ADBackend>::to_record(s);
-                if let Err(err) = burn::record::Recorder::<ADBackend>::record(
+                let record = burn::lr_scheduler::LrScheduler::<ADBackend>::to_record(s);
+                if let Err(e) = burn::record::Recorder::<ADBackend>::record(
                     &recorder,
-                    sched_record,
+                    record,
                     sched_path.clone(),
                 ) {
-                    eprintln!("Failed to save scheduler checkpoint: {:?}", err);
+                    eprintln!(
+                        "Failed to save cosine scheduler checkpoint to {}: {:?}",
+                        sched_path.display(),
+                        e
+                    );
                 }
             }
         }
-        // touch device to keep warning-free
-        let _ = device;
     }
 
     fn mean_iou_host(
@@ -868,32 +1243,16 @@ mod real {
         obj_thresh: f32,
         iou_thresh: f32,
     ) -> (f32, usize, usize, usize, usize) {
-        let obj = match obj_logits.to_data().to_vec::<f32>() {
-            Ok(v) => v,
-            Err(_) => return (0.0, 0, 0, 0, 0),
+        let decoded = match decode_grid_preds(obj_logits, box_logits, obj_thresh) {
+            Some(d) => d,
+            None => return (0.0, 0, 0, 0, 0),
         };
-        let boxes = match box_logits.to_data().to_vec::<f32>() {
-            Ok(v) => v,
-            Err(_) => return (0.0, 0, 0, 0, 0),
-        };
-        let dims = obj_logits.dims();
-        if dims.len() != 4 {
-            return (0.0, 0, 0, 0, 0);
-        }
-        let (b, _c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
-        let hw = h * w;
+        let b = decoded.len();
 
-        // Collect GT boxes per image.
-        let gt_boxes = match batch.boxes.to_data().to_vec::<f32>() {
-            Ok(v) => v,
-            Err(_) => return (0.0, 0, 0, 0, 0),
+        let gt = match collect_gt_boxes(&batch.boxes, &batch.box_mask) {
+            Some(g) => g,
+            None => return (0.0, 0, 0, 0, 0),
         };
-        let gt_mask = match batch.box_mask.to_data().to_vec::<f32>() {
-            Ok(v) => v,
-            Err(_) => return (0.0, 0, 0, 0, 0),
-        };
-        let max_boxes = batch.boxes.dims()[1];
-
         let mut all_iou = 0.0f32;
         let mut all_matched = 0usize;
         let mut tp = 0usize;
@@ -901,61 +1260,25 @@ mod real {
         let mut fn_total = 0usize;
 
         for bi in 0..b {
-            // Decode predictions for image bi.
-            let mut preds = Vec::new();
-            for yi in 0..h {
-                for xi in 0..w {
-                    let idx = bi * hw + yi * w + xi;
-                    let score = 1.0 / (1.0 + (-obj[idx]).exp());
-                    if score < obj_thresh {
-                        continue;
-                    }
-                    let base = bi * 4 * hw + yi * w + xi;
-                    let mut pb = [
-                        1.0 / (1.0 + (-boxes[base]).exp()),
-                        1.0 / (1.0 + (-boxes[base + hw]).exp()),
-                        1.0 / (1.0 + (-boxes[base + 2 * hw]).exp()),
-                        1.0 / (1.0 + (-boxes[base + 3 * hw]).exp()),
-                    ];
-                    pb[0] = pb[0].clamp(0.0, 1.0);
-                    pb[1] = pb[1].clamp(0.0, 1.0);
-                    pb[2] = pb[2].clamp(pb[0], 1.0);
-                    pb[3] = pb[3].clamp(pb[1], 1.0);
-                    preds.push((score, pb));
-                }
-            }
-            let mut gt = Vec::new();
-            for gi in 0..max_boxes {
-                let m = gt_mask[bi * max_boxes + gi];
-                if m <= 0.0 {
-                    continue;
-                }
-                let base = (bi * max_boxes + gi) * 4;
-                gt.push([
-                    gt_boxes[base].clamp(0.0, 1.0),
-                    gt_boxes[base + 1].clamp(0.0, 1.0),
-                    gt_boxes[base + 2].clamp(0.0, 1.0),
-                    gt_boxes[base + 3].clamp(0.0, 1.0),
-                ]);
-            }
+            let preds = &decoded[bi];
+            let gt_boxes = gt.get(bi).cloned().unwrap_or_default();
 
             if preds.is_empty() {
-                if !gt.is_empty() {
-                    fn_total += gt.len();
+                if !gt_boxes.is_empty() {
+                    fn_total += gt_boxes.len();
                 }
                 continue;
             }
-            preds.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
             let mut boxes_only: Vec<[f32; 4]> = preds.iter().map(|p| p.1).collect();
             let scores_only: Vec<f32> = preds.iter().map(|p| p.0).collect();
             let keep = nms(&boxes_only, &scores_only, iou_thresh);
             boxes_only = keep.iter().map(|&i| boxes_only[i]).collect();
 
-            if gt.is_empty() || boxes_only.is_empty() {
-                if gt.is_empty() {
+            if gt_boxes.is_empty() || boxes_only.is_empty() {
+                if gt_boxes.is_empty() {
                     fp += boxes_only.len();
                 } else {
-                    fn_total += gt.len();
+                    fn_total += gt_boxes.len();
                 }
                 continue;
             }
@@ -972,11 +1295,11 @@ mod real {
                 inter / union
             }
 
-            let mut matched_gt = vec![false; gt.len()];
+            let mut matched_gt = vec![false; gt_boxes.len()];
             for pb in boxes_only {
                 let mut best = -1isize;
                 let mut best_iou = 0.0f32;
-                for (gidx, gb) in gt.iter().enumerate() {
+                for (gidx, gb) in gt_boxes.iter().enumerate() {
                     if matched_gt[gidx] {
                         continue;
                     }
@@ -996,7 +1319,7 @@ mod real {
             let matched_count = matched_gt.iter().filter(|m| **m).count();
             tp += matched_count;
             fp += preds.len().saturating_sub(matched_count);
-            fn_total += gt.len().saturating_sub(matched_count);
+            fn_total += gt_boxes.len().saturating_sub(matched_count);
         }
 
         if all_matched == 0 {
