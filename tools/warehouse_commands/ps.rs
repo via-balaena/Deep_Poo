@@ -2,9 +2,11 @@
 //! Edit `CONFIG` below (or swap to `DEFAULT_CONFIG`) and run:
 //! `cargo run --bin warehouse_ps_command`.
 
-mod lib;
+mod common;
+mod ps_builder;
 
-use lib::{build_ps_command, CmdConfig, ModelKind, WarehouseStore, DEFAULT_CONFIG};
+use common::{CmdConfig, ModelKind, WarehouseStore};
+use ps_builder::build_ps_command;
 
 const CONFIG: CmdConfig = CmdConfig {
     manifest: "artifacts/tensor_warehouse/v<version>/manifest.json",

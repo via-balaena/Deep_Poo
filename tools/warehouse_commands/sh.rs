@@ -2,9 +2,11 @@
 //! Edit `CONFIG` below (or swap to `DEFAULT_CONFIG`) and run:
 //! `cargo run --bin warehouse_sh_command`.
 
-mod lib;
+mod common;
+mod sh_builder;
 
-use lib::{build_bash_command, CmdConfig, ModelKind, WarehouseStore, DEFAULT_CONFIG};
+use common::{CmdConfig, ModelKind, WarehouseStore};
+use sh_builder::build_bash_command;
 
 const CONFIG: CmdConfig = CmdConfig {
     manifest: "artifacts/tensor_warehouse/v<version>/manifest.json",
