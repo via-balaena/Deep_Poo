@@ -2,7 +2,9 @@
 //! Edit `CONFIG` below (or swap to `DEFAULT_CONFIG`) and run:
 //! `cargo run --bin warehouse_sh_command`.
 
+#[path = "../lib/common.rs"]
 mod common;
+#[path = "../lib/sh_builder.rs"]
 mod sh_builder;
 
 use common::{CmdConfig, ModelKind, WarehouseStore};

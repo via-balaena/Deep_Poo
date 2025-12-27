@@ -1,5 +1,6 @@
 use super::common::{CmdConfig, WarehouseStore};
 
+#[allow(dead_code)]
 pub fn build_ps_command(cfg: &CmdConfig<'_>) -> String {
     let mut env_parts = Vec::new();
     env_parts.push(format!(

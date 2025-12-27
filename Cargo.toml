@@ -52,11 +52,11 @@ required-features = ["scheduler"]
 
 [[bin]]
 name = "warehouse_ps_command"
-path = "tools/warehouse_commands/ps.rs"
+path = "tools/warehouse_commands/bin/ps.rs"
 
 [[bin]]
 name = "warehouse_sh_command"
-path = "tools/warehouse_commands/sh.rs"
+path = "tools/warehouse_commands/bin/sh.rs"
 
 [dependencies]
 bevy = "0.17.3"
