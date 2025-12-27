@@ -41,6 +41,8 @@ pub struct CmdConfig<'a> {
     pub model: ModelKind,
     pub batch_size: usize,
     pub log_every: usize,
+    pub wgpu_backend: &'a str,
+    pub wgpu_adapter: Option<&'a str>,
     pub extra_args: &'a str,
 }
 
@@ -52,5 +54,7 @@ pub const DEFAULT_CONFIG: CmdConfig<'static> = CmdConfig {
     model: ModelKind::Big,
     batch_size: 32,
     log_every: 1,
+    wgpu_backend: "vulkan",
+    wgpu_adapter: None,
     extra_args: "",
 };

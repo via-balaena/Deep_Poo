@@ -1,6 +1,5 @@
-//! Prints a Bash one-liner for running training with a warehouse manifest.
-//! Edit `CONFIG` below (or swap to `DEFAULT_CONFIG`) and run:
-//! `cargo run --bin warehouse_sh_command`.
+//! Bash one-liner generator for NVIDIA / Linux/macOS (Vulkan/Metal).
+//! Run: `cargo run --bin warehouse_nvidia_sh_command`.
 
 #[path = "../lib/common.rs"]
 mod common;
@@ -17,11 +16,12 @@ const CONFIG: CmdConfig = CmdConfig {
     model: ModelKind::Big,
     batch_size: 32,
     log_every: 1,
+    wgpu_backend: "vulkan",
+    wgpu_adapter: Some("NVIDIA"),
     extra_args: "",
 };
 
 fn main() {
-    // Use CONFIG for ad-hoc tweaks; switch to DEFAULT_CONFIG for shared defaults.
     let cmd = build_bash_command(&CONFIG);
     println!("{cmd}");
 }

@@ -12,6 +12,10 @@ pub fn build_bash_command(cfg: &CmdConfig<'_>) -> String {
         let depth = cfg.prefetch.unwrap_or(2);
         env_parts.push(format!("WAREHOUSE_PREFETCH=\"{}\"", depth));
     }
+    env_parts.push(format!("WGPU_BACKEND=\"{}\"", cfg.wgpu_backend));
+    if let Some(adapter) = cfg.wgpu_adapter {
+        env_parts.push(format!("WGPU_ADAPTER_NAME=\"{}\"", adapter));
+    }
     env_parts.push("WGPU_POWER_PREF=\"high-performance\"".into());
     env_parts.push("RUST_LOG=\"info,wgpu_core=info\"".into());
 

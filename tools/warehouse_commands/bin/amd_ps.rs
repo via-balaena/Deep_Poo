@@ -1,6 +1,5 @@
-//! Prints a PowerShell one-liner for running training with a warehouse manifest.
-//! Edit `CONFIG` below (or swap to `DEFAULT_CONFIG`) and run:
-//! `cargo run --bin warehouse_ps_command`.
+//! PowerShell one-liner generator for AMD / Windows (DX12).
+//! Run: `cargo run --bin warehouse_amd_ps_command`.
 
 #[path = "../lib/common.rs"]
 mod common;
@@ -17,11 +16,12 @@ const CONFIG: CmdConfig = CmdConfig {
     model: ModelKind::Big,
     batch_size: 32,
     log_every: 1,
+    wgpu_backend: "dx12",
+    wgpu_adapter: Some("AMD"),
     extra_args: "",
 };
 
 fn main() {
-    // Use CONFIG for ad-hoc tweaks; switch to DEFAULT_CONFIG for shared defaults.
     let cmd = build_ps_command(&CONFIG);
     println!("{cmd}");
 }
