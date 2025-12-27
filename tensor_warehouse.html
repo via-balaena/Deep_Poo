@@ -1,0 +1,289 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tensor Warehouse - Deep Poo</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data_pipeline_overview.html"><strong aria-hidden="true">2.</strong> Data Pipeline</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="data_ingestion.html"><strong aria-hidden="true">2.1.</strong> Data Ingestion</a></li><li class="chapter-item expanded "><a href="data_schema.html"><strong aria-hidden="true">2.2.</strong> Data Schema</a></li><li class="chapter-item expanded "><a href="datagen_scheduler.html"><strong aria-hidden="true">2.3.</strong> Datagen Scheduler</a></li><li class="chapter-item expanded "><a href="burn_dataset.html"><strong aria-hidden="true">2.4.</strong> Burn Dataset</a></li><li class="chapter-item expanded "><a href="tensor_warehouse.html" class="active"><strong aria-hidden="true">2.5.</strong> Tensor Warehouse</a></li><li class="chapter-item expanded "><a href="streaming_shards.html"><strong aria-hidden="true">2.6.</strong> Warehouse Store Modes</a></li></ol></li><li class="chapter-item expanded "><a href="training_overview.html"><strong aria-hidden="true">3.</strong> Training</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="training.html"><strong aria-hidden="true">3.1.</strong> Training Harness</a></li><li class="chapter-item expanded "><a href="ml_pipeline.html"><strong aria-hidden="true">3.2.</strong> ML Pipeline</a></li><li class="chapter-item expanded "><a href="burn_patch.html"><strong aria-hidden="true">3.3.</strong> Burn Patch Notes</a></li></ol></li><li class="chapter-item expanded "><a href="runtime_overview.html"><strong aria-hidden="true">4.</strong> Runtime & Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="cli.html"><strong aria-hidden="true">4.1.</strong> CLI Usage</a></li><li class="chapter-item expanded "><a href="tui.html"><strong aria-hidden="true">4.2.</strong> TUI</a></li><li class="chapter-item expanded "><a href="CONTROLS.html"><strong aria-hidden="true">4.3.</strong> Controls</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Deep Poo</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="tensor-warehouse"><a class="header" href="#tensor-warehouse">Tensor Warehouse</a></h1>
+<p>A versioned, precomputed tensor store so training never decodes or resizes on the fly. ETL builds shards + manifest; training only reads the warehouse.</p>
+<h2 id="what-you-get"><a class="header" href="#what-you-get">What you get</a></h2>
+<ul>
+<li>Versioned root (e.g., <code>artifacts/tensor_warehouse/v&lt;sha&gt;/</code>) with <code>manifest.json</code> and <code>shard_*.bin</code>.</li>
+<li>Deterministic transforms baked in (decode + resize/letterbox + box normalization); no augments cached.</li>
+<li>Strict validation (schema/bboxes/image presence) with summaries in the manifest.</li>
+<li>Observability: ETL timings/skip counts, shard load timings in training, optional trace, Parquet export of summaries.</li>
+</ul>
+<h2 id="layout"><a class="header" href="#layout">Layout</a></h2>
+<ul>
+<li><code>manifest.json</code>: dataset_root, cacheable transform config, version hash/recipe/code_version, thresholds, per-run + aggregate summaries, shard list with checksums/dtypes.</li>
+<li><code>shard_*.bin</code>: header + contiguous CHW tensors (f32), padded boxes/masks. Default shard format: magic <code>TWH1</code>, little-endian, <code>shard_version=1</code>, dtype=f32, channels=3, offsets for images/boxes/masks. Size target ~128–256 MB/shard.</li>
+</ul>
+<h2 id="build-etl"><a class="header" href="#build-etl">Build (ETL)</a></h2>
+<ul>
+<li>Base command (f32, 256x256 letterbox):<br />
+<code>CODE_VERSION=$(git rev-parse --short HEAD 2&gt;/dev/null || echo "") cargo run --bin warehouse_etl -- --input-root assets/datasets/captures_filtered --output-root artifacts/tensor_warehouse --target-size 384x384 --resize-mode letterbox --max-boxes 16 --shard-samples 1024</code></li>
+<li>PowerShell equivalent:
+<pre><code class="language-pwsh">$env:CODE_VERSION = (git rev-parse --short HEAD 2&gt;$null)
+cargo run --bin warehouse_etl -- --input-root assets/datasets/captures_filtered --output-root artifacts/tensor_warehouse --target-size 384x384 --resize-mode letterbox --max-boxes 16 --shard-samples 1024
+</code></pre>
+(Set once per PowerShell session; reuse for multiple runs unless you change commits—then re-run the assignment to keep the hash current.)</li>
+<li>Controls:
+<ul>
+<li><code>WAREHOUSE_CLEAR=1</code> to delete the computed version directory before writing.</li>
+<li><code>WAREHOUSE_SKIP_IF_EXISTS=1</code> to exit early if the versioned manifest already exists.</li>
+<li>Validation env (fail/warn): e.g., <code>BURN_DATASET_MAX_INVALID=0</code>, <code>BURN_DATASET_MAX_MISSING=0</code>, <code>BURN_DATASET_MAX_EMPTY_RATIO=0.05</code>.</li>
+</ul>
+</li>
+<li>Outputs to <code>artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json</code> plus shards.</li>
+</ul>
+<h2 id="train-from-the-warehouse"><a class="header" href="#train-from-the-warehouse">Train from the warehouse</a></h2>
+<ul>
+<li>Training requires a manifest; no live loader fallback.<br />
+<code>cargo train_hp -- --tensor-warehouse artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json --batch-size 64 --epochs 20 --status-file logs/train_status.json</code></li>
+<li>WGPU env (Windows NVIDIA example):<br />
+<code>$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"</code></li>
+<li>Training logs shard load times on startup and uses manifest counts for per-epoch math and progress.</li>
+</ul>
+<h2 id="analytics"><a class="header" href="#analytics">Analytics</a></h2>
+<ul>
+<li>Export manifest summaries to Parquet:<br />
+<code>cargo run --bin warehouse_export -- --manifest artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json --out logs/warehouse_summary.parquet</code></li>
+<li>Quick peek with Polars/DataFusion (Rust examples):
+<ul>
+<li>Polars (Rust): load with <code>polars::prelude::LazyFrame::scan_parquet("logs/warehouse_summary.parquet", Default::default())?;</code></li>
+<li>DataFusion (SQL): use a <code>SessionContext</code>, <code>register_parquet</code>, then <code>sql("SELECT * FROM warehouse_summary LIMIT 5")</code>.</li>
+</ul>
+</li>
+</ul>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<ul>
+<li>Version key = SHA256(source root + cacheable transform config + max_boxes + skip_empty + code_version), stored in manifest; shards live under <code>v&lt;version&gt;/</code>.</li>
+<li>Checksums per shard (SHA256) are recorded; f32 shards only for now.</li>
+<li>ETL trace: set <code>WAREHOUSE_TRACE=logs/warehouse_trace.jsonl</code> to emit per-shard timing.</li>
+<li>Warehouse loader store: choose via <code>WAREHOUSE_STORE</code> = <code>memory</code> (default), <code>mmap</code>, or <code>stream</code> (prefetch via <code>WAREHOUSE_PREFETCH</code>, default 2). Training also accepts <code>--warehouse-store</code> to override.
+<ul>
+<li>Trade-offs: <code>memory</code> loads all shards up front (fast per-batch, high RAM). <code>mmap</code> keeps shards on disk (lower RAM, depends on IO). <code>stream</code> reads via a bounded prefetch queue (lowest RAM, may increase IO contention; tune <code>WAREHOUSE_PREFETCH</code>).</li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="burn_dataset.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="streaming_shards.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="burn_dataset.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="streaming_shards.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

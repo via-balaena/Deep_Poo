@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Training Harness - Deep Poo</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data_pipeline_overview.html"><strong aria-hidden="true">2.</strong> Data Pipeline</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="data_ingestion.html"><strong aria-hidden="true">2.1.</strong> Data Ingestion</a></li><li class="chapter-item expanded "><a href="data_schema.html"><strong aria-hidden="true">2.2.</strong> Data Schema</a></li><li class="chapter-item expanded "><a href="datagen_scheduler.html"><strong aria-hidden="true">2.3.</strong> Datagen Scheduler</a></li><li class="chapter-item expanded "><a href="burn_dataset.html"><strong aria-hidden="true">2.4.</strong> Burn Dataset</a></li><li class="chapter-item expanded "><a href="tensor_warehouse.html"><strong aria-hidden="true">2.5.</strong> Tensor Warehouse</a></li><li class="chapter-item expanded "><a href="streaming_shards.html"><strong aria-hidden="true">2.6.</strong> Warehouse Store Modes</a></li></ol></li><li class="chapter-item expanded "><a href="training_overview.html"><strong aria-hidden="true">3.</strong> Training</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="training.html" class="active"><strong aria-hidden="true">3.1.</strong> Training Harness</a></li><li class="chapter-item expanded "><a href="ml_pipeline.html"><strong aria-hidden="true">3.2.</strong> ML Pipeline</a></li><li class="chapter-item expanded "><a href="burn_patch.html"><strong aria-hidden="true">3.3.</strong> Burn Patch Notes</a></li></ol></li><li class="chapter-item expanded "><a href="runtime_overview.html"><strong aria-hidden="true">4.</strong> Runtime & Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="cli.html"><strong aria-hidden="true">4.1.</strong> CLI Usage</a></li><li class="chapter-item expanded "><a href="tui.html"><strong aria-hidden="true">4.2.</strong> TUI</a></li><li class="chapter-item expanded "><a href="CONTROLS.html"><strong aria-hidden="true">4.3.</strong> Controls</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Deep Poo</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="burn-training-harness"><a class="header" href="#burn-training-harness">Burn training harness</a></h1>
+<h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
+<p>Basic (CPU) runtime:</p>
+<pre><code class="language-bash">cargo run --features burn_runtime --bin train -- --help
+</code></pre>
+<p>GPU (wgpu): add <code>burn_wgpu</code> alongside <code>burn_runtime</code>:</p>
+<pre><code class="language-bash">cargo run --features "burn_runtime,burn_wgpu" --bin train -- --help
+</code></pre>
+<p>High-performance preset (release, GPU, larger batch/epochs):</p>
+<pre><code class="language-bash"># From repo root
+cargo train_hp
+# Defaults: --input-root assets/datasets/captures_filtered --val-ratio 0.1 --batch-size 128 --epochs 20 --scheduler cosine --lr-start 3e-4 --lr-end 1e-5 --target-size 256x256 --val-target-size 256x256 --status-file logs/train_hp_status.json
+</code></pre>
+<p>Run from the repo root. Adjust adapter/backend in the shell if needed (<code>WGPU_POWER_PREF=high-performance</code>, <code>WGPU_BACKEND=dx12</code> or <code>vulkan</code>, <code>WGPU_ADAPTER_NAME=&lt;name&gt;</code>).</p>
+<p>Full one-liner (Windows, repo root, forces NVIDIA DX12 and logs adapter):</p>
+<details>
+<summary>NVIDIA (DX12)</summary>
+<pre><code class="language-powershell">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"; cargo train_hp
+</code></pre>
+<p>If DX12 picks WARP/CPU, try <code>WGPU_BACKEND="vulkan"</code> and set <code>WGPU_ADAPTER_NAME</code> to the exact adapter name from Device Manager. Override flags by appending them without an extra <code>--</code>, e.g., <code>cargo train_hp --batch-size 128</code>.</p>
+</details>
+<details>
+<summary>AMD (DX12)</summary>
+<pre><code class="language-powershell">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="AMD"; $env:RUST_LOG="info,wgpu_core=info"; cargo train_hp
+</code></pre>
+<p>If DX12 picks WARP/CPU, try <code>WGPU_BACKEND="vulkan"</code> and set <code>WGPU_ADAPTER_NAME</code> to the exact adapter name from Device Manager. Override flags by appending them without an extra <code>--</code>, e.g., <code>cargo train_hp --batch-size 128</code>.</p>
+</details>
+<details>
+<summary>Apple (Metal)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=metal cargo train_hp
+</code></pre>
+<p>If Metal falls back or you want logging, add <code>RUST_LOG=info,wgpu_core=info</code>.</p>
+</details>
+<details>
+<summary>Linux (Vulkan)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=vulkan WGPU_ADAPTER_NAME="NVIDIA" RUST_LOG=info,wgpu_core=info cargo train_hp
+</code></pre>
+<p>Adjust <code>WGPU_ADAPTER_NAME</code> to match your GPU vendor/name (e.g., "AMD", "Intel") or omit to auto-pick.</p>
+</details>
+<details>
+<summary>Linux (Mesa/GL fallback)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=gl RUST_LOG=info,wgpu_core=info cargo train_hp
+</code></pre>
+<p>Use only if Vulkan isn’t available; performance may be lower.</p>
+</details>
+<h2 id="end-to-end-workflow"><a class="header" href="#end-to-end-workflow">End-to-end workflow</a></h2>
+<ul>
+<li>Capture/prune data: run <code>sim_view --mode datagen</code> to create runs under <code>assets/datasets/captures</code>, then prune empties with <code>cargo run --bin prune_empty -- --input assets/datasets/captures --output assets/datasets/captures_filtered</code>. Repeat for any real-val root (<code>assets/datasets/real_val_filtered</code>).</li>
+<li>Point training at filtered roots: e.g., <code>--input-root assets/datasets/captures_filtered</code> and <code>--real-val-dir assets/datasets/real_val_filtered</code>, or rely on the split manifest/seed for repeatable splits.</li>
+<li>Train: pick a batch/epoch schedule and run (see sample commands). Logs go to stdout; optional <code>--metrics-out</code> appends JSONL with IoU/PR/mAP per epoch.</li>
+<li>Outputs: model/optim/scheduler checkpoints land in <code>--ckpt-dir</code> (default <code>checkpoints</code>); metrics JSONL if requested. A demo checkpoint can be loaded via <code>--demo-checkpoint</code>.</li>
+</ul>
+<h2 id="common-flags"><a class="header" href="#common-flags">Common flags</a></h2>
+<ul>
+<li><code>--batch-size &lt;N&gt;</code>: train/val batch size (default 2); targets built per-image.</li>
+<li><code>--epochs &lt;N&gt;</code>: number of epochs (default 1).</li>
+<li><code>--log-every &lt;N&gt;</code>: log loss/IoU every N steps (default 1). Step tracing is on by default (<code>--trace-steps</code>/<code>--no-trace-steps</code>) to print batch start/end even before the first log interval.</li>
+<li><code>--lr-start &lt;f64&gt;</code>, <code>--lr-end &lt;f64&gt;</code>: linear LR schedule endpoints.</li>
+<li><code>--scheduler &lt;linear|cosine&gt;</code>: LR schedule type.</li>
+<li><code>--ckpt-every-steps &lt;usize&gt;</code> / <code>--ckpt-every-epochs &lt;usize&gt;</code>: checkpoint cadence (0 disables).</li>
+<li><code>--val-ratio &lt;f32&gt;</code>: fraction of runs for validation split (default 0.2).</li>
+<li><code>--seed &lt;u64&gt;</code>: deterministic shuffle/splits; default seed 42 if omitted.</li>
+<li><code>--ckpt-dir &lt;path&gt;</code>: checkpoint in/out directory (default <code>checkpoints</code>).</li>
+<li><code>--val-obj-thresh &lt;f32&gt;</code> / <code>--val-iou-thresh &lt;f32&gt;</code>: thresholds for val matching (mAP sweep uses 0.05–0.95 objectness).</li>
+<li><code>--patience &lt;usize&gt;</code> / <code>--patience-min-delta &lt;f32&gt;</code>: optional early stop on val IoU plateau.</li>
+<li><code>--real-val-dir &lt;path&gt;</code>: use all runs under this path for validation instead of a split.</li>
+<li><code>--input-root &lt;path&gt;</code>: capture root to train from (default <code>assets/datasets/captures_filtered</code>); point to a filtered/pruned root if desired.</li>
+<li><code>--stratify-split</code>: stratify train/val by box-count buckets (0/1/2+) instead of pure run-level split.</li>
+<li><code>--split-manifest &lt;path&gt;</code>: optional JSON manifest; if present, load train/val label lists from it; if absent, save the current split for reuse.</li>
+<li><code>--drop-last</code>: drop the last partial training batch (can help BN stability). Validation never drops.</li>
+<li><code>--demo-checkpoint &lt;path&gt;</code>: optional model checkpoint to load at startup (model only; skips optimizer/scheduler). Useful for bundled/demo weights.</li>
+<li><code>--metrics-out &lt;path&gt;</code>: append per-epoch val metrics (IoU/PR/mAP, tp/fp/fn) with seed/thresholds.</li>
+<li><code>--tensor-warehouse &lt;manifest&gt;</code> (or env <code>TENSOR_WAREHOUSE_MANIFEST</code>): prefer precomputed tensor shards; falls back to live loader with a warning if unavailable.</li>
+<li><code>--model &lt;tiny|big&gt;</code> and <code>--model-max-boxes &lt;N&gt;</code>: select TinyDet (default) or the wider/deeper BigDet. BigDet is heavier on VRAM/compute; bump <code>--batch-size</code> only if your GPU allows.</li>
+</ul>
+<p>Sample run (CPU backend):</p>
+<pre><code class="language-bash">cargo run --features burn_runtime --bin train -- \
+  --batch-size 4 \
+  --epochs 5 \
+  --scheduler cosine \
+  --lr-start 1e-3 \
+  --lr-end 1e-4 \
+  --val-ratio 0.2 \
+  --ckpt-every-epochs 1 \
+  --val-obj-thresh 0.3 \
+  --val-iou-thresh 0.5 \
+  --real-val-dir assets/datasets/real_val \
+  --input-root assets/datasets/captures_filtered \
+  --stratify-split \
+  --demo-checkpoint assets/checkpoints/tinydet_demo.bin
+</code></pre>
+<p>Sample run (wgpu backend, warehouse preferred if set):</p>
+<pre><code class="language-pwsh"># Windows / NVIDIA (DX12), from repo root
+$env:WGPU_POWER_PREF="high-performance"
+$env:WGPU_BACKEND="dx12"
+$env:WGPU_ADAPTER_NAME="NVIDIA"   # omit if single GPU
+$env:RUST_LOG="info,wgpu_core=info"
+$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"  # required
+$env:WAREHOUSE_STORE="memory"  # or mmap/stream; stream prefetch via WAREHOUSE_PREFETCH (default 2)
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- `
+  --batch-size 64 `
+  --epochs 20 `
+  --scheduler cosine `
+  --lr-start 3e-4 `
+  --lr-end 1e-5 `
+  --val-ratio 0.1
+</code></pre>
+<p>PowerShell one-liner variant:</p>
+<pre><code class="language-pwsh">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"; $env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"; $env:WAREHOUSE_STORE="memory"; cargo train_hp
+</code></pre>
+<pre><code class="language-bash"># Linux / Vulkan (NVIDIA/AMD), from repo root
+WGPU_POWER_PREF=high-performance \
+WGPU_BACKEND=vulkan \
+WGPU_ADAPTER_NAME="NVIDIA" \
+RUST_LOG=info,wgpu_core=info \
+TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
+  --batch-size 64 \
+  --epochs 20 \
+  --scheduler cosine \
+  --lr-start 3e-4 \
+  --lr-end 1e-5 \
+  --val-ratio 0.1
+</code></pre>
+<p>Larger model example (BigDet, NVIDIA/DX12, warehouse, repo root):</p>
+<pre><code class="language-pwsh">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; `
+$env:RUST_LOG="info,wgpu_core=info"; `
+$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"; `
+$env:WAREHOUSE_STORE="memory"; `
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- `
+  --model big `
+  --model-max-boxes 16 `
+  --batch-size 32 `
+  --epochs 20 `
+  --scheduler cosine `
+  --lr-start 3e-4 `
+  --lr-end 1e-5 `
+  --val-ratio 0.1
+</code></pre>
+<p>If VRAM permits, increase <code>--batch-size</code>; if you hit OOM, lower it or use <code>--model tiny</code>.</p>
+<p>Validation thresholds:</p>
+<ul>
+<li><code>--val-obj-thresh &lt;f32&gt;</code>: objectness threshold for val matching (default 0.3).</li>
+<li><code>--val-iou-thresh &lt;f32&gt;</code> / <code>--val-iou-sweep</code>: IoU threshold(s) for val matching/NMS (default 0.5).
+Runtime inference thresholds are adjusted via hotkeys in the sim (<code>-</code>/<code>=</code> for objectness, <code>[</code>/<code>]</code> for IoU).</li>
+</ul>
+<h2 id="models-and-the-bounding-box-trait"><a class="header" href="#models-and-the-bounding-box-trait">Models and the bounding-box trait</a></h2>
+<ul>
+<li>The training loop is backed by a <code>BoundingBoxModel</code> trait (forward/loss/postprocess). Implementations today: <code>TinyDet</code> (default) and <code>BigDet</code> (wider/deeper).</li>
+<li>Select via <code>--model {tiny|big}</code> and <code>--model-max-boxes &lt;N&gt;</code>. Checkpoints are stored per model name (<code>tinydet.*</code>, <code>bigdet.*</code>) with meta recording the model kind and max_boxes.</li>
+<li>Adding a new model: implement <code>BoundingBoxModel</code> (forward returns <code>ModelOutputs</code>, loss consumes <code>ModelTargets</code>), add a config, wire it into the model enum/CLI, and add checkpoint names for load/save. Postprocess/NMS stays shared via the existing helpers.</li>
+</ul>
+<h2 id="what-it-does-today"><a class="header" href="#what-it-does-today">What it does today</a></h2>
+<ul>
+<li>Loads capture runs via <code>BatchIter</code> (train with aug; val without), builds TinyDet, AdamW, and a linear LR scheduler.</li>
+<li>Runs epoch/batch loop with per-step optimizer updates; logs loss and mean IoU each log interval.</li>
+<li>Validation: decodes per-cell predictions, applies sigmoid + NMS, matches to GT boxes with IoU threshold, and reports mean IoU plus precision/recall and an approximate mAP via a small PR sweep (tp/fp/fn).</li>
+<li>Checkpoints: on start, loads model/optim/scheduler from <code>ckpt_dir</code> if present; saves them per configured cadence (steps/epochs). Optional early stop tracks best val IoU.</li>
+</ul>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<ul>
+<li>Requires <code>--features burn_runtime</code> to pull in Burn and the training harness. Add <code>burn_wgpu</code> for GPU (wgpu); otherwise NdArray CPU is used.</li>
+<li>Val metric thresholds are tunable via CLI; adjust to trade off recall/precision during evaluation.</li>
+<li>Runtime inference loads <code>checkpoints/tinydet.bin</code>; if missing or failed, it logs a warning and falls back to the heuristic detector.</li>
+<li>Demo/bundled checkpoint: pass <code>--demo-checkpoint &lt;path&gt;</code> during training/eval; for runtime, place it at <code>checkpoints/tinydet.bin</code> (or update CLI flags) so the sim loads it automatically.</li>
+<li>Runtime knobs: during sim, adjust thresholds with <code>-</code>/<code>=</code> (objectness) and <code>[</code>/<code>]</code> (IoU); press <code>B</code> to toggle between Burn and heuristic detectors. The HUD shows mode, box count, inference latency, and fallback banners.</li>
+<li>Eval-only: <code>cargo run --features burn_runtime --bin eval -- --checkpoint &lt;path&gt; --input-root &lt;val_root&gt; [--val-iou-sweep ...] [--metrics-out ...]</code>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="training_overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ml_pipeline.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="training_overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ml_pipeline.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

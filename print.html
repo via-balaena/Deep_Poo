@@ -1,0 +1,1187 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Deep Poo</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data_pipeline_overview.html"><strong aria-hidden="true">2.</strong> Data Pipeline</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="data_ingestion.html"><strong aria-hidden="true">2.1.</strong> Data Ingestion</a></li><li class="chapter-item expanded "><a href="data_schema.html"><strong aria-hidden="true">2.2.</strong> Data Schema</a></li><li class="chapter-item expanded "><a href="datagen_scheduler.html"><strong aria-hidden="true">2.3.</strong> Datagen Scheduler</a></li><li class="chapter-item expanded "><a href="burn_dataset.html"><strong aria-hidden="true">2.4.</strong> Burn Dataset</a></li><li class="chapter-item expanded "><a href="tensor_warehouse.html"><strong aria-hidden="true">2.5.</strong> Tensor Warehouse</a></li><li class="chapter-item expanded "><a href="streaming_shards.html"><strong aria-hidden="true">2.6.</strong> Warehouse Store Modes</a></li></ol></li><li class="chapter-item expanded "><a href="training_overview.html"><strong aria-hidden="true">3.</strong> Training</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="training.html"><strong aria-hidden="true">3.1.</strong> Training Harness</a></li><li class="chapter-item expanded "><a href="ml_pipeline.html"><strong aria-hidden="true">3.2.</strong> ML Pipeline</a></li><li class="chapter-item expanded "><a href="burn_patch.html"><strong aria-hidden="true">3.3.</strong> Burn Patch Notes</a></li></ol></li><li class="chapter-item expanded "><a href="runtime_overview.html"><strong aria-hidden="true">4.</strong> Runtime & Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="cli.html"><strong aria-hidden="true">4.1.</strong> CLI Usage</a></li><li class="chapter-item expanded "><a href="tui.html"><strong aria-hidden="true">4.2.</strong> TUI</a></li><li class="chapter-item expanded "><a href="CONTROLS.html"><strong aria-hidden="true">4.3.</strong> Controls</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Deep Poo</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<ul>
+<li><a href="data_pipeline_overview.html">Data Pipeline</a>
+<ul>
+<li>Capture/prune workflow, GPU-aware datagen, schemas, and dataset loader/transforms.</li>
+</ul>
+</li>
+<li><a href="training_overview.html">Training</a>
+<ul>
+<li>Train/eval harness, ML pipeline, and Burn-specific notes.</li>
+</ul>
+</li>
+<li><a href="runtime_overview.html">Runtime &amp; Usage</a>
+<ul>
+<li>CLI commands, TUI, controls, and datagen scheduler access.</li>
+</ul>
+</li>
+<li><a href="appendix_overview.html">Appendix</a>
+<ul>
+<li>Checklists and GPU monitoring references.</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-pipeline"><a class="header" href="#data-pipeline">Data Pipeline</a></h1>
+<ul>
+<li><a href="data_ingestion.html">Data Ingestion</a>
+<ul>
+<li>Capture/prune workflow</li>
+<li>Filtered roots and ingestion guidance</li>
+</ul>
+</li>
+<li><a href="datagen_scheduler.html">Datagen Scheduler</a>
+<ul>
+<li>GPU-aware datagen launcher</li>
+<li>Resource guards</li>
+</ul>
+</li>
+<li><a href="data_schema.html">Data Schema</a>
+<ul>
+<li>Label/image schema details</li>
+</ul>
+</li>
+<li><a href="burn_dataset.html">Burn Dataset</a>
+<ul>
+<li>Loader and transforms</li>
+<li>Progress/tracing and skip counts</li>
+<li>Helper APIs and env controls</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-ingestion-safeguards"><a class="header" href="#data-ingestion-safeguards">Data ingestion safeguards</a></h1>
+<h2 id="processing-order-with-controls"><a class="header" href="#processing-order-with-controls">Processing order (with controls)</a></h2>
+<ol>
+<li><strong>Decode labels</strong> from JSON into in-memory structs.
+<ul>
+<li>Code: <code>load_sample</code> in <code>src/tools/burn_dataset.rs</code> deserializes <code>labels/frame_XXXXX.json</code> via <code>serde_json</code>, then calls <code>validate_label</code> to enforce required fields and bbox ranges.</li>
+<li>Controls:
+<ul>
+<li>Strict vs permissive: default is strict; permissive skips malformed labels with a warning. Toggle via <code>BURN_DATASET_STRICT=0</code>.</li>
+<li>Max invalid/missing thresholds: <code>BURN_DATASET_MAX_INVALID_RATIO</code>, <code>BURN_DATASET_MAX_MISSING</code> abort the run if exceeded.</li>
+</ul>
+</li>
+<li>Outcomes:
+<ul>
+<li>Valid labels proceed to normalization; empty/missing/invalid labels increment skip counters and surface in the pre-run summary and <code>[dataset]</code> progress logs.</li>
+</ul>
+</li>
+<li>CLI: <code>sim_view</code>/<code>datagen_headless</code> produce the label JSONs; no separate decode CLI needed.</li>
+</ul>
+</li>
+<li><strong>Prune/clip invalid boxes</strong> (e.g., out-of-bounds, zero-area).
+<ul>
+<li>Code: <code>normalize_boxes</code> / <code>normalize_boxes_with_px</code> clamp coords to <code>[0,1]</code>, and resize/letterbox recomputes boxes with padding.</li>
+<li>CLI: use <code>prune_empty</code> (below) if you want to strip empty-label frames ahead of time.</li>
+</ul>
+</li>
+<li><strong>Drop empty</strong> (after pruning):
+<ul>
+<li><code>DatasetConfig::skip_empty_labels</code> (default true) skips samples with no remaining labels and logs the label path, preventing zero-target batches.</li>
+<li>To pre-filter datasets, use the <code>prune_empty</code> CLI to copy runs without empty-label frames:
+<ul>
+<li>Usage: <code>cargo run --release --bin prune_empty -- --input &lt;in_dir&gt; --output &lt;out_dir&gt;</code></li>
+<li>Copies <code>run_manifest.json</code>, labels/images/overlays for frames with at least one <code>polyp_labels</code> entry; skips empty-label frames (counts printed).</li>
+<li>Example (captures): <code>cargo run --release --bin prune_empty -- --input assets/datasets/captures --output assets/datasets/captures_filtered</code></li>
+<li>Example (real val): <code>cargo run --release --bin prune_empty -- --input assets/datasets/real_val --output assets/datasets/real_val_filtered</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Tensorize &amp; batch</strong> the remaining samples for the model.
+<ul>
+<li>Code: <code>BatchIter::next_batch</code> in <code>src/tools/burn_dataset.rs</code> builds <code>[B,3,H,W]</code> tensors and padded boxes.</li>
+<li>CLI: run training with <code>--features burn_runtime</code> so the iterator can construct Burn tensors.</li>
+<li>If an entire split ends up empty, the iterator yields no batches; regenerate data or point at runs with labels.</li>
+</ul>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-schema-and-run-layout"><a class="header" href="#data-schema-and-run-layout">Data Schema and Run Layout</a></h1>
+<p>Each run is stored under <code>run_&lt;timestamp&gt;/</code> with three subdirectories:</p>
+<ul>
+<li><code>images/</code> — raw PNG frames.</li>
+<li><code>labels/</code> — JSON label files (<code>frame_XXXXX.json</code>).</li>
+<li><code>overlays/</code> — PNGs with bounding boxes drawn (auto-generated at run end for data runs).</li>
+</ul>
+<h2 id="run_manifestjson"><a class="header" href="#run_manifestjson">run_manifest.json</a></h2>
+<p>Written once per run:</p>
+<ul>
+<li><code>schema_version</code> (u32) — manifest schema version.</li>
+<li><code>seed</code> (u64) — polyp generation seed.</li>
+<li><code>output_root</code> (path) — root output directory.</li>
+<li><code>run_dir</code> (path) — this run’s directory.</li>
+<li><code>started_at_unix</code> (f64) — wall-clock time when run initialized (seconds).</li>
+<li><code>max_frames</code> (optional u32) — capture frame cap, if provided.</li>
+</ul>
+<h2 id="label-file-labelsframe_xxxxxjson"><a class="header" href="#label-file-labelsframe_xxxxxjson">Label file (labels/frame_XXXXX.json)</a></h2>
+<ul>
+<li><code>frame_id</code> (u64)</li>
+<li><code>sim_time</code> (f64)</li>
+<li><code>unix_time</code> (f64)</li>
+<li><code>image</code> (string) — path relative to run root, e.g., <code>images/frame_00000.png</code></li>
+<li><code>image_present</code> (bool)</li>
+<li><code>camera_active</code> (bool)</li>
+<li><code>polyp_seed</code> (u64)</li>
+<li><code>polyp_labels</code> (array)
+<ul>
+<li><code>center_world</code> ([f32; 3])</li>
+<li><code>bbox_px</code> (optional [f32; 4]) — min_x, min_y, max_x, max_y in pixels</li>
+<li><code>bbox_norm</code> (optional [f32; 4]) — normalized coords</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="datagen-scheduler-gpu-aware--how-to"><a class="header" href="#datagen-scheduler-gpu-aware--how-to">Datagen Scheduler (GPU-aware) — How-to</a></h1>
+<p>Lightweight job runner that staggers datagen launches based on CPU/RAM/GPU headroom, with pruning enabled by default.</p>
+<h2 id="what-it-does"><a class="header" href="#what-it-does">What it does</a></h2>
+<ul>
+<li>Auto-detects GPU vendor (NVIDIA/AMD/Intel/macOS helper) and samples utilization (+ VRAM where available).</li>
+<li>Enforces CPU %, free RAM, and optional GPU % / GPU mem thresholds before launching each datagen run.</li>
+<li>Launches <code>sim_view --mode datagen --headless --prune-empty --prune-output-root &lt;…&gt;</code> so filtered runs are written.</li>
+<li>Never hard-fails on missing probes: if a GPU probe/tool is unavailable, it logs and falls back to CPU/RAM checks.</li>
+</ul>
+<h2 id="build--run"><a class="header" href="#build--run">Build &amp; run</a></h2>
+<ul>
+<li>Default (CPU/RAM + auto-probes):
+<pre><code class="language-sh">cargo run --release --features scheduler --bin datagen_scheduler -- \
+  --count 4 --concurrency 2 --max-gpu 80 --max-gpu-mem-mb 8000
+</code></pre>
+</li>
+<li>With NVML (NVIDIA richer stats):
+<pre><code class="language-sh">cargo run --release --features "scheduler,gpu_nvidia" --bin datagen_scheduler -- \
+  --count 4 --concurrency 2 --max-gpu 80 --max-gpu-mem-mb 8000
+</code></pre>
+</li>
+<li>macOS helper: built and used by default on macOS; no extra flag needed.</li>
+</ul>
+<p>Options:</p>
+<ul>
+<li><code>--count</code>: how many runs to launch.</li>
+<li><code>--concurrency</code>: max concurrent runs.</li>
+<li><code>--max-cpu</code>: max global CPU% to allow starting a run (default 85).</li>
+<li><code>--min-free-mem-mb</code>: minimum free RAM to start a run (default 2048).</li>
+<li><code>--max-gpu</code> / <code>--max-gpu-mem-mb</code>: optional GPU thresholds; enforced only if a probe returns stats.</li>
+<li><code>--output-root</code>, <code>--prune-output-root</code>, <code>--seed</code>, <code>--max-frames</code>, <code>--headless</code>: passed through to datagen.</li>
+</ul>
+<h2 id="probes-and-requirements"><a class="header" href="#probes-and-requirements">Probes and requirements</a></h2>
+<ul>
+<li>NVIDIA: <code>nvidia-smi</code> (default) or NVML via <code>gpu_nvidia</code> feature.</li>
+<li>AMD: <code>rocm-smi</code> (JSON preferred) or <code>radeontop</code> present.</li>
+<li>Intel (Linux): <code>intel_gpu_top</code> with <code>--json</code>.</li>
+<li>macOS: <code>gpu_macos_helper</code> binary (bundled); uses <code>powermetrics</code> + Metal VRAM stats.</li>
+<li>If a tool is missing or parsing fails, GPU gating is skipped with a log; CPU/RAM gating still applies.</li>
+</ul>
+<h2 id="current-behavior-and-limits"><a class="header" href="#current-behavior-and-limits">Current behavior and limits</a></h2>
+<ul>
+<li>Utilization: returned for all vendors when tools respond.</li>
+<li>VRAM: NVIDIA (smi/NVML), AMD (rocm-smi meminfo), macOS helper (Metal), Intel best-effort from <code>intel_gpu_top</code>.</li>
+<li>No per-GPU selection; first device is used where applicable.</li>
+<li>No smoothing/logging of samples yet; thresholds are checked on each poll.</li>
+</ul>
+<h2 id="future-improvements-optional"><a class="header" href="#future-improvements-optional">Future improvements (optional)</a></h2>
+<ul>
+<li>Per-GPU selection and multi-GPU awareness.</li>
+<li>Smoothing/averaging samples before gating to avoid transient spikes.</li>
+<li>CSV/JSON logging of samples for tuning thresholds.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="burn-dataset-loader-usage"><a class="header" href="#burn-dataset-loader-usage">Burn dataset loader usage</a></h1>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick start</a></h2>
+<p>Load capture runs, split train/val by run, and iterate batches with letterboxed resizing and padded boxes:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use colon_sim::tools::burn_dataset::{BatchIter, DatasetConfig, ResizeMode, split_runs, index_runs};
+
+let cfg = DatasetConfig {
+    target_size: Some((512, 512)),
+    resize_mode: ResizeMode::Letterbox,
+    ..Default::default()
+};
+
+let all = index_runs(std::path::Path::new("assets/datasets/captures"))?;
+let (train_idx, val_idx) = split_runs(all, 0.2);
+
+let mut train = BatchIter::from_indices(train_idx, cfg.clone())?;
+let mut val = BatchIter::from_indices(val_idx, cfg)?;
+
+if let Some(batch) = train.next_batch::&lt;burn_ndarray::NdArrayBackend&lt;f32&gt;&gt;(8)? {
+    // batch.images: [B,3,H,W], batch.boxes: [B,max_boxes,4], box_mask: [B,max_boxes]
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="feature-flags"><a class="header" href="#feature-flags">Feature flags</a></h2>
+<ul>
+<li><code>BatchIter</code>/<code>BurnBatch</code> require <code>--features burn_runtime</code> to pull in Burn (e.g., <code>cargo run --features burn_runtime --bin ...</code>).</li>
+<li>Lower-level loaders (<code>load_run_dataset</code>, <code>DatasetSample</code>) work without that feature if you only need plain Rust structs.</li>
+</ul>
+<h2 id="augmentations"><a class="header" href="#augmentations">Augmentations</a></h2>
+<ul>
+<li><code>flip_horizontal_prob</code>: optional horizontal flip with box updates (after resize/letterbox).</li>
+<li><code>scale_jitter_*</code>: optional zoom in/out with bbox-safe padding/cropping.</li>
+<li><code>color_jitter_*</code>: optional brightness/contrast jitter.</li>
+<li><code>noise_*</code>: optional uniform noise per channel.</li>
+<li><code>blur_*</code>: optional blur.</li>
+<li><code>skip_empty_labels</code> (default true): drop frames with no boxes; warns instead of emitting zero-target batches.</li>
+<li><code>drop_last</code>: drop the last partial training batch if set (validation should keep partials).</li>
+</ul>
+<h2 id="reproducibility"><a class="header" href="#reproducibility">Reproducibility</a></h2>
+<ul>
+<li><code>seed</code> controls shuffling in <code>BatchIter</code> so splits/batches are deterministic when set.</li>
+<li>CLI example (train): <code>cargo train_hp --seed 1234</code></li>
+</ul>
+<h2 id="progress-logging"><a class="header" href="#progress-logging">Progress logging</a></h2>
+<ul>
+<li>Default: emits loader progress about every 1k samples (<code>[dataset] batches=… samples=… skipped=… rate=… img/s</code>).</li>
+<li>Override: set <code>BURN_DATASET_LOG_EVERY=&lt;N&gt;</code> (samples) for a custom cadence.</li>
+<li>Disable: set <code>BURN_DATASET_LOG_EVERY=0</code> or <code>off</code>.</li>
+<li>Example: <code>BURN_DATASET_LOG_EVERY=2000 cargo train_hp</code></li>
+<li>Logs include skip counts (<code>skipped_empty</code>, <code>skipped_missing</code>, <code>skipped_errors</code>) plus timing/rate metrics.</li>
+</ul>
+<h2 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h2>
+<ul>
+<li>Default: permissive; malformed/missing labels are skipped with a warning.</li>
+<li>Strict: set <code>BURN_DATASET_PERMISSIVE=0</code> or <code>off</code> to fail fast on bad labels/images.</li>
+<li>Examples:
+<ul>
+<li>Permissive (default): <code>BURN_DATASET_PERMISSIVE=1 cargo train_hp</code></li>
+<li>Strict: <code>BURN_DATASET_PERMISSIVE=0 cargo train_hp</code></li>
+</ul>
+</li>
+<li>Warning aggregation: set <code>BURN_DATASET_WARN_ONCE=1</code> to suppress per-sample warnings and emit only aggregated progress logs.</li>
+<li>Optional trace: set <code>BURN_DATASET_TRACE=&lt;path/to/trace.jsonl&gt;</code> to write per-batch JSONL records (batch idx, samples, dims, skips, load/assemble ms).</li>
+</ul>
+<h2 id="validation-thresholds"><a class="header" href="#validation-thresholds">Validation thresholds</a></h2>
+<ul>
+<li>Optionally gate training on dataset quality; thresholds apply to the computed summary before entering the training loop.</li>
+<li>Counts: set <code>BURN_DATASET_MAX_INVALID=&lt;N&gt;</code>, <code>BURN_DATASET_MAX_MISSING=&lt;N&gt;</code> (missing images/files), and/or <code>BURN_DATASET_MAX_EMPTY=&lt;N&gt;</code>.</li>
+<li>Ratios (0–1): <code>BURN_DATASET_MAX_INVALID_RATIO=&lt;f32&gt;</code>, <code>BURN_DATASET_MAX_MISSING_RATIO=&lt;f32&gt;</code>, <code>BURN_DATASET_MAX_EMPTY_RATIO=&lt;f32&gt;</code>.</li>
+<li>Any threshold exceeded → validation <strong>fail</strong> and the train binary exits; otherwise non-zero counts are surfaced as warnings.</li>
+<li>Example: <code>BURN_DATASET_MAX_INVALID_RATIO=0.01 BURN_DATASET_MAX_MISSING=10 cargo train_hp</code></li>
+</ul>
+<h2 id="transform-pipeline-builder"><a class="header" href="#transform-pipeline-builder">Transform pipeline builder</a></h2>
+<ul>
+<li>Compose a custom pipeline (resize/letterbox + augments + max_boxes) and attach it to <code>DatasetConfig.transform</code>:</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use colon_sim::tools::burn_dataset::{DatasetConfig, TransformPipelineBuilder, ResizeMode};
+
+let pipeline = TransformPipelineBuilder::new()
+    .target_size(Some((256, 256)))
+    .resize_mode(ResizeMode::Letterbox)
+    .flip_horizontal_prob(0.5)
+    .color_jitter(0.2, 0.1)
+    .max_boxes(8)
+    .seed(Some(42))
+    .build();
+
+let cfg = DatasetConfig {
+    transform: Some(pipeline),
+    ..Default::default()
+};
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>If no transform is provided, one is built from the other <code>DatasetConfig</code> fields (default behavior).</li>
+<li>The train binary logs the active transform config for train/val (target size, resize mode, aug probs/strengths, max_boxes, seed).</li>
+<li>Val-specific overrides (train CLI):
+<ul>
+<li><code>--val-target-size &lt;WxH&gt;</code> (e.g., <code>256x256</code>; defaults to train target_size)</li>
+<li><code>--val-resize-mode &lt;force|letterbox&gt;</code> (defaults to train resize_mode)</li>
+<li><code>--val-flip-prob &lt;p&gt;</code> (defaults to 0.0 for val)</li>
+<li><code>--val-max-boxes &lt;N&gt;</code> (defaults to train max_boxes)</li>
+</ul>
+</li>
+<li>Example: <code>cargo train_hp --val-target-size 256x256 --val-resize-mode letterbox --val-max-boxes 8</code></li>
+</ul>
+<h2 id="helper-entrypoint"><a class="header" href="#helper-entrypoint">Helper entrypoint</a></h2>
+<ul>
+<li>Build train/val iterators with defaults in one call:</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use colon_sim::tools::burn_dataset::{DatasetConfig, build_train_val_iters};
+let train_cfg = DatasetConfig {
+    target_size: Some((128, 128)),
+    max_boxes: 8,
+    flip_horizontal_prob: 0.5,
+    ..Default::default()
+};
+let (mut train_iter, mut val_iter) = build_train_val_iters(
+    std::path::Path::new("assets/datasets/captures_filtered"),
+    0.2,
+    train_cfg,
+    None, // Optional val cfg override
+)?;
+<span class="boring">}</span></code></pre></pre>
+<p>Validation defaults: no shuffle, no aug, drop_last=false, flip_prob=0 unless overridden via <code>val_cfg</code>.</p>
+<ul>
+<li>Requires <code>burn_runtime</code> feature (same as <code>BatchIter</code>).</li>
+</ul>
+<details>
+<summary>Improvement roadmap (ranked)</summary>
+<ol>
+<li>Throughput &amp; memory
+<ul>
+<li>
+<p>❌ Optional on-disk cache of resized/letterboxed images + normalized boxes (deferred).</p>
+<details>
+<summary>Implementation plan</summary>
+<ul>
+<li>Scope: cache deterministic steps only (decode + resize/letterbox + normalize boxes); skip augments.</li>
+<li>Key: dataset root + run path + target_size + resize_mode + max_boxes + skip_empty + version hash; treat any change as a miss.</li>
+<li>Storage: per-label binary blob under a cache root (e.g., <code>logs/cache/burn_dataset</code>), header with dims/max_boxes/count/checksum.</li>
+<li>Invalidation: recompute if source mtime &gt; cache mtime; support <code>BURN_DATASET_CACHE_CLEAR=1</code> to wipe cache.</li>
+<li>Controls: opt-in via env; disabled by default.</li>
+</ul>
+</details>
+</li>
+</ul>
+</li>
+</ol>
+</details>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tensor-warehouse"><a class="header" href="#tensor-warehouse">Tensor Warehouse</a></h1>
+<p>A versioned, precomputed tensor store so training never decodes or resizes on the fly. ETL builds shards + manifest; training only reads the warehouse.</p>
+<h2 id="what-you-get"><a class="header" href="#what-you-get">What you get</a></h2>
+<ul>
+<li>Versioned root (e.g., <code>artifacts/tensor_warehouse/v&lt;sha&gt;/</code>) with <code>manifest.json</code> and <code>shard_*.bin</code>.</li>
+<li>Deterministic transforms baked in (decode + resize/letterbox + box normalization); no augments cached.</li>
+<li>Strict validation (schema/bboxes/image presence) with summaries in the manifest.</li>
+<li>Observability: ETL timings/skip counts, shard load timings in training, optional trace, Parquet export of summaries.</li>
+</ul>
+<h2 id="layout"><a class="header" href="#layout">Layout</a></h2>
+<ul>
+<li><code>manifest.json</code>: dataset_root, cacheable transform config, version hash/recipe/code_version, thresholds, per-run + aggregate summaries, shard list with checksums/dtypes.</li>
+<li><code>shard_*.bin</code>: header + contiguous CHW tensors (f32), padded boxes/masks. Default shard format: magic <code>TWH1</code>, little-endian, <code>shard_version=1</code>, dtype=f32, channels=3, offsets for images/boxes/masks. Size target ~128–256 MB/shard.</li>
+</ul>
+<h2 id="build-etl"><a class="header" href="#build-etl">Build (ETL)</a></h2>
+<ul>
+<li>Base command (f32, 256x256 letterbox):<br />
+<code>CODE_VERSION=$(git rev-parse --short HEAD 2&gt;/dev/null || echo "") cargo run --bin warehouse_etl -- --input-root assets/datasets/captures_filtered --output-root artifacts/tensor_warehouse --target-size 384x384 --resize-mode letterbox --max-boxes 16 --shard-samples 1024</code></li>
+<li>PowerShell equivalent:
+<pre><code class="language-pwsh">$env:CODE_VERSION = (git rev-parse --short HEAD 2&gt;$null)
+cargo run --bin warehouse_etl -- --input-root assets/datasets/captures_filtered --output-root artifacts/tensor_warehouse --target-size 384x384 --resize-mode letterbox --max-boxes 16 --shard-samples 1024
+</code></pre>
+(Set once per PowerShell session; reuse for multiple runs unless you change commits—then re-run the assignment to keep the hash current.)</li>
+<li>Controls:
+<ul>
+<li><code>WAREHOUSE_CLEAR=1</code> to delete the computed version directory before writing.</li>
+<li><code>WAREHOUSE_SKIP_IF_EXISTS=1</code> to exit early if the versioned manifest already exists.</li>
+<li>Validation env (fail/warn): e.g., <code>BURN_DATASET_MAX_INVALID=0</code>, <code>BURN_DATASET_MAX_MISSING=0</code>, <code>BURN_DATASET_MAX_EMPTY_RATIO=0.05</code>.</li>
+</ul>
+</li>
+<li>Outputs to <code>artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json</code> plus shards.</li>
+</ul>
+<h2 id="train-from-the-warehouse"><a class="header" href="#train-from-the-warehouse">Train from the warehouse</a></h2>
+<ul>
+<li>Training requires a manifest; no live loader fallback.<br />
+<code>cargo train_hp -- --tensor-warehouse artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json --batch-size 64 --epochs 20 --status-file logs/train_status.json</code></li>
+<li>WGPU env (Windows NVIDIA example):<br />
+<code>$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"</code></li>
+<li>Training logs shard load times on startup and uses manifest counts for per-epoch math and progress.</li>
+</ul>
+<h2 id="analytics"><a class="header" href="#analytics">Analytics</a></h2>
+<ul>
+<li>Export manifest summaries to Parquet:<br />
+<code>cargo run --bin warehouse_export -- --manifest artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json --out logs/warehouse_summary.parquet</code></li>
+<li>Quick peek with Polars/DataFusion (Rust examples):
+<ul>
+<li>Polars (Rust): load with <code>polars::prelude::LazyFrame::scan_parquet("logs/warehouse_summary.parquet", Default::default())?;</code></li>
+<li>DataFusion (SQL): use a <code>SessionContext</code>, <code>register_parquet</code>, then <code>sql("SELECT * FROM warehouse_summary LIMIT 5")</code>.</li>
+</ul>
+</li>
+</ul>
+<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
+<ul>
+<li>Version key = SHA256(source root + cacheable transform config + max_boxes + skip_empty + code_version), stored in manifest; shards live under <code>v&lt;version&gt;/</code>.</li>
+<li>Checksums per shard (SHA256) are recorded; f32 shards only for now.</li>
+<li>ETL trace: set <code>WAREHOUSE_TRACE=logs/warehouse_trace.jsonl</code> to emit per-shard timing.</li>
+<li>Warehouse loader store: choose via <code>WAREHOUSE_STORE</code> = <code>memory</code> (default), <code>mmap</code>, or <code>stream</code> (prefetch via <code>WAREHOUSE_PREFETCH</code>, default 2). Training also accepts <code>--warehouse-store</code> to override.
+<ul>
+<li>Trade-offs: <code>memory</code> loads all shards up front (fast per-batch, high RAM). <code>mmap</code> keeps shards on disk (lower RAM, depends on IO). <code>stream</code> reads via a bounded prefetch queue (lowest RAM, may increase IO contention; tune <code>WAREHOUSE_PREFETCH</code>).</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="warehouse-shard-loading-modes"><a class="header" href="#warehouse-shard-loading-modes">Warehouse shard loading modes</a></h1>
+<p>We support three ways to load tensor warehouse shards. Pick based on memory/IO trade-offs and set via <code>WAREHOUSE_STORE</code> (or CLI <code>--warehouse-store</code>):</p>
+<ul>
+<li><code>memory</code> (default): load all shards into RAM (<code>ShardBacking::Owned</code>).</li>
+<li><code>mmap</code>: memory-map shard files (<code>ShardBacking::Mmap</code>), on-demand paging by the OS.</li>
+<li><code>stream</code>: read per-sample slices from disk (<code>ShardBacking::Streamed</code>) with a bounded prefetch queue.</li>
+</ul>
+<h2 id="how-they-work"><a class="header" href="#how-they-work">How they work</a></h2>
+<ul>
+<li><strong>memory</strong>: reads shard payloads into <code>Vec&lt;f32&gt;</code> once at startup. Fast iteration; highest RAM use.</li>
+<li><strong>mmap</strong>: maps shard files; <code>copy_sample</code> slices directly from the mapped region. Lower RAM; relies on OS page cache.</li>
+<li><strong>stream</strong>: keeps only offsets/path in memory; a worker thread seeks/reads sample slices into temp buffers and sends them through a bounded channel (<code>WAREHOUSE_PREFETCH</code>, default 2). Back-pressure blocks the producer when the queue is full.</li>
+</ul>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<ul>
+<li>Env/CLI: <code>WAREHOUSE_STORE={memory|mmap|stream}</code>; <code>WAREHOUSE_PREFETCH=&lt;N&gt;</code> for streaming prefetch depth (default 2).</li>
+<li>Training logs the selected mode; streaming logs prefetch depth and shard/sample counts.</li>
+</ul>
+<h2 id="command-examples"><a class="header" href="#command-examples">Command examples</a></h2>
+<p>Assuming a warehouse manifest at <code>artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json</code>:</p>
+<ul>
+<li><strong>Env (memory, default)</strong>:</li>
+</ul>
+<pre><code class="language-bash">TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+WAREHOUSE_STORE=memory \
+cargo train_hp
+</code></pre>
+<p>PowerShell variant:</p>
+<pre><code class="language-pwsh">$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"; `
+$env:WAREHOUSE_STORE="memory"; `
+cargo train_hp
+</code></pre>
+<ul>
+<li><strong>One-liner helper (Rust)</strong>: run <code>cargo run --bin warehouse_cmd -- --shell ps --adapter amd</code> (DX12/AMD) or swap <code>--adapter nvidia</code>; for Bash use <code>--shell sh</code> (defaults to Vulkan). Defaults live in <code>tools/warehouse_commands/lib/common.rs</code>.</li>
+<li><strong>CLI flag (mmap)</strong>:</li>
+</ul>
+<pre><code class="language-bash">TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
+  --tensor-warehouse artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+  --warehouse-store mmap \
+  --batch-size 64
+</code></pre>
+<ul>
+<li><strong>Streaming with prefetch</strong>:</li>
+</ul>
+<pre><code class="language-bash">TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+WAREHOUSE_PREFETCH=4 \
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
+  --tensor-warehouse artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+  --warehouse-store stream \
+  --batch-size 64 \
+  --epochs 20
+</code></pre>
+<h2 id="validation--tests"><a class="header" href="#validation--tests">Validation &amp; tests</a></h2>
+<ul>
+<li>Streamed backing validates shard header (magic/version/dtype/shape/offsets) like mmap.</li>
+<li>Tests:
+<ul>
+<li>Integration: streamed vs owned samples match on a tiny shard.</li>
+<li>Optional bench (<code>STREAM_BENCH=1 cargo test --tests</code>): logs elapsed ms/img/s for memory/stream/mmap on a small shard.</li>
+</ul>
+</li>
+</ul>
+<h2 id="when-to-use-which"><a class="header" href="#when-to-use-which">When to use which</a></h2>
+<ul>
+<li>Use <strong>memory</strong> when RAM is plentiful and you want the fastest iteration.</li>
+<li>Use <strong>mmap</strong> when RAM is tighter but you still want OS-managed caching.</li>
+<li>Use <strong>stream</strong> when RAM is constrained or shards are large; expect more disk IO but bounded memory.</li>
+</ul>
+<h2 id="future-considerations"><a class="header" href="#future-considerations">Future considerations</a></h2>
+<ul>
+<li>Per-device cache of recent batches if streaming re-reads the same shards frequently.</li>
+<li>Async IO only if profiling shows thread-based streaming is a bottleneck (current implementation is sync threads for portability).</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="training"><a class="header" href="#training">Training</a></h1>
+<ul>
+<li><a href="training.html">Training Harness</a>
+<ul>
+<li>CLI/aliases and train_hp usage</li>
+<li>Val overrides and workflow examples</li>
+</ul>
+</li>
+<li><a href="ml_pipeline.html">ML Pipeline</a>
+<ul>
+<li>End-to-end pipeline</li>
+<li>Model specifics</li>
+</ul>
+</li>
+<li><a href="burn_patch.html">Burn Patch Notes</a>
+<ul>
+<li>Burn-related changes</li>
+<li>Release notes</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="burn-training-harness"><a class="header" href="#burn-training-harness">Burn training harness</a></h1>
+<h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
+<p>Basic (CPU) runtime:</p>
+<pre><code class="language-bash">cargo run --features burn_runtime --bin train -- --help
+</code></pre>
+<p>GPU (wgpu): add <code>burn_wgpu</code> alongside <code>burn_runtime</code>:</p>
+<pre><code class="language-bash">cargo run --features "burn_runtime,burn_wgpu" --bin train -- --help
+</code></pre>
+<p>High-performance preset (release, GPU, larger batch/epochs):</p>
+<pre><code class="language-bash"># From repo root
+cargo train_hp
+# Defaults: --input-root assets/datasets/captures_filtered --val-ratio 0.1 --batch-size 128 --epochs 20 --scheduler cosine --lr-start 3e-4 --lr-end 1e-5 --target-size 256x256 --val-target-size 256x256 --status-file logs/train_hp_status.json
+</code></pre>
+<p>Run from the repo root. Adjust adapter/backend in the shell if needed (<code>WGPU_POWER_PREF=high-performance</code>, <code>WGPU_BACKEND=dx12</code> or <code>vulkan</code>, <code>WGPU_ADAPTER_NAME=&lt;name&gt;</code>).</p>
+<p>Full one-liner (Windows, repo root, forces NVIDIA DX12 and logs adapter):</p>
+<details>
+<summary>NVIDIA (DX12)</summary>
+<pre><code class="language-powershell">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"; cargo train_hp
+</code></pre>
+<p>If DX12 picks WARP/CPU, try <code>WGPU_BACKEND="vulkan"</code> and set <code>WGPU_ADAPTER_NAME</code> to the exact adapter name from Device Manager. Override flags by appending them without an extra <code>--</code>, e.g., <code>cargo train_hp --batch-size 128</code>.</p>
+</details>
+<details>
+<summary>AMD (DX12)</summary>
+<pre><code class="language-powershell">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="AMD"; $env:RUST_LOG="info,wgpu_core=info"; cargo train_hp
+</code></pre>
+<p>If DX12 picks WARP/CPU, try <code>WGPU_BACKEND="vulkan"</code> and set <code>WGPU_ADAPTER_NAME</code> to the exact adapter name from Device Manager. Override flags by appending them without an extra <code>--</code>, e.g., <code>cargo train_hp --batch-size 128</code>.</p>
+</details>
+<details>
+<summary>Apple (Metal)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=metal cargo train_hp
+</code></pre>
+<p>If Metal falls back or you want logging, add <code>RUST_LOG=info,wgpu_core=info</code>.</p>
+</details>
+<details>
+<summary>Linux (Vulkan)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=vulkan WGPU_ADAPTER_NAME="NVIDIA" RUST_LOG=info,wgpu_core=info cargo train_hp
+</code></pre>
+<p>Adjust <code>WGPU_ADAPTER_NAME</code> to match your GPU vendor/name (e.g., "AMD", "Intel") or omit to auto-pick.</p>
+</details>
+<details>
+<summary>Linux (Mesa/GL fallback)</summary>
+<pre><code class="language-bash">WGPU_POWER_PREF=high-performance WGPU_BACKEND=gl RUST_LOG=info,wgpu_core=info cargo train_hp
+</code></pre>
+<p>Use only if Vulkan isn’t available; performance may be lower.</p>
+</details>
+<h2 id="end-to-end-workflow"><a class="header" href="#end-to-end-workflow">End-to-end workflow</a></h2>
+<ul>
+<li>Capture/prune data: run <code>sim_view --mode datagen</code> to create runs under <code>assets/datasets/captures</code>, then prune empties with <code>cargo run --bin prune_empty -- --input assets/datasets/captures --output assets/datasets/captures_filtered</code>. Repeat for any real-val root (<code>assets/datasets/real_val_filtered</code>).</li>
+<li>Point training at filtered roots: e.g., <code>--input-root assets/datasets/captures_filtered</code> and <code>--real-val-dir assets/datasets/real_val_filtered</code>, or rely on the split manifest/seed for repeatable splits.</li>
+<li>Train: pick a batch/epoch schedule and run (see sample commands). Logs go to stdout; optional <code>--metrics-out</code> appends JSONL with IoU/PR/mAP per epoch.</li>
+<li>Outputs: model/optim/scheduler checkpoints land in <code>--ckpt-dir</code> (default <code>checkpoints</code>); metrics JSONL if requested. A demo checkpoint can be loaded via <code>--demo-checkpoint</code>.</li>
+</ul>
+<h2 id="common-flags"><a class="header" href="#common-flags">Common flags</a></h2>
+<ul>
+<li><code>--batch-size &lt;N&gt;</code>: train/val batch size (default 2); targets built per-image.</li>
+<li><code>--epochs &lt;N&gt;</code>: number of epochs (default 1).</li>
+<li><code>--log-every &lt;N&gt;</code>: log loss/IoU every N steps (default 1). Step tracing is on by default (<code>--trace-steps</code>/<code>--no-trace-steps</code>) to print batch start/end even before the first log interval.</li>
+<li><code>--lr-start &lt;f64&gt;</code>, <code>--lr-end &lt;f64&gt;</code>: linear LR schedule endpoints.</li>
+<li><code>--scheduler &lt;linear|cosine&gt;</code>: LR schedule type.</li>
+<li><code>--ckpt-every-steps &lt;usize&gt;</code> / <code>--ckpt-every-epochs &lt;usize&gt;</code>: checkpoint cadence (0 disables).</li>
+<li><code>--val-ratio &lt;f32&gt;</code>: fraction of runs for validation split (default 0.2).</li>
+<li><code>--seed &lt;u64&gt;</code>: deterministic shuffle/splits; default seed 42 if omitted.</li>
+<li><code>--ckpt-dir &lt;path&gt;</code>: checkpoint in/out directory (default <code>checkpoints</code>).</li>
+<li><code>--val-obj-thresh &lt;f32&gt;</code> / <code>--val-iou-thresh &lt;f32&gt;</code>: thresholds for val matching (mAP sweep uses 0.05–0.95 objectness).</li>
+<li><code>--patience &lt;usize&gt;</code> / <code>--patience-min-delta &lt;f32&gt;</code>: optional early stop on val IoU plateau.</li>
+<li><code>--real-val-dir &lt;path&gt;</code>: use all runs under this path for validation instead of a split.</li>
+<li><code>--input-root &lt;path&gt;</code>: capture root to train from (default <code>assets/datasets/captures_filtered</code>); point to a filtered/pruned root if desired.</li>
+<li><code>--stratify-split</code>: stratify train/val by box-count buckets (0/1/2+) instead of pure run-level split.</li>
+<li><code>--split-manifest &lt;path&gt;</code>: optional JSON manifest; if present, load train/val label lists from it; if absent, save the current split for reuse.</li>
+<li><code>--drop-last</code>: drop the last partial training batch (can help BN stability). Validation never drops.</li>
+<li><code>--demo-checkpoint &lt;path&gt;</code>: optional model checkpoint to load at startup (model only; skips optimizer/scheduler). Useful for bundled/demo weights.</li>
+<li><code>--metrics-out &lt;path&gt;</code>: append per-epoch val metrics (IoU/PR/mAP, tp/fp/fn) with seed/thresholds.</li>
+<li><code>--tensor-warehouse &lt;manifest&gt;</code> (or env <code>TENSOR_WAREHOUSE_MANIFEST</code>): prefer precomputed tensor shards; falls back to live loader with a warning if unavailable.</li>
+<li><code>--model &lt;tiny|big&gt;</code> and <code>--model-max-boxes &lt;N&gt;</code>: select TinyDet (default) or the wider/deeper BigDet. BigDet is heavier on VRAM/compute; bump <code>--batch-size</code> only if your GPU allows.</li>
+</ul>
+<p>Sample run (CPU backend):</p>
+<pre><code class="language-bash">cargo run --features burn_runtime --bin train -- \
+  --batch-size 4 \
+  --epochs 5 \
+  --scheduler cosine \
+  --lr-start 1e-3 \
+  --lr-end 1e-4 \
+  --val-ratio 0.2 \
+  --ckpt-every-epochs 1 \
+  --val-obj-thresh 0.3 \
+  --val-iou-thresh 0.5 \
+  --real-val-dir assets/datasets/real_val \
+  --input-root assets/datasets/captures_filtered \
+  --stratify-split \
+  --demo-checkpoint assets/checkpoints/tinydet_demo.bin
+</code></pre>
+<p>Sample run (wgpu backend, warehouse preferred if set):</p>
+<pre><code class="language-pwsh"># Windows / NVIDIA (DX12), from repo root
+$env:WGPU_POWER_PREF="high-performance"
+$env:WGPU_BACKEND="dx12"
+$env:WGPU_ADAPTER_NAME="NVIDIA"   # omit if single GPU
+$env:RUST_LOG="info,wgpu_core=info"
+$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"  # required
+$env:WAREHOUSE_STORE="memory"  # or mmap/stream; stream prefetch via WAREHOUSE_PREFETCH (default 2)
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- `
+  --batch-size 64 `
+  --epochs 20 `
+  --scheduler cosine `
+  --lr-start 3e-4 `
+  --lr-end 1e-5 `
+  --val-ratio 0.1
+</code></pre>
+<p>PowerShell one-liner variant:</p>
+<pre><code class="language-pwsh">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; $env:RUST_LOG="info,wgpu_core=info"; $env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"; $env:WAREHOUSE_STORE="memory"; cargo train_hp
+</code></pre>
+<pre><code class="language-bash"># Linux / Vulkan (NVIDIA/AMD), from repo root
+WGPU_POWER_PREF=high-performance \
+WGPU_BACKEND=vulkan \
+WGPU_ADAPTER_NAME="NVIDIA" \
+RUST_LOG=info,wgpu_core=info \
+TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json \
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- \
+  --batch-size 64 \
+  --epochs 20 \
+  --scheduler cosine \
+  --lr-start 3e-4 \
+  --lr-end 1e-5 \
+  --val-ratio 0.1
+</code></pre>
+<p>Larger model example (BigDet, NVIDIA/DX12, warehouse, repo root):</p>
+<pre><code class="language-pwsh">$env:WGPU_POWER_PREF="high-performance"; $env:WGPU_BACKEND="dx12"; $env:WGPU_ADAPTER_NAME="NVIDIA"; `
+$env:RUST_LOG="info,wgpu_core=info"; `
+$env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v&lt;version&gt;/manifest.json"; `
+$env:WAREHOUSE_STORE="memory"; `
+cargo run --features "burn_runtime,burn_wgpu" --bin train -- `
+  --model big `
+  --model-max-boxes 16 `
+  --batch-size 32 `
+  --epochs 20 `
+  --scheduler cosine `
+  --lr-start 3e-4 `
+  --lr-end 1e-5 `
+  --val-ratio 0.1
+</code></pre>
+<p>If VRAM permits, increase <code>--batch-size</code>; if you hit OOM, lower it or use <code>--model tiny</code>.</p>
+<p>Validation thresholds:</p>
+<ul>
+<li><code>--val-obj-thresh &lt;f32&gt;</code>: objectness threshold for val matching (default 0.3).</li>
+<li><code>--val-iou-thresh &lt;f32&gt;</code> / <code>--val-iou-sweep</code>: IoU threshold(s) for val matching/NMS (default 0.5).
+Runtime inference thresholds are adjusted via hotkeys in the sim (<code>-</code>/<code>=</code> for objectness, <code>[</code>/<code>]</code> for IoU).</li>
+</ul>
+<h2 id="models-and-the-bounding-box-trait"><a class="header" href="#models-and-the-bounding-box-trait">Models and the bounding-box trait</a></h2>
+<ul>
+<li>The training loop is backed by a <code>BoundingBoxModel</code> trait (forward/loss/postprocess). Implementations today: <code>TinyDet</code> (default) and <code>BigDet</code> (wider/deeper).</li>
+<li>Select via <code>--model {tiny|big}</code> and <code>--model-max-boxes &lt;N&gt;</code>. Checkpoints are stored per model name (<code>tinydet.*</code>, <code>bigdet.*</code>) with meta recording the model kind and max_boxes.</li>
+<li>Adding a new model: implement <code>BoundingBoxModel</code> (forward returns <code>ModelOutputs</code>, loss consumes <code>ModelTargets</code>), add a config, wire it into the model enum/CLI, and add checkpoint names for load/save. Postprocess/NMS stays shared via the existing helpers.</li>
+</ul>
+<h2 id="what-it-does-today"><a class="header" href="#what-it-does-today">What it does today</a></h2>
+<ul>
+<li>Loads capture runs via <code>BatchIter</code> (train with aug; val without), builds TinyDet, AdamW, and a linear LR scheduler.</li>
+<li>Runs epoch/batch loop with per-step optimizer updates; logs loss and mean IoU each log interval.</li>
+<li>Validation: decodes per-cell predictions, applies sigmoid + NMS, matches to GT boxes with IoU threshold, and reports mean IoU plus precision/recall and an approximate mAP via a small PR sweep (tp/fp/fn).</li>
+<li>Checkpoints: on start, loads model/optim/scheduler from <code>ckpt_dir</code> if present; saves them per configured cadence (steps/epochs). Optional early stop tracks best val IoU.</li>
+</ul>
+<h2 id="notes-1"><a class="header" href="#notes-1">Notes</a></h2>
+<ul>
+<li>Requires <code>--features burn_runtime</code> to pull in Burn and the training harness. Add <code>burn_wgpu</code> for GPU (wgpu); otherwise NdArray CPU is used.</li>
+<li>Val metric thresholds are tunable via CLI; adjust to trade off recall/precision during evaluation.</li>
+<li>Runtime inference loads <code>checkpoints/tinydet.bin</code>; if missing or failed, it logs a warning and falls back to the heuristic detector.</li>
+<li>Demo/bundled checkpoint: pass <code>--demo-checkpoint &lt;path&gt;</code> during training/eval; for runtime, place it at <code>checkpoints/tinydet.bin</code> (or update CLI flags) so the sim loads it automatically.</li>
+<li>Runtime knobs: during sim, adjust thresholds with <code>-</code>/<code>=</code> (objectness) and <code>[</code>/<code>]</code> (IoU); press <code>B</code> to toggle between Burn and heuristic detectors. The HUD shows mode, box count, inference latency, and fallback banners.</li>
+<li>Eval-only: <code>cargo run --features burn_runtime --bin eval -- --checkpoint &lt;path&gt; --input-root &lt;val_root&gt; [--val-iou-sweep ...] [--metrics-out ...]</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ml-pipeline"><a class="header" href="#ml-pipeline">ML Pipeline</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="burn-patch-note"><a class="header" href="#burn-patch-note">Burn patch note</a></h1>
+<h2 id="whats-patched"><a class="header" href="#whats-patched">What’s patched</a></h2>
+<ul>
+<li>Patched source: <code>vendor/burn-core-0.14.0/src/record/memory.rs</code> (swapped <code>decode_borrowed_from_slice</code> for <code>decode_from_slice</code> with error mapping).</li>
+<li>Cargo override: <code>[patch.crates-io] burn-core = { path = "vendor/burn-core-0.14.0" }</code>.</li>
+<li>Rationale: upstream <code>burn-core</code> calls <code>bincode::serde::decode_borrowed_from_slice</code>, which isn’t available in the published bincode versions we resolve here, breaking <code>--features burn_runtime</code> builds.</li>
+<li>Upstream PR filed: https://github.com/tracel-ai/burn/pull/4247</li>
+</ul>
+<h2 id="future-cleanup"><a class="header" href="#future-cleanup">Future cleanup</a></h2>
+<ul>
+<li>Drop the patch when Burn publishes a version compatible with current bincode (or bincode restores the missing API).</li>
+<li>Remove <code>vendor/burn-core-0.14.0</code> and the <code>[patch.crates-io]</code> override in <code>Cargo.toml</code>.</li>
+<li>Re-run <code>cargo update</code> and verify <code>--features burn_runtime</code> builds without overrides.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="runtime--usage"><a class="header" href="#runtime--usage">Runtime &amp; Usage</a></h1>
+<ul>
+<li><a href="cli.html">CLI Usage</a>
+<ul>
+<li>Simulator/datagen commands</li>
+<li>Flags and hotkeys</li>
+</ul>
+</li>
+<li><a href="tui.html">TUI</a>
+<ul>
+<li>Terminal UI controls</li>
+<li>Train/datagen triggers</li>
+<li>Status display</li>
+</ul>
+</li>
+<li><a href="CONTROLS.html">Controls</a>
+<ul>
+<li>In-sim control reference</li>
+</ul>
+</li>
+<li><a href="datagen_scheduler.html">Datagen Scheduler</a>
+<ul>
+<li>GPU-aware datagen launcher</li>
+<li>Resource guards</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cli-usage"><a class="header" href="#cli-usage">CLI usage</a></h1>
+<p>The simulator ships multiple binaries (interactive, headless data-gen, overlay tool) driven by a Clap CLI. This page lists every flag, defaults, and ready-to-run examples.</p>
+<h2 id="flags-all-binaries"><a class="header" href="#flags-all-binaries">Flags (all binaries)</a></h2>
+<ul>
+<li><code>--mode &lt;sim|datagen&gt;</code>: run interactively (<code>sim</code>, default) or headless data generation (<code>datagen</code>).</li>
+<li><code>--seed &lt;u64&gt;</code>: optional seed override for reproducible polyp layouts; default is time-based.</li>
+<li><code>--output-root &lt;path&gt;</code>: root for run folders. Default: <code>assets/datasets/captures</code>.</li>
+<li><code>--max-frames &lt;N&gt;</code>: optional frame cap for data runs (stop after N frames).</li>
+<li><code>--headless</code>: hide the main window / offscreen rendering (for datagen).</li>
+<li><code>--prune-empty</code>: after datagen, copy the run with empty-label frames removed (non-destructive; raw run kept).
+<ul>
+<li><code>--prune-output-root &lt;path&gt;</code>: destination for pruned runs (default: <code>&lt;output_root&gt;_filtered</code>).</li>
+</ul>
+</li>
+</ul>
+<h2 id="binaries"><a class="header" href="#binaries">Binaries</a></h2>
+<ul>
+<li><code>sim_view</code>: interactive/visible sim (also usable for visible datagen with <code>--mode datagen</code>).</li>
+<li><code>datagen_headless</code>: headless data-gen runner.</li>
+<li><code>overlay_labels</code>: draw bounding boxes onto captured frames.</li>
+</ul>
+<h2 id="runtime-hotkeys-vision"><a class="header" href="#runtime-hotkeys-vision">Runtime hotkeys (vision)</a></h2>
+<ul>
+<li><code>-</code>/<code>=</code>: decrease/increase objectness threshold.</li>
+<li><code>[</code>/<code>]</code>: decrease/increase IoU threshold.</li>
+<li><code>B</code>: toggle between Burn and heuristic detectors; HUD shows the active mode/box stats.</li>
+<li>Burn checkpoint: place model at <code>checkpoints/tinydet.bin</code> (runtime loads automatically). If missing or load fails, sim falls back to the heuristic detector and shows a fallback banner in the HUD.</li>
+</ul>
+<h2 id="runtime-inference-burn"><a class="header" href="#runtime-inference-burn">Runtime inference (Burn)</a></h2>
+<ul>
+<li>
+<p>Enable Burn: run with <code>--features burn_runtime</code> (CPU), <code>--features "burn_runtime,burn_wgpu"</code> (GPU), or the alias <code>--features burn_runtime_wgpu</code> (CPU+GPU).</p>
+<ul>
+<li>Example (CPU): <code>cargo run --release --features burn_runtime --bin sim_view</code></li>
+<li>Example (GPU): <code>cargo run --release --features "burn_runtime,burn_wgpu" --bin sim_view</code>
+<ul>
+<li>Example (alias): <code>cargo run --release --features burn_runtime_wgpu --bin sim_view</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Checkpoint: place model at <code>checkpoints/tinydet.bin</code> (expected at startup). If missing, sim falls back to the heuristic detector.</p>
+</li>
+<li>
+<p>Toggle detector: press <code>B</code> to switch between Burn and heuristic; HUD shows active mode and box stats.</p>
+</li>
+<li>
+<p>Thresholds: <code>-</code>/<code>=</code> lower/raise objectness; <code>[</code>/<code>]</code> lower/raise IoU. HUD shows current values and inference latency when Burn is active.</p>
+</li>
+</ul>
+<h2 id="command-gallery-covers-every-flag"><a class="header" href="#command-gallery-covers-every-flag">Command gallery (covers every flag)</a></h2>
+<h3 id="how-to-run-the-simulator-by-scenario"><a class="header" href="#how-to-run-the-simulator-by-scenario">How to Run the Simulator (By Scenario)</a></h3>
+<ol>
+<li>
+<p><strong>Interactive sim (defaults)</strong></p>
+<p>Launch the visible simulator for manual driving and HUD tuning; no capture unless you trigger it.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view</code></li>
+<li>Flags: none
+<ul>
+<li>mode=<code>sim</code>, time-based seed, output root <code>assets/datasets/captures</code></li>
+<li>Recording is manual in this mode:
+<ul>
+<li><code>C</code> — toggle camera; switch to probe POV until HUD shows <code>VISION :: cam=ON</code> (needed for POV captures).</li>
+<li><code>L</code> — start/stop recording manually; HUD shows <code>REC :: on</code> and frames/labels are written under <code>assets/datasets/captures/run_&lt;timestamp&gt;/</code>.</li>
+<li><code>O</code> — data-run shortcut: enables autopilot + probe POV; recording auto-starts after ~8s and auto-stops at tunnel end (return leg not recorded).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Interactive sim with fixed seed</strong></p>
+<p>Same as defaults, but deterministic polyp layout via seed.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view -- --seed 1234</code></li>
+<li>Flags: <code>--seed</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Interactive datagen (visible) with frame cap</strong></p>
+<p>Visible data-gen session; you can watch and cap frames.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view -- --mode datagen --max-frames 500</code></li>
+<li>Flags: <code>--mode datagen</code>, <code>--max-frames</code>
+<ul>
+<li>Recording: same hotkeys as sim (<code>C</code> POV toggle, <code>L</code> start/stop, <code>O</code> auto-run with auto-stop).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen with custom output + seed</strong></p>
+<p>Fully automated headless data run to a custom folder with a fixed seed.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless -- --seed 42 --output-root /tmp/runs --max-frames 600</code></li>
+<li>Flags: <code>--headless</code> (implied by binary), <code>--seed</code>, <code>--output-root</code>, <code>--max-frames</code>
+<ul>
+<li>Recording: automatic in headless datagen; frames/labels written under the specified output root.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen using default output root</strong></p>
+<p>Automated headless run using defaults.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless -- --mode datagen</code></li>
+<li>Flags: <code>--mode datagen</code> (explicit), other flags default
+<ul>
+<li>Recording: automatic in headless datagen; output under <code>assets/datasets/captures</code>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen with explicit headless flag</strong></p>
+<p>Force headless via <code>sim_view</code> with datagen mode and frame cap.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view -- --mode datagen --headless --max-frames 300</code></li>
+<li>Flags: <code>--mode datagen</code>, <code>--headless</code>, <code>--max-frames</code>
+<ul>
+<li>Recording: automatic in headless/datagen mode; respect frame cap.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Run with alternate output root (visible sim)</strong></p>
+<p>Interactive sim writing captures to a custom root when you record.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view -- --output-root /tmp/captures</code></li>
+<li>Flags: <code>--output-root</code>
+<ul>
+<li>Recording: manual via <code>C</code>/<code>L</code>/<code>O</code>; writes under the custom root.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen with only a frame cap</strong></p>
+<p>Automated headless run with just a frame limit.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless -- --max-frames 1000</code></li>
+<li>Flags: <code>--max-frames</code>
+<ul>
+<li>Recording: automatic in headless; stops at cap.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Visible datagen with max frames and seed</strong></p>
+<p>Visible datagen with deterministic layout and cap.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin sim_view -- --mode datagen --seed 9876 --max-frames 750</code></li>
+<li>Flags: <code>--mode datagen</code>, <code>--seed</code>, <code>--max-frames</code>
+<ul>
+<li>Recording: manual hotkeys; respects frame cap if recording is on.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen writing to default root (short form)</strong></p>
+<p>Shortest headless command; defaults everything else.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless</code></li>
+<li>Flags: none (binary is headless; mode defaults to <code>sim</code> but headless path is implied)
+<ul>
+<li>Recording: automatic to <code>assets/datasets/captures</code> with time-based seed.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen with custom output and headless flag (redundant but explicit)</strong></p>
+<p>Headless run to a specific output root with explicit headless flag.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless -- --output-root /data/runs --headless</code></li>
+<li>Flags: <code>--output-root</code>, <code>--headless</code>
+<ul>
+<li>Recording: automatic to <code>/data/runs</code> with time-based seed unless <code>--seed</code> is provided.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Headless datagen with pruning to filtered root</strong></p>
+<p>Headless run that writes the raw run and a pruned copy with empty-label frames removed.</p>
+<ul>
+<li>Command: <code>cargo run --release --bin datagen_headless -- --prune-empty</code></li>
+<li>Flags: <code>--prune-empty</code> (optional <code>--prune-output-root /custom/filtered</code>); default pruned output is <code>&lt;output_root&gt;_filtered</code>.
+<ul>
+<li>Recording: automatic; raw run under <code>assets/datasets/captures</code>, pruned copy under <code>assets/datasets/captures_filtered</code> unless overridden.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="overlay-previously-captured-run"><a class="header" href="#overlay-previously-captured-run">Overlay previously captured run</a></h3>
+<p>Render boxes onto stored frames for a completed run.</p>
+<p><em>Data runs already auto-generate overlays at run end, so the entry isn’t strictly required for normal usage. It’s still useful if you want to regenerate overlays (e.g., after changing box-drawing logic)</em></p>
+<ul>
+<li>Command: <code>cargo run --release --bin overlay_labels -- assets/datasets/captures/run_1234567890123</code></li>
+<li>Flags: positional path to run directory (no additional flags)
+<ul>
+<li>Output: writes overlays under <code>&lt;run&gt;/overlays</code> (or optional custom output dir).</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tui-optional"><a class="header" href="#tui-optional">TUI (optional)</a></h1>
+<p>The TUI is an optional front-end kept separate from the core simulator. It is built only when the <code>tui</code> feature is enabled and lives in its own binary (<code>src/bin/tui.rs</code>) so core code stays free of UI dependencies.</p>
+<h2 id="running"><a class="header" href="#running">Running</a></h2>
+<ul>
+<li>CPU: <code>cargo run --release --features tui --bin tui</code></li>
+<li>(If you also need Burn GPU, combine features, e.g., <code>--features "tui,burn_runtime_wgpu"</code>)</li>
+</ul>
+<h2 id="design"><a class="header" href="#design">Design</a></h2>
+<ul>
+<li>Separate bin: depends on the <code>colon_sim</code> library only; no TUI deps in core.</li>
+<li>Thin service surface: call into a small API for listing runs, starting datagen/train, and reading status/logs. Keep UI concerns out of core.</li>
+<li>UI stack: <code>ratatui</code> + <code>crossterm</code> for terminal rendering/input.</li>
+<li>Architecture: split state/render/handlers (e.g., <code>app.rs</code>, <code>ui.rs</code>, <code>handlers.rs</code>), drive via an event loop (input, tick, backend events).</li>
+</ul>
+<h2 id="keybindings"><a class="header" href="#keybindings">Keybindings</a></h2>
+<ul>
+<li><code>q</code> / <code>Esc</code>: quit</li>
+<li><code>r</code>: refresh runs list</li>
+<li><code>d</code>: start datagen via <code>sim_view --mode datagen --headless</code> with pruning (<code>--prune-empty</code>, output to <code>assets/datasets/captures_filtered</code>)</li>
+<li><code>m</code>: read last metrics entry (<code>checkpoints/metrics.jsonl</code>) and display (auto-refreshed on tick)</li>
+<li><code>l</code>: tail last 5 lines of <code>logs/train.log</code> (auto-refreshed on tick)</li>
+<li><code>t</code>: start training with defaults (writes <code>logs/train_status.json</code>)</li>
+<li><code>↑</code> / <code>↓</code>: move selection in runs list (details shown in status pane)</li>
+</ul>
+<h2 id="status-fields"><a class="header" href="#status-fields">Status fields</a></h2>
+<ul>
+<li>Selected run details: path, label/image/overlay counts, manifest (seed, max_frames, start time)</li>
+<li>Metrics: last entry from <code>checkpoints/metrics.jsonl</code> (auto)</li>
+<li>Logs: tail of <code>logs/train.log</code> (auto)</li>
+<li>Progress: if <code>max_frames</code> is in the manifest, show frames recorded vs. max</li>
+<li>PIDs: last launched datagen/train process IDs and whether they are still running (if started via TUI)</li>
+<li>Train status: contents of <code>logs/train_status.json</code> if present (status/epoch/epochs/seed/step/loss/lr)</li>
+</ul>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next steps</a></h2>
+<ul>
+<li>Optional: detect running datagen/train processes (and show progress) or surface error banners in the UI.</li>
+<li>Formatting: run <code>cargo fmt</code> locally if permissions were blocked to keep the TUI files tidy.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="probe-controls"><a class="header" href="#probe-controls">Probe Controls</a></h1>
+<ul>
+<li><strong>Tension</strong> <code>[ [ ] ]</code>: 0.01–5.0× spring rest length (lower = tighter).</li>
+<li><strong>Stiffness</strong> <code>[ ; ' ]</code>: 20–5000 spring stiffness (higher = stiffer).</li>
+<li><strong>Damping</strong> <code>[ , . ]</code>: 0.5–200 spring damping (higher = less oscillation).</li>
+<li><strong>Thrust</strong> <code>[ 1 2 ]</code>: 5–200 forward force on the rear segment.</li>
+<li><strong>Speed Clamp</strong> <code>[ 3 4 ]</code>: 0.05–5.0 target forward speed.</li>
+<li><strong>Linear Damping</strong> <code>[ 5 6 ]</code>: 0.01–2.0 linear drag on segments.</li>
+<li><strong>Friction</strong> <code>[ 7 8 ]</code>: 0.1–3.0 surface friction for the probe.</li>
+</ul>
+<p>Values update live and are mirrored in the top-left HUD. Press the keys to tighten/loosen and adjust movement to suit different tunnel sections.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
