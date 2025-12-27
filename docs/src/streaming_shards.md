@@ -29,8 +29,7 @@ $env:TENSOR_WAREHOUSE_MANIFEST="artifacts/tensor_warehouse/v<version>/manifest.j
 $env:WAREHOUSE_STORE="memory"; `
 cargo train_hp
 ```
-- **PowerShell helpers (Rust)**: run `cargo run --bin warehouse_nvidia_ps_command` (DX12/NVIDIA) or `cargo run --bin warehouse_amd_ps_command` (DX12/AMD) to print a one-liner; edit defaults in `tools/warehouse_commands/` (manifest path, store mode, prefetch, model, batch size, log cadence).
-- **Bash helpers (Rust)**: run `cargo run --bin warehouse_nvidia_sh_command` (Vulkan/NVIDIA) or `cargo run --bin warehouse_amd_sh_command` (Vulkan/AMD) for Linux/macOS; edit the same defaults in `tools/warehouse_commands/`.
+- **One-liner helper (Rust)**: run `cargo run --bin warehouse_cmd -- --shell ps --adapter amd` (DX12/AMD) or swap `--adapter nvidia`; for Bash use `--shell sh` (defaults to Vulkan). Defaults live in `tools/warehouse_commands/lib/common.rs`.
 - **CLI flag (mmap)**:
 ```bash
 TENSOR_WAREHOUSE_MANIFEST=artifacts/tensor_warehouse/v<version>/manifest.json \

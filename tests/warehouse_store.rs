@@ -5,7 +5,7 @@ use colon_sim::tools::burn_dataset::{
     CacheableTransformConfig, DatasetSummary, Endianness, RunSummary, ShardDType, ShardMetadata,
     ValidationThresholds, WarehouseLoaders, WarehouseManifest,
 };
-use std::fs::{File};
+use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -162,7 +162,10 @@ fn streaming_vs_ram_throughput_smoke() {
         }
         let elapsed = start.elapsed().as_millis();
         assert_eq!(seen, samples);
-        eprintln!("[warehouse][{}] samples={} elapsed_ms={}", m, samples, elapsed);
+        eprintln!(
+            "[warehouse][{}] samples={} elapsed_ms={}",
+            m, samples, elapsed
+        );
     }
 }
 

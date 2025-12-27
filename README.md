@@ -65,3 +65,17 @@ Quick start:
 cargo run --features burn_runtime --bin train -- --help
 ```
 Key flags: `--batch-size`, `--epochs`, `--lr-start/--lr-end`, `--val-ratio`, `--seed`, `--ckpt-dir`, and val metric thresholds `--val-obj-thresh/--val-iou-thresh`. See the mdBook Training section for details.
+
+## Warehouse command helper
+Generate the training one-liner with a single CLI:
+- PowerShell + AMD (DX12): `cargo run --bin warehouse_cmd -- --shell ps --adapter amd`
+- PowerShell + NVIDIA (DX12): `cargo run --bin warehouse_cmd -- --shell ps --adapter nvidia`
+- Bash + AMD (Vulkan): `cargo run --bin warehouse_cmd -- --shell sh --adapter amd`
+- Bash + NVIDIA (Vulkan): `cargo run --bin warehouse_cmd -- --shell sh --adapter nvidia`
+
+Defaults (manifest path, store/prefetch, batch/log cadence) live in `tools/warehouse_commands/lib/common.rs`. Useful overrides:
+- `--manifest artifacts/tensor_warehouse/v2/manifest.json` to point at a specific version
+- `--store stream --prefetch 4` to change backing and prefetch depth
+- `--batch-size 64 --log-every 5` to tune training cadence
+- `--backend metal --shell sh` to force a different WGPU backend
+- `--extra-args "--lr-start 5e-4 --epochs 10"` to append training flags

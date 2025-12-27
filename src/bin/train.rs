@@ -211,20 +211,14 @@ mod real {
             }
         }
 
-        fn visit<Visitor: burn::module::ModuleVisitor<ADBackend>>(
-            &self,
-            visitor: &mut Visitor,
-        ) {
+        fn visit<Visitor: burn::module::ModuleVisitor<ADBackend>>(&self, visitor: &mut Visitor) {
             match self {
                 Model::Tiny(m) => m.visit(visitor),
                 Model::Big(m) => m.visit(visitor),
             }
         }
 
-        fn map<Mapper: burn::module::ModuleMapper<ADBackend>>(
-            self,
-            mapper: &mut Mapper,
-        ) -> Self {
+        fn map<Mapper: burn::module::ModuleMapper<ADBackend>>(self, mapper: &mut Mapper) -> Self {
             match self {
                 Model::Tiny(m) => Model::Tiny(m.map(mapper)),
                 Model::Big(m) => Model::Big(m.map(mapper)),
@@ -261,8 +255,7 @@ mod real {
 
     type InnerBackend = <ADBackend as AutodiffBackend>::InnerBackend;
 
-    type TinyInnerRecord =
-        <TinyDet<InnerBackend> as burn::module::Module<InnerBackend>>::Record;
+    type TinyInnerRecord = <TinyDet<InnerBackend> as burn::module::Module<InnerBackend>>::Record;
     type BigInnerRecord = <BigDet<InnerBackend> as burn::module::Module<InnerBackend>>::Record;
 
     enum ModelInnerRecord {
@@ -318,17 +311,17 @@ mod real {
             }
         }
 
-        fn to_device(self, device: &<InnerBackend as burn::tensor::backend::Backend>::Device) -> Self {
+        fn to_device(
+            self,
+            device: &<InnerBackend as burn::tensor::backend::Backend>::Device,
+        ) -> Self {
             match self {
                 ModelInner::Tiny(m) => ModelInner::Tiny(m.to_device(device)),
                 ModelInner::Big(m) => ModelInner::Big(m.to_device(device)),
             }
         }
 
-        fn visit<Visitor: burn::module::ModuleVisitor<InnerBackend>>(
-            &self,
-            visitor: &mut Visitor,
-        ) {
+        fn visit<Visitor: burn::module::ModuleVisitor<InnerBackend>>(&self, visitor: &mut Visitor) {
             match self {
                 ModelInner::Tiny(m) => m.visit(visitor),
                 ModelInner::Big(m) => m.visit(visitor),
@@ -347,7 +340,9 @@ mod real {
 
         fn load_record(self, record: Self::Record) -> Self {
             match (self, record) {
-                (ModelInner::Tiny(m), ModelInnerRecord::Tiny(r)) => ModelInner::Tiny(m.load_record(r)),
+                (ModelInner::Tiny(m), ModelInnerRecord::Tiny(r)) => {
+                    ModelInner::Tiny(m.load_record(r))
+                }
                 (ModelInner::Big(m), ModelInnerRecord::Big(r)) => ModelInner::Big(m.load_record(r)),
                 (m, _) => m,
             }
@@ -721,7 +716,10 @@ mod real {
                 .map_err(|e| anyhow::anyhow!("{:?}", e))?
             {
                 let val_outputs = model.forward(val_batch.images.clone());
-                let (v_obj, v_boxes) = (val_outputs.obj_logits.clone(), val_outputs.box_logits.clone());
+                let (v_obj, v_boxes) = (
+                    val_outputs.obj_logits.clone(),
+                    val_outputs.box_logits.clone(),
+                );
                 for accum in val_accum.iter_mut() {
                     let (iou_sum, matched_count, batch_tp, batch_fp, batch_fn) = val_metrics_nms(
                         &v_obj,
@@ -1061,10 +1059,7 @@ mod real {
             if let Ok(bytes) = std::fs::read(&meta_path) {
                 if let Ok(meta) = serde_json::from_slice::<serde_json::Value>(&bytes) {
                     let stored_model = meta.get("model").and_then(|v| v.as_str()).unwrap_or("");
-                    let stored_boxes = meta
-                        .get("max_boxes")
-                        .and_then(|v| v.as_u64())
-                        .unwrap_or(0);
+                    let stored_boxes = meta.get("max_boxes").and_then(|v| v.as_u64()).unwrap_or(0);
                     if stored_model != model_name {
                         eprintln!(
                             "Checkpoint meta mismatch: expected {}, found {}",
@@ -1080,7 +1075,10 @@ mod real {
         }
 
         if model_path.with_extension("bin").exists() {
-            if let Ok(loaded) = model.clone().load_file(model_path.clone(), &recorder, device) {
+            if let Ok(loaded) = model
+                .clone()
+                .load_file(model_path.clone(), &recorder, device)
+            {
                 *model = loaded;
                 println!("Loaded model checkpoint ({})", model_path.display());
             }
@@ -1100,7 +1098,10 @@ mod real {
                         device,
                     ) {
                         *s = burn::lr_scheduler::LrScheduler::<ADBackend>::load_record(*s, record);
-                        println!("Loaded scheduler checkpoint (linear) ({})", sched_path.display());
+                        println!(
+                            "Loaded scheduler checkpoint (linear) ({})",
+                            sched_path.display()
+                        );
                     }
                 }
                 Scheduler::Cosine(s) => {
@@ -1110,7 +1111,10 @@ mod real {
                         device,
                     ) {
                         *s = burn::lr_scheduler::LrScheduler::<ADBackend>::load_record(*s, record);
-                        println!("Loaded scheduler checkpoint (cosine) ({})", sched_path.display());
+                        println!(
+                            "Loaded scheduler checkpoint (cosine) ({})",
+                            sched_path.display()
+                        );
                     }
                 }
             }
@@ -1168,11 +1172,9 @@ mod real {
         }
 
         let optim_record = optim.to_record();
-        if let Err(e) = burn::record::Recorder::<ADBackend>::record(
-            &recorder,
-            optim_record,
-            optim_path.clone(),
-        ) {
+        if let Err(e) =
+            burn::record::Recorder::<ADBackend>::record(&recorder, optim_record, optim_path.clone())
+        {
             eprintln!(
                 "Failed to save optimizer checkpoint to {}: {:?}",
                 optim_path.display(),

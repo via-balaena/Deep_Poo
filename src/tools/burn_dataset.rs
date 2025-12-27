@@ -2071,10 +2071,11 @@ impl ShardBuffer {
                     .checked_add(sample_idx * mask_bytes)
                     .ok_or_else(|| BurnDatasetError::Other("mask offset overflow".into()))?;
 
-                let mut file = BufReader::new(File::open(path).map_err(|e| BurnDatasetError::Io {
-                    path: path.clone(),
-                    source: e,
-                })?);
+                let mut file =
+                    BufReader::new(File::open(path).map_err(|e| BurnDatasetError::Io {
+                        path: path.clone(),
+                        source: e,
+                    })?);
 
                 fn read_f32s<R: Read + Seek>(
                     file: &mut R,
@@ -2083,16 +2084,18 @@ impl ShardBuffer {
                     out: &mut Vec<f32>,
                     path: &Path,
                 ) -> DatasetResult<()> {
-                    file.seek(SeekFrom::Start(offset as u64))
+                    file.seek(SeekFrom::Start(offset as u64)).map_err(|e| {
+                        BurnDatasetError::Io {
+                            path: path.to_path_buf(),
+                            source: e,
+                        }
+                    })?;
+                    let mut buf = vec![0u8; bytes];
+                    file.read_exact(&mut buf)
                         .map_err(|e| BurnDatasetError::Io {
                             path: path.to_path_buf(),
                             source: e,
                         })?;
-                    let mut buf = vec![0u8; bytes];
-                    file.read_exact(&mut buf).map_err(|e| BurnDatasetError::Io {
-                        path: path.to_path_buf(),
-                        source: e,
-                    })?;
                     for chunk in buf.chunks_exact(4) {
                         let mut arr = [0u8; 4];
                         arr.copy_from_slice(chunk);

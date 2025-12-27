@@ -51,20 +51,8 @@ path = "src/bin/datagen_scheduler.rs"
 required-features = ["scheduler"]
 
 [[bin]]
-name = "warehouse_nvidia_ps_command"
-path = "tools/warehouse_commands/bin/nvidia_ps.rs"
-
-[[bin]]
-name = "warehouse_amd_ps_command"
-path = "tools/warehouse_commands/bin/amd_ps.rs"
-
-[[bin]]
-name = "warehouse_nvidia_sh_command"
-path = "tools/warehouse_commands/bin/nvidia_sh.rs"
-
-[[bin]]
-name = "warehouse_amd_sh_command"
-path = "tools/warehouse_commands/bin/amd_sh.rs"
+name = "warehouse_cmd"
+path = "tools/warehouse_commands/bin/main.rs"
 
 [dependencies]
 bevy = "0.17.3"
