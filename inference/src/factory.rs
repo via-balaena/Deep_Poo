@@ -2,9 +2,8 @@ use std::path::Path;
 use burn::module::Module;
 use burn::tensor::TensorData;
 use std::sync::{Arc, Mutex};
-use models::{TinyDet, TinyDetConfig};
 use vision_core::interfaces::{Detector, DetectionResult, Frame};
-use crate::InferenceBackend;
+use crate::{InferenceBackend, InferenceModel, InferenceModelConfig};
 
 /// Thresholds for inference (objectness + IoU).
 #[derive(Debug, Clone, Copy)]
@@ -41,7 +40,7 @@ impl Detector for HeuristicDetector {
 }
 
 struct BurnTinyDetDetector {
-    model: Arc<Mutex<TinyDet<InferenceBackend>>>,
+    model: Arc<Mutex<InferenceModel<InferenceBackend>>>,
     obj_thresh: f32,
     #[allow(dead_code)]
     iou_thresh: f32,
@@ -106,6 +105,7 @@ impl InferenceFactory {
         if let Some(det) = self.try_load_burn_detector(thresh, weights) {
             return det;
         }
+        eprintln!("InferenceFactory: no valid checkpoint provided; using heuristic detector.");
         Box::new(HeuristicDetector {
             obj_thresh: thresh.obj_thresh,
         })
@@ -122,7 +122,7 @@ impl InferenceFactory {
         }
         let device = <InferenceBackend as burn::tensor::backend::Backend>::Device::default();
         let recorder = burn::record::BinFileRecorder::<burn::record::FullPrecisionSettings>::new();
-        match TinyDet::<InferenceBackend>::new(TinyDetConfig::default(), &device)
+        match InferenceModel::<InferenceBackend>::new(InferenceModelConfig::default(), &device)
             .load_file(path, &recorder, &device)
         {
             Ok(model) => Some(Box::new(BurnTinyDetDetector {

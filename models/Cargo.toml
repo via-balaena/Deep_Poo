@@ -6,3 +6,8 @@ publish = false
 
 [dependencies]
 burn = { version = "0.14", default-features = false, features = ["autodiff", "std"] }
+
+[features]
+default = ["tinydet"]
+tinydet = []
+bigdet = []

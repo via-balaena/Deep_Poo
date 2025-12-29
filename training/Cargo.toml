@@ -1,7 +1,9 @@
 [features]
-default = ["backend-ndarray"]
+default = ["backend-ndarray", "tinydet"]
 backend-ndarray = ["burn-ndarray"]
 backend-wgpu = ["burn-wgpu"]
+tinydet = ["models/tinydet"]
+bigdet = ["models/bigdet"]
 
 [package]
 name = "training"

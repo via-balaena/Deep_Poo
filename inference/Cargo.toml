@@ -5,9 +5,11 @@ edition = "2021"
 publish = false
 
 [features]
-default = ["backend-ndarray"]
+default = ["backend-ndarray", "tinydet"]
 backend-ndarray = ["burn-ndarray"]
 backend-wgpu = ["burn-wgpu"]
+tinydet = ["models/tinydet"]
+bigdet = ["models/bigdet"]
 
 [lib]
 name = "inference"
