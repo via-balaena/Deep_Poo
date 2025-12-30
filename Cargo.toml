@@ -11,6 +11,7 @@ members = [
     "inference",
     "models",
     "apps/colon_sim",
+    "apps/hello_substrate",
 ]
 resolver = "2"
 
@@ -33,11 +34,11 @@ gpu_intel = []
 
 [[bin]]
 name = "sim_view"
-path = "apps/sim_view/main.rs"
+path = "apps/colon_sim/bin/sim_view.rs"
 
 [[bin]]
 name = "inference_view"
-path = "apps/inference_view/main.rs"
+path = "apps/colon_sim/bin/inference_view.rs"
 
 [dependencies]
 sim_core = { path = "sim_core" }
