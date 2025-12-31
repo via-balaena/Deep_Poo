@@ -10,6 +10,8 @@ For developers working on the data/training pipeline: setup, standards (fmt/clip
 - Tools: `colon_sim_tools` (overlay/prune/warehouse/datagen/scheduler/tui) plus shared helpers.
 - Build your own sim: add an app crate that registers domain systems/hooks; keep the root crate as glue only.
  - Bins: run specific bins (`sim_view`, `inference_view`, tools bins) via `cargo run --bin ...`; `main` is just a thin wrapper over `run_app`.
+- Sample app: `apps/hello_substrate` shows a minimal plugin on the substrate (no colon-specific systems).
+- Migration summary: see `MIGRATION.md` at repo root for the refactor overview.
 
 ## Recorder defaults & hooks
 - Recorder runs in the substrate (`src/sim/recorder.rs`) and installs a default `JsonRecorder` sink (from `capture_utils`) when a run starts. You can inject your own sink via `RecorderSink.writer`.

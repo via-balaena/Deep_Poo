@@ -4,6 +4,7 @@
   - [Quickstart (10-minute flow)](overview/quickstart.md)
   - [Pipeline map and lifecycle](overview/pipeline_lifecycle.md)
   - [Glossary and conventions](overview/glossary.md)
+  - [Architecture (substrate + app)](overview/architecture.md)
 - [Data Capture](data_capture/README.md)
   - [Manual capture & controls](data_capture/manual_capture.md)
   - [Headless datagen](data_capture/datagen.md)

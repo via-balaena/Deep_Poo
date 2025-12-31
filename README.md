@@ -16,6 +16,11 @@ No attempt is made to reproduce proprietary hardware, clinical configurations, o
 **Video of auto probe in action**
 https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
 
+## Substrate vs. app (early “Pipelinea” branding)
+We have a reusable substrate (candidate name “Pipelinea”) made of `sim_core`, `vision_core`/`vision_runtime`, `data_contracts`, `models`, `training`, `inference`, `capture_utils`, and `colon_sim_tools`. Apps build on it:
+- `apps/colon_sim`: reference domain app (bins below launch this).
+- `apps/hello_substrate`: minimal demo showing a custom plugin on the substrate with no colon-specific systems.
+Root crate is glue-only (`src/cli/*`, `run_app`); domain systems stay in the app crates.
 
 ## Controls
 - `P` begin automated process
@@ -24,8 +29,8 @@ https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
 
 
 ## Binaries
-- `sim_view` (apps/sim_view): interactive sim
-- `inference_view` (apps/inference_view): inference mode
+- `sim_view` (apps/colon_sim/bin): interactive sim/datagen
+- `inference_view` (apps/colon_sim/bin): inference mode
 - `datagen_headless` (src/bin/datagen.rs): headless capture
 - Training bins live under `training/` (train/eval)
 - CLI tools are in the `tools/` crate (overlay_labels, prune_empty, warehouse_*; feature-gated: tui, datagen_scheduler)

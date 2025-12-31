@@ -2,6 +2,10 @@
 
 ## warehouse_etl
 - Purpose: build the tensor warehouse (manifest + shards) from filtered captures.
+- Default run:
+  ```bash
+  cargo run -p colon_sim_tools --bin warehouse_etl
+  ```
 - Key flags (defaults):
   - `--input-root <path>` (default `assets/datasets/captures_filtered`)
   - `--output-root <path>` (default `artifacts/tensor_warehouse`)
@@ -14,6 +18,10 @@
 
 ## warehouse_cmd
 - Purpose: emit one-liner training env/command based on shell/adapter/backend.
+- Default run (will emit defaults for bash + nvidia vulkan):
+  ```bash
+  cargo run -p colon_sim_tools --bin warehouse_cmd -- --shell sh --adapter nvidia
+  ```
 - Key flags:
   - `--shell <ps|sh>`
   - `--adapter <amd|nvidia>`
@@ -30,6 +38,11 @@
 
 ## train / train_hp variants
 - Purpose: train models using the tensor warehouse.
+- Default run (NdArray backend unless you enable `burn_wgpu`):
+  ```bash
+  cargo run -p training --features burn_runtime --bin train -- \
+    --manifest artifacts/tensor_warehouse/v<version>/manifest.json
+  ```
 - Key flags:
   - `--tensor-warehouse <path>`
   - `--warehouse-store <memory|mmap|stream>`
@@ -41,6 +54,10 @@
 
 ## inference_view
 - Purpose: run the trained detector live and show boxes.
+- Default run (inference mode):
+  ```bash
+  cargo run --bin inference_view
+  ```
 - Key flags (defaults):
   - `--output-root <path>` (recording output, if enabled; default `assets/datasets/captures`)
   - `--infer-obj-thresh <float>` (default `0.3`)
@@ -53,6 +70,10 @@
 
 ## single_infer
 - Purpose: run the detector on a single image and emit a boxed PNG.
+- Default run:
+  ```bash
+  cargo run -p colon_sim_tools --bin single_infer -- --image path/to/image.png
+  ```
 - Key flags:
   - `--image <path>` (required)
   - `--out <path>` (optional; defaults to `<stem>_boxed.png` next to input)
@@ -62,6 +83,11 @@
 
 ## capture/datagen (sim_view/datagen binaries)
 - Purpose: interactive sim or headless datagen capture.
+- Default runs:
+  ```bash
+  cargo run --bin sim_view
+  cargo run -p colon_sim_tools --bin datagen
+  ```
 - Key flags (defaults):
   - `--mode <sim|datagen|inference>` (sim_view sets this; datagen forces `datagen`)
   - `--output-root <path>` (default `assets/datasets/captures`)

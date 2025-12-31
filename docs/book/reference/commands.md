@@ -1,3 +1,40 @@
+# Happy-path commands (defaults only)
+
+Use these minimal invocations to exercise the full pipeline with defaults. Swap paths/versions as needed.
+
+## Capture (interactive or headless)
+- Interactive sim/datagen (writes under `assets/datasets/captures/run_<timestamp>`):
+  ```bash
+  cargo run --bin sim_view
+  ```
+- Headless datagen wrapper (defaults to headless=true, same output root):
+  ```bash
+  cargo run -p colon_sim_tools --bin datagen
+  ```
+
+## ETL (warehouse_etl)
+Build a warehouse from filtered captures with defaults:
+```bash
+cargo run -p colon_sim_tools --bin warehouse_etl
+```
+
+## Training (train CLI)
+Train from a manifest with defaults (NdArray backend unless you enable burn_wgpu):
+```bash
+cargo run -p training --features burn_runtime --bin train -- \
+  --manifest artifacts/tensor_warehouse/v<version>/manifest.json
+```
+
+## Inference
+- Real-time view (inference mode):
+  ```bash
+  cargo run --bin inference_view
+  ```
+- Single-image inference with default thresholds:
+  ```bash
+  cargo run -p colon_sim_tools --bin single_infer -- --image path/to/image.png
+  ```
+
 # Common commands (ETL + training)
 
 ## ETL (warehouse_etl)

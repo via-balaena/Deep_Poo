@@ -35,3 +35,5 @@ cargo run -p colon_sim_tools --bin warehouse_export -- \
 - Tools: `colon_sim_tools` hosts CLIs (overlay/prune/warehouse/datagen/scheduler/tui, single_infer, gpu helper).
 - Recorder: runs in the substrate; installs a default JSON sink. Apps provide recorder world-state updates and can inject custom sinks.
 - App hook points: provide controls/autopilot via `SimHooks`; recorder metadata/world-state via `RecorderMetaProvider`/`RecorderWorldState`; add domain systems in your app crate (see `apps/colon_sim` as a reference).
+- Sample app: `apps/hello_substrate` is a minimal demo showing how to wire your own app/plugin on the substrate without colon-specific systems.
+- Migration note: see `MIGRATION.md` at repo root for a summary of the refactor (root orchestrator, app crates, tools move).
