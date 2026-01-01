@@ -3,7 +3,9 @@ use bevy::prelude::*;
 use sim_core::prelude::ControlParams;
 
 use crate::balloon_control::BalloonControl;
-use crate::polyp::{PolypDetectionVotes, PolypRandom, PolypRemoval, PolypSpawnMeta, PolypTelemetry};
+use crate::polyp::{
+    PolypDetectionVotes, PolypRandom, PolypRemoval, PolypSpawnMeta, PolypTelemetry,
+};
 use crate::probe::{StretchState, TipSense};
 use crate::tunnel::CecumState;
 

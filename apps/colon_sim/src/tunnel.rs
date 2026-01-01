@@ -2,7 +2,7 @@ use bevy::color::Mix;
 use bevy::math::primitives::Cylinder;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use smallvec::{SmallVec, smallvec};
+use smallvec::{smallvec, SmallVec};
 
 use crate::balloon_control::BalloonControl;
 use crate::probe::{CapsuleProbe, ProbeHead};

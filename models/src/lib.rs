@@ -71,8 +71,7 @@ impl<B: burn::tensor::backend::Backend> BigDet<B> {
         for _ in 0..cfg.depth {
             blocks.push(nn::LinearConfig::new(cfg.hidden, cfg.hidden).init(device));
         }
-        let box_head =
-            nn::LinearConfig::new(cfg.hidden, cfg.max_boxes.max(1) * 4).init(device);
+        let box_head = nn::LinearConfig::new(cfg.hidden, cfg.max_boxes.max(1) * 4).init(device);
         let score_head = nn::LinearConfig::new(cfg.hidden, cfg.max_boxes.max(1)).init(device);
         Self {
             stem,

@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::probe::ProbeHead;
 use crate::tunnel::CecumState;
-use sim_core::SimRunMode;
 use sim_core::recorder_meta::RecorderWorldState;
+use sim_core::SimRunMode;
 
 /// Update RecorderWorldState with probe head_z and stop flag from app state.
 pub fn update_recorder_world_state(

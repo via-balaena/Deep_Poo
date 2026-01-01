@@ -23,6 +23,14 @@ cargo run -p colon_sim_tools --bin datagen
 ```
 This creates a new `run_<timestamp>` under `assets/datasets/captures/`.
 
+### Release builds (faster)
+Use optimized binaries when you want max throughput or smooth playback:
+```bash
+cargo run --release --bin sim_view
+cargo run -p colon_sim_tools --release --bin datagen
+```
+How it’s wired: `datagen` is a thin wrapper that spawns `sim_view` with the right args. It looks for `sim_view` in the same `target/<profile>/` directory as itself; build `sim_view` once in that profile (`cargo build --release --bin sim_view`) so the wrapper can find it. If you prefer debug, build debug `sim_view` (`cargo build --bin sim_view`) and run the debug `datagen`, or put any `sim_view` on your `PATH`.
+
 ## Run layout
 - `run_manifest.json`: metadata for the run (seed, timing, camera, version).
 - `images/`: frames.

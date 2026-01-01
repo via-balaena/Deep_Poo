@@ -32,12 +32,17 @@ mod tests {
         let factory = InferenceFactory;
         let mut detector = factory.build(InferenceThresholds::default(), None);
         // Should not panic and should produce a detector.
-        assert!(detector.detect(&vision_core::interfaces::Frame {
-            id: 0,
-            timestamp: 0.0,
-            rgba: None,
-            size: (1, 1),
-            path: None,
-        }).frame_id == 0);
+        assert!(
+            detector
+                .detect(&vision_core::interfaces::Frame {
+                    id: 0,
+                    timestamp: 0.0,
+                    rgba: None,
+                    size: (1, 1),
+                    path: None,
+                })
+                .frame_id
+                == 0
+        );
     }
 }

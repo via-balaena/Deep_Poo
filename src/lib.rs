@@ -5,26 +5,26 @@ pub mod tools_postprocess {
     pub use crate::tools::postprocess::*;
 }
 pub mod vision;
-pub use colon_sim_app::prelude::*;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+pub use colon_sim_app::prelude::*;
 
 const RAPIER_DEBUG_WIREFRAMES: bool = true;
 
+use crate::cli::RunMode;
+use crate::cli::seed::{SeedState, resolve_seed};
+use inference::prelude::{InferenceFactory, InferenceThresholds as InferenceFactoryThresholds};
 use sim_core::camera::PovState;
-use sim_core::recorder_types::{AutoRecordTimer, RecorderConfig, RecorderMotion, RecorderState};
 use sim_core::hooks::SimHooks;
 use sim_core::recorder_meta::{
     BasicRecorderMeta, RecorderMetaProvider, RecorderSink, RecorderWorldState,
 };
+use sim_core::recorder_types::{AutoRecordTimer, RecorderConfig, RecorderMotion, RecorderState};
 use sim_core::{ModeSet, SimConfig, SimPlugin, SimRunMode, build_app};
-use crate::cli::RunMode;
-use crate::cli::seed::{SeedState, resolve_seed};
-use inference::prelude::{InferenceFactory, InferenceThresholds as InferenceFactoryThresholds};
 use vision::{
     BurnDetector, BurnInferenceState, DetectionOverlayState, DetectorHandle, DetectorKind,
-    FrontCameraFrameBuffer, FrontCameraState, FrontCaptureReadback, InferenceThresholds,
-    InferencePlugin, schedule_burn_inference,
+    FrontCameraFrameBuffer, FrontCameraState, FrontCaptureReadback, InferencePlugin,
+    InferenceThresholds, schedule_burn_inference,
 };
 
 pub fn run_app(args: crate::cli::AppArgs) {
@@ -67,8 +67,7 @@ pub fn run_app(args: crate::cli::AppArgs) {
         });
     }
 
-    app
-        .insert_resource(SeedState { value: polyp_seed })
+    app.insert_resource(SeedState { value: polyp_seed })
         .insert_resource(sim_mode)
         .insert_resource(RecorderMetaProvider {
             provider: Box::new(BasicRecorderMeta { seed: polyp_seed }),
@@ -95,8 +94,10 @@ pub fn run_app(args: crate::cli::AppArgs) {
                 ..default()
             };
             if let Some(interval) = sim_config.capture_interval_secs {
-                cfg.capture_interval =
-                    bevy::prelude::Timer::from_seconds(interval, bevy::prelude::TimerMode::Repeating);
+                cfg.capture_interval = bevy::prelude::Timer::from_seconds(
+                    interval,
+                    bevy::prelude::TimerMode::Repeating,
+                );
             }
             cfg
         })
@@ -111,19 +112,10 @@ pub fn run_app(args: crate::cli::AppArgs) {
 
     insert_domain_resources(&mut app, polyp_seed);
 
-    app
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                visible: !headless,
-                fit_canvas_to_parent: true,
-                ..default()
-            }),
-            ..default()
-        }))
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugins(ConditionalRapierDebug)
+    app.add_plugins(ConditionalRapierDebug)
         .add_plugins(SimPlugin)
         .add_plugins(sim_core::runtime::SimRuntimePlugin)
+        .add_plugins(vision::CapturePlugin)
         .add_plugins(AppSystemsPlugin)
         .add_plugins(AppBootstrapPlugin);
 

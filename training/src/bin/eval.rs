@@ -1,10 +1,15 @@
 use clap::Parser;
-use training::dataset::{DatasetConfig, collate};
-use training::util::{load_tinydet_from_checkpoint, load_bigdet_from_checkpoint, ModelKind, BackendKind};
-use training::{TinyDet, TinyDetConfig, BigDet, BigDetConfig, TrainBackend};
+use training::dataset::{collate, DatasetConfig};
+use training::util::{
+    load_bigdet_from_checkpoint, load_tinydet_from_checkpoint, BackendKind, ModelKind,
+};
+use training::{BigDet, BigDetConfig, TinyDet, TinyDetConfig, TrainBackend};
 
 #[derive(Parser, Debug)]
-#[command(name = "eval", about = "Evaluate TinyDet/BigDet checkpoint on a dataset (precision/recall by IoU)")]
+#[command(
+    name = "eval",
+    about = "Evaluate TinyDet/BigDet checkpoint on a dataset (precision/recall by IoU)"
+)]
 struct Args {
     /// Model to evaluate.
     #[arg(long, value_enum, default_value_t = ModelKind::Tiny)]
@@ -77,10 +82,7 @@ fn main() -> anyhow::Result<()> {
                     .reshape([boxes.dims()[0], 4]);
 
                 let mask = batch.box_mask.clone();
-                let has_box = mask
-                    .clone()
-                    .sum_dim(1)
-                    .reshape([mask.dims()[0], 1]);
+                let has_box = mask.clone().sum_dim(1).reshape([mask.dims()[0], 1]);
 
                 let preds = model.forward(first_box);
                 // Treat preds > 0.5 as positive.
@@ -100,17 +102,18 @@ fn main() -> anyhow::Result<()> {
         }
         ModelKind::Big => {
             let model = match ckpt {
-                Some(ref p) => load_bigdet_from_checkpoint(p, &device, args.max_boxes).unwrap_or_else(|e| {
-                    println!("Failed to load checkpoint {p}; using fresh model ({e})");
-                    BigDet::<TrainBackend>::new(
-                        BigDetConfig {
-                            input_dim: Some(4 + 8),
-                            max_boxes: args.max_boxes,
-                            ..Default::default()
-                        },
-                        &device,
-                    )
-                }),
+                Some(ref p) => load_bigdet_from_checkpoint(p, &device, args.max_boxes)
+                    .unwrap_or_else(|e| {
+                        println!("Failed to load checkpoint {p}; using fresh model ({e})");
+                        BigDet::<TrainBackend>::new(
+                            BigDetConfig {
+                                input_dim: Some(4 + 8),
+                                max_boxes: args.max_boxes,
+                                ..Default::default()
+                            },
+                            &device,
+                        )
+                    }),
                 None => {
                     println!("No checkpoint provided; using fresh BigDet");
                     BigDet::<TrainBackend>::new(

@@ -1,9 +1,9 @@
+use burn::tensor::TensorData;
+use burn::tensor::{backend::Backend, Tensor};
 use data_contracts::capture::CaptureMetadata;
 use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
-use burn::tensor::{backend::Backend, Tensor};
-use burn::tensor::TensorData;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DatasetConfig {
@@ -52,7 +52,10 @@ impl DatasetConfig {
     }
 }
 
-pub fn collate<B: Backend>(samples: &[RunSample], max_boxes: usize) -> anyhow::Result<CollatedBatch<B>> {
+pub fn collate<B: Backend>(
+    samples: &[RunSample],
+    max_boxes: usize,
+) -> anyhow::Result<CollatedBatch<B>> {
     if samples.is_empty() {
         anyhow::bail!("cannot collate empty batch");
     }
@@ -76,9 +79,8 @@ pub fn collate<B: Backend>(samples: &[RunSample], max_boxes: usize) -> anyhow::R
         let img = if idx == 0 {
             first.clone()
         } else {
-            let img = image::open(&sample.image).map_err(|e| {
-                anyhow::anyhow!("failed to open image {:?}: {e}", sample.image)
-            })?;
+            let img = image::open(&sample.image)
+                .map_err(|e| anyhow::anyhow!("failed to open image {:?}: {e}", sample.image))?;
             let rgb = img.to_rgb8();
             let (w, h) = rgb.dimensions();
             if w != width || h != height {
@@ -109,11 +111,7 @@ pub fn collate<B: Backend>(samples: &[RunSample], max_boxes: usize) -> anyhow::R
             }
         }
         let pix_count = (width * height) as f32;
-        let mean = [
-            sum[0] / pix_count,
-            sum[1] / pix_count,
-            sum[2] / pix_count,
-        ];
+        let mean = [sum[0] / pix_count, sum[1] / pix_count, sum[2] / pix_count];
         let std = [
             (sumsq[0] / pix_count - mean[0] * mean[0]).max(0.0).sqrt(),
             (sumsq[1] / pix_count - mean[1] * mean[1]).max(0.0).sqrt(),
@@ -141,7 +139,14 @@ pub fn collate<B: Backend>(samples: &[RunSample], max_boxes: usize) -> anyhow::R
         }
         let box_count = boxes.len() as f32;
         features.extend_from_slice(&[
-            mean[0], mean[1], mean[2], std[0], std[1], std[2], width as f32 / height as f32, box_count,
+            mean[0],
+            mean[1],
+            mean[2],
+            std[0],
+            std[1],
+            std[2],
+            width as f32 / height as f32,
+            box_count,
         ]);
         all_boxes.push(boxes);
     }
@@ -158,25 +163,14 @@ pub fn collate<B: Backend>(samples: &[RunSample], max_boxes: usize) -> anyhow::R
 
     let device = &B::Device::default();
     let images = Tensor::<B, 4>::from_data(
-        TensorData::new(
-            image_buf,
-            [batch, 3, height as usize, width as usize],
-        ),
+        TensorData::new(image_buf, [batch, 3, height as usize, width as usize]),
         device,
     );
-    let boxes = Tensor::<B, 3>::from_data(
-        TensorData::new(boxes_buf, [batch, max_boxes, 4]),
-        device,
-    );
-    let box_mask = Tensor::<B, 2>::from_data(
-        TensorData::new(mask_buf, [batch, max_boxes]),
-        device,
-    );
+    let boxes =
+        Tensor::<B, 3>::from_data(TensorData::new(boxes_buf, [batch, max_boxes, 4]), device);
+    let box_mask = Tensor::<B, 2>::from_data(TensorData::new(mask_buf, [batch, max_boxes]), device);
 
-    let features = Tensor::<B, 2>::from_data(
-        TensorData::new(features, [batch, 8]),
-        device,
-    );
+    let features = Tensor::<B, 2>::from_data(TensorData::new(features, [batch, 8]), device);
 
     Ok(CollatedBatch {
         images,

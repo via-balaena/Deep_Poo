@@ -7,7 +7,9 @@ use bevy_camera::{ImageRenderTarget, RenderTarget};
 use futures_lite::future::{block_on, poll_once};
 use image::RgbaImage;
 use sim_core::{ModeSet, SimRunMode};
-use vision_core::capture::{FrontCamera, FrontCaptureCamera, FrontCaptureReadback, FrontCaptureTarget};
+use vision_core::capture::{
+    FrontCamera, FrontCaptureCamera, FrontCaptureReadback, FrontCaptureTarget,
+};
 use vision_core::interfaces::{self, Frame};
 use vision_core::overlay::draw_rect;
 
@@ -135,9 +137,8 @@ pub fn setup_front_capture(
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::default(),
     );
-    image.texture_descriptor.usage = TextureUsages::COPY_SRC
-        | TextureUsages::TEXTURE_BINDING
-        | TextureUsages::RENDER_ATTACHMENT;
+    image.texture_descriptor.usage =
+        TextureUsages::COPY_SRC | TextureUsages::TEXTURE_BINDING | TextureUsages::RENDER_ATTACHMENT;
     let handle = images.add(image);
 
     let cam_entity = commands
@@ -341,7 +342,11 @@ impl Plugin for InferencePlugin {
             .init_resource::<DetectionOverlayState>()
             .add_systems(
                 Update,
-                (schedule_burn_inference, poll_inference_task, threshold_hotkeys)
+                (
+                    schedule_burn_inference,
+                    poll_inference_task,
+                    threshold_hotkeys,
+                )
                     .in_set(ModeSet::Inference),
             );
     }
@@ -360,9 +365,9 @@ pub fn recorder_draw_rect(
 
 pub mod prelude {
     pub use super::{
-        BurnDetectionResult, BurnDetector, BurnInferenceState, CapturePlugin, DetectorHandle,
-        DetectorKind, DetectionOverlayState, FrontCameraFrame, FrontCameraFrameBuffer,
-        FrontCameraState, InferencePlugin, InferenceThresholds,
+        BurnDetectionResult, BurnDetector, BurnInferenceState, CapturePlugin,
+        DetectionOverlayState, DetectorHandle, DetectorKind, FrontCameraFrame,
+        FrontCameraFrameBuffer, FrontCameraState, InferencePlugin, InferenceThresholds,
     };
 }
 pub fn poll_inference_task(

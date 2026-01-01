@@ -1,10 +1,15 @@
 use clap::Parser;
 use colon_sim::cli::common::CaptureOutputArgs;
 use colon_sim::cli::seed::resolve_seed;
+use std::path::PathBuf;
 use std::process::Command;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about = "Headless datagen launcher (wrapper over sim_view)")]
+#[command(
+    author,
+    version,
+    about = "Headless datagen launcher (wrapper over sim_view)"
+)]
 struct Args {
     /// Seed for the run (defaults to randomized in resolve_seed).
     #[arg(long)]
@@ -22,7 +27,18 @@ struct Args {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let seed = resolve_seed(args.seed);
-    let mut cmd = Command::new("sim_view");
+    // Prefer the sibling sim_view binary in the same target dir as this tool.
+    let sim_view_path = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(PathBuf::from))
+        .map(|dir| dir.join("sim_view"))
+        .filter(|p| p.exists());
+
+    let mut cmd = Command::new(
+        sim_view_path
+            .as_deref()
+            .unwrap_or_else(|| std::path::Path::new("sim_view")),
+    );
     cmd.arg("--mode")
         .arg("datagen")
         .arg("--seed")

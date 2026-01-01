@@ -1,9 +1,9 @@
 use anyhow::Context;
 use clap::Parser;
 use colon_sim::tools::burn_dataset::{
-    CacheableTransformConfig, DatasetConfig, DatasetSample, Endianness, ResizeMode, ShardDType,
-    ShardMetadata, ValidationThresholds, WarehouseManifest, index_runs, load_sample_for_etl,
-    summarize_root_with_thresholds,
+    index_runs, load_sample_for_etl, summarize_root_with_thresholds, CacheableTransformConfig,
+    DatasetConfig, DatasetSample, Endianness, ResizeMode, ShardDType, ShardMetadata,
+    ValidationThresholds, WarehouseManifest,
 };
 use rayon::prelude::*;
 use sha2::Digest;

@@ -6,10 +6,10 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::probe::{PROBE_BASE_LENGTH, PROBE_START_TAIL_Z, ProbeHead};
+use crate::probe::{ProbeHead, PROBE_BASE_LENGTH, PROBE_START_TAIL_Z};
 use crate::tunnel::{
-    TUNNEL_BASE_RADIUS, TUNNEL_LENGTH, TUNNEL_START_Z, advance_centerline, tunnel_tangent_rotation,
-    wall_base_color,
+    advance_centerline, tunnel_tangent_rotation, wall_base_color, TUNNEL_BASE_RADIUS,
+    TUNNEL_LENGTH, TUNNEL_START_Z,
 };
 
 #[derive(Component)]

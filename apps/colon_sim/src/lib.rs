@@ -2,13 +2,13 @@
 //! Reference implementation built on sim_core/vision_core.
 
 pub mod autopilot;
-pub mod controls;
-pub mod probe;
-pub mod polyp;
-pub mod tunnel;
 pub mod balloon_control;
-pub mod hud;
-pub mod recorder;
 pub mod bootstrap;
+pub mod controls;
+pub mod hud;
+pub mod polyp;
 pub mod prelude;
+pub mod probe;
+pub mod recorder;
 pub mod systems;
+pub mod tunnel;

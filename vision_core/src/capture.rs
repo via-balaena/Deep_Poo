@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Resource, Handle, Image, Entity, UVec2};
+use bevy::prelude::{Component, Entity, Handle, Image, Resource, UVec2};
 
 #[derive(Resource, Default, Clone)]
 pub struct CaptureLimit {

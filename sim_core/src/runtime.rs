@@ -9,14 +9,17 @@ pub struct SimRuntimePlugin;
 
 impl Plugin for SimRuntimePlugin {
     fn build(&self, app: &mut App) {
-        app.configure_sets(Update, (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference))
-            .insert_resource(AutoDrive::default())
-            .insert_resource(DataRun::default())
-            .insert_resource(DatagenInit::default())
-            .insert_resource(RecorderConfig::default())
-            .insert_resource(RecorderState::default())
-            .insert_resource(RecorderMotion::default())
-            .insert_resource(AutoRecordTimer::default());
+        app.configure_sets(
+            Update,
+            (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference),
+        )
+        .insert_resource(AutoDrive::default())
+        .insert_resource(DataRun::default())
+        .insert_resource(DatagenInit::default())
+        .insert_resource(RecorderConfig::default())
+        .insert_resource(RecorderState::default())
+        .insert_resource(RecorderMotion::default())
+        .insert_resource(AutoRecordTimer::default());
     }
 }
 

@@ -2,8 +2,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use data_contracts::capture::{CaptureMetadata, PolypLabel};
-use training::{DatasetConfig, collate};
 use image::{Rgb, RgbImage};
+use training::{collate, DatasetConfig};
 
 #[test]
 fn load_and_collate_synthetic() {

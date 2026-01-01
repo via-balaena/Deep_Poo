@@ -5,13 +5,13 @@ use bevy_rapier3d::plugin::ReadRapierContext;
 use bevy_rapier3d::prelude::*;
 use std::f32::consts::FRAC_PI_2;
 
-use sim_core::autopilot_types::AutoDrive;
 use crate::balloon_control::BalloonControl;
+use crate::polyp::{PolypRemoval, PolypTelemetry};
+use crate::tunnel::{advance_centerline, tunnel_centerline, tunnel_tangent_rotation};
+use sim_core::autopilot_types::AutoDrive;
 use sim_core::camera::ProbePovCamera;
 use sim_core::controls::ControlParams;
 use sim_core::probe_types::ProbeSegment;
-use crate::polyp::{PolypRemoval, PolypTelemetry};
-use crate::tunnel::{advance_centerline, tunnel_centerline, tunnel_tangent_rotation};
 use vision_core::capture::{FrontCamera, FrontCaptureCamera, FrontCaptureTarget};
 
 pub const MIN_STRETCH: f32 = 1.0;

@@ -1,7 +1,11 @@
 //! Unified warehouse command generator CLI.
 
 use clap::{Parser, Subcommand, ValueEnum};
-use colon_sim_tools::warehouse_commands::{common::CmdConfig, builder::{Shell, build_command}, common::{ModelKind, WarehouseStore}};
+use colon_sim_tools::warehouse_commands::{
+    builder::{build_command, Shell},
+    common::CmdConfig,
+    common::{ModelKind, WarehouseStore},
+};
 use std::path::PathBuf;
 
 #[derive(Clone, Copy, Debug, ValueEnum)]

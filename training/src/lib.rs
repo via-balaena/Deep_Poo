@@ -1,9 +1,9 @@
 pub mod dataset;
 pub mod util;
 
-pub use models::{TinyDetConfig, TinyDet, BigDet, BigDetConfig};
-pub use dataset::{DatasetConfig, RunSample, collate};
-pub use util::{TrainArgs, run_train};
+pub use dataset::{collate, DatasetConfig, RunSample};
+pub use models::{BigDet, BigDetConfig, TinyDet, TinyDetConfig};
+pub use util::{run_train, TrainArgs};
 /// Backend alias for training/eval (NdArray by default; WGPU if enabled).
 #[cfg(feature = "backend-wgpu")]
 pub type TrainBackend = burn_wgpu::Wgpu<f32>;

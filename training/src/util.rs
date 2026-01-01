@@ -6,7 +6,7 @@ use burn::record::{BinFileRecorder, FullPrecisionSettings, RecorderError};
 use burn::tensor::{Tensor, TensorData};
 use std::path::Path;
 
-use crate::{DatasetConfig, TinyDet, TinyDetConfig, TrainBackend, BigDet, BigDetConfig};
+use crate::{BigDet, BigDetConfig, DatasetConfig, TinyDet, TinyDetConfig, TrainBackend};
 use clap::{Parser, ValueEnum};
 use std::fs;
 
@@ -15,8 +15,11 @@ pub fn load_tinydet_from_checkpoint<P: AsRef<Path>>(
     device: &<TrainBackend as burn::tensor::backend::Backend>::Device,
 ) -> Result<TinyDet<TrainBackend>, RecorderError> {
     let recorder = BinFileRecorder::<FullPrecisionSettings>::new();
-    TinyDet::<TrainBackend>::new(TinyDetConfig::default(), device)
-        .load_file(path.as_ref(), &recorder, device)
+    TinyDet::<TrainBackend>::new(TinyDetConfig::default(), device).load_file(
+        path.as_ref(),
+        &recorder,
+        device,
+    )
 }
 
 #[derive(ValueEnum, Debug, Clone, Copy)]
@@ -115,7 +118,11 @@ pub fn run_train(args: TrainArgs) -> anyhow::Result<()> {
 
 type ADBackend = Autodiff<TrainBackend>;
 
-fn train_tinydet(args: &TrainArgs, samples: &[crate::RunSample], ckpt_path: &str) -> anyhow::Result<()> {
+fn train_tinydet(
+    args: &TrainArgs,
+    samples: &[crate::RunSample],
+    ckpt_path: &str,
+) -> anyhow::Result<()> {
     let device = <ADBackend as burn::tensor::backend::Backend>::Device::default();
     let mut model = TinyDet::<ADBackend>::new(TinyDetConfig::default(), &device);
     let mut optim = AdamConfig::new().init();
@@ -135,10 +142,7 @@ fn train_tinydet(args: &TrainArgs, samples: &[crate::RunSample], ckpt_path: &str
 
             // Target: 1.0 if any box present, else 0.0.
             let mask = batch.box_mask.clone();
-            let has_box = mask
-                .clone()
-                .sum_dim(1)
-                .reshape([mask.dims()[0], 1]);
+            let has_box = mask.clone().sum_dim(1).reshape([mask.dims()[0], 1]);
 
             let preds = model.forward(first_box);
             let mse = MseLoss::new();
@@ -173,7 +177,11 @@ fn train_tinydet(args: &TrainArgs, samples: &[crate::RunSample], ckpt_path: &str
     Ok(())
 }
 
-fn train_bigdet(args: &TrainArgs, samples: &[crate::RunSample], ckpt_path: &str) -> anyhow::Result<()> {
+fn train_bigdet(
+    args: &TrainArgs,
+    samples: &[crate::RunSample],
+    ckpt_path: &str,
+) -> anyhow::Result<()> {
     let device = <ADBackend as burn::tensor::backend::Backend>::Device::default();
     let mut model = BigDet::<ADBackend>::new(
         BigDetConfig {
@@ -213,12 +221,18 @@ fn train_bigdet(args: &TrainArgs, samples: &[crate::RunSample], ckpt_path: &str)
             // Objectness loss (BCE) with targets; unassigned preds stay at 0.0.
             let eps = 1e-6;
             let pred_scores_clamped = pred_scores.clamp(eps, 1.0 - eps);
-            let obj_targets_inv = Tensor::<ADBackend, 2>::ones(obj_targets.dims(), &obj_targets.device())
-                - obj_targets.clone();
+            let obj_targets_inv =
+                Tensor::<ADBackend, 2>::ones(obj_targets.dims(), &obj_targets.device())
+                    - obj_targets.clone();
             let obj_loss = -((obj_targets.clone() * pred_scores_clamped.clone().log())
-                + (obj_targets_inv * (Tensor::<ADBackend, 2>::ones(pred_scores_clamped.dims(), &pred_scores_clamped.device()) - pred_scores_clamped).log()))
-                .sum()
-                .div_scalar((obj_targets.dims()[0] * obj_targets.dims()[1]) as f32);
+                + (obj_targets_inv
+                    * (Tensor::<ADBackend, 2>::ones(
+                        pred_scores_clamped.dims(),
+                        &pred_scores_clamped.device(),
+                    ) - pred_scores_clamped)
+                        .log()))
+            .sum()
+            .div_scalar((obj_targets.dims()[0] * obj_targets.dims()[1]) as f32);
 
             // Box regression loss on matched preds only.
             let box_err = (pred_boxes - box_targets.clone()).abs() * box_weights.clone();
@@ -336,14 +350,25 @@ pub fn build_greedy_targets<B: burn::tensor::backend::Backend>(
     gt_boxes: Tensor<B, 3>,
     gt_mask: Tensor<B, 2>,
 ) -> (Tensor<B, 2>, Tensor<B, 3>, Tensor<B, 3>) {
-
     let batch = pred_boxes.dims()[0];
     let max_pred = pred_boxes.dims()[1];
     let max_gt = gt_boxes.dims()[1];
 
-    let gt_mask_vec = gt_mask.clone().into_data().to_vec::<f32>().unwrap_or_default();
-    let gt_boxes_vec = gt_boxes.clone().into_data().to_vec::<f32>().unwrap_or_default();
-    let pred_boxes_vec = pred_boxes.clone().into_data().to_vec::<f32>().unwrap_or_default();
+    let gt_mask_vec = gt_mask
+        .clone()
+        .into_data()
+        .to_vec::<f32>()
+        .unwrap_or_default();
+    let gt_boxes_vec = gt_boxes
+        .clone()
+        .into_data()
+        .to_vec::<f32>()
+        .unwrap_or_default();
+    let pred_boxes_vec = pred_boxes
+        .clone()
+        .into_data()
+        .to_vec::<f32>()
+        .unwrap_or_default();
 
     let mut obj_targets = vec![0.0f32; batch * max_pred];
     let mut box_targets = vec![0.0f32; batch * max_pred * 4];
@@ -387,18 +412,12 @@ pub fn build_greedy_targets<B: burn::tensor::backend::Backend>(
     }
 
     let device = &B::Device::default();
-    let obj_targets = Tensor::<B, 2>::from_data(
-        TensorData::new(obj_targets, [batch, max_pred]),
-        device,
-    );
-    let box_targets = Tensor::<B, 3>::from_data(
-        TensorData::new(box_targets, [batch, max_pred, 4]),
-        device,
-    );
-    let box_weights = Tensor::<B, 3>::from_data(
-        TensorData::new(box_weights, [batch, max_pred, 4]),
-        device,
-    );
+    let obj_targets =
+        Tensor::<B, 2>::from_data(TensorData::new(obj_targets, [batch, max_pred]), device);
+    let box_targets =
+        Tensor::<B, 3>::from_data(TensorData::new(box_targets, [batch, max_pred, 4]), device);
+    let box_weights =
+        Tensor::<B, 3>::from_data(TensorData::new(box_weights, [batch, max_pred, 4]), device);
 
     (obj_targets, box_targets, box_weights)
 }

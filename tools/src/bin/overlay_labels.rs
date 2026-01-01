@@ -2,9 +2,9 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use data_contracts::capture::CaptureMetadata;
 use image::Rgba;
 use vision_core::overlay::{draw_rect, normalize_box};
-use data_contracts::capture::CaptureMetadata;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = env::args().skip(1);

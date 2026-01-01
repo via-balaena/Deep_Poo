@@ -1,5 +1,5 @@
 use colon_sim_tools::warehouse_commands::{
-    builder::{Shell, build_command},
+    builder::{build_command, Shell},
     common::{CmdConfig, WarehouseStore},
 };
 

@@ -1,5 +1,5 @@
 use hello_substrate::HelloAppPlugin;
-use sim_core::{SimConfig, SimRunMode, build_app};
+use sim_core::{build_app, SimConfig, SimRunMode};
 
 fn main() {
     let mut app = build_app(SimConfig {

@@ -6,14 +6,14 @@ use std::time::{Duration, Instant};
 use crossterm::{
     event::{self, Event, KeyCode},
     execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{
-    Terminal,
     backend::CrosstermBackend,
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     widgets::{Block, Borders, List, ListItem, Paragraph},
+    Terminal,
 };
 use serde_json::json;
 

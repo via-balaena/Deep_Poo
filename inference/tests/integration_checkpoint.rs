@@ -12,11 +12,7 @@ fn load_checkpoint_when_provided() {
             return;
         }
     };
-    assert!(
-        ckpt.exists(),
-        "checkpoint path {:?} does not exist",
-        ckpt
-    );
+    assert!(ckpt.exists(), "checkpoint path {:?} does not exist", ckpt);
     let factory = InferenceFactory;
     let mut detector = factory.build(InferenceThresholds::default(), Some(&ckpt));
     let result = detector.detect(&Frame {

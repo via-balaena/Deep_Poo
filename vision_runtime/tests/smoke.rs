@@ -1,11 +1,11 @@
+use bevy::ecs::system::RunSystemOnce;
 use bevy::prelude::*;
+use bevy::tasks::AsyncComputeTaskPool;
+use vision_core::interfaces::{self, DetectionResult, Detector, Frame};
 use vision_runtime::prelude::{
     BurnInferenceState, CapturePlugin, DetectionOverlayState, DetectorHandle, DetectorKind,
     InferencePlugin, InferenceThresholds,
 };
-use bevy::ecs::system::RunSystemOnce;
-use bevy::tasks::AsyncComputeTaskPool;
-use vision_core::interfaces::{self, Detector, DetectionResult, Frame};
 
 struct DummyDetector;
 impl Detector for DummyDetector {
@@ -43,7 +43,10 @@ fn inference_plugin_smoke_updates_overlay() {
     app.update();
     // Simulate a completed task by enqueuing a ready task and calling poll system.
     {
-        let mut jobs = app.world_mut().get_resource_mut::<BurnInferenceState>().unwrap();
+        let mut jobs = app
+            .world_mut()
+            .get_resource_mut::<BurnInferenceState>()
+            .unwrap();
         let task = AsyncComputeTaskPool::get().spawn(async {
             (
                 Box::new(DummyDetector) as Box<dyn interfaces::Detector + Send + Sync>,

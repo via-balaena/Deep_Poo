@@ -1,4 +1,4 @@
-use training::{DatasetConfig, collate};
+use training::{collate, DatasetConfig};
 
 #[test]
 fn collate_runs_with_empty_images() {

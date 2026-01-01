@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::RapierPhysicsPlugin;
+use bevy_rapier3d::prelude::{NoUserData, RapierPhysicsPlugin};
 use std::path::PathBuf;
 
 /// High-level run mode for the sim runtime (detector-free).
@@ -50,8 +50,10 @@ pub struct SimPlugin;
 
 impl Plugin for SimPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(SimConfig::default())
-            .configure_sets(Update, (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference));
+        app.insert_resource(SimConfig::default()).configure_sets(
+            Update,
+            (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference),
+        );
     }
 }
 
@@ -59,35 +61,48 @@ pub mod prelude {
     pub use super::{ModeSet, SimConfig, SimPlugin, SimRunMode};
     pub use crate::autopilot_types::{AutoDir, AutoDrive, AutoStage, DataRun, DatagenInit};
     pub use crate::camera::{
-        Flycam, PovState, ProbePovCamera, UiOverlayCamera, camera_controller, pov_toggle_system,
-        setup_camera,
+        camera_controller, pov_toggle_system, setup_camera, Flycam, PovState, ProbePovCamera,
+        UiOverlayCamera,
     };
-    pub use crate::hooks::{AutopilotHook, ControlsHook, SimHooks};
     pub use crate::controls::ControlParams;
+    pub use crate::hooks::{AutopilotHook, ControlsHook, SimHooks};
+    pub use crate::probe_types::{ProbeSegment, SegmentSpring};
     pub use crate::recorder_meta::{
         BasicRecorderMeta, RecorderMetaProvider, RecorderMetadataProvider, RecorderSink,
         RecorderWorldState,
     };
-    pub use crate::recorder_types::{AutoRecordTimer, RecorderConfig, RecorderMotion, RecorderState};
-    pub use crate::probe_types::{ProbeSegment, SegmentSpring};
-    pub use crate::runtime::{SimRuntimePlugin, register_runtime_systems};
+    pub use crate::recorder_types::{
+        AutoRecordTimer, RecorderConfig, RecorderMotion, RecorderState,
+    };
+    pub use crate::runtime::{register_runtime_systems, SimRuntimePlugin};
 }
 
 /// Build a base Bevy `App` with sim mode sets and config. Detector wiring is intentionally omitted.
 pub fn build_app(sim_config: SimConfig) -> App {
     let mut app = App::new();
+    let headless = sim_config.headless;
     app.insert_resource(sim_config)
-        .add_plugins(DefaultPlugins)
-        .add_plugins(RapierPhysicsPlugin::<()>::default())
-        .configure_sets(Update, (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference));
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                visible: !headless,
+                fit_canvas_to_parent: true,
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .configure_sets(
+            Update,
+            (ModeSet::Common, ModeSet::SimDatagen, ModeSet::Inference),
+        );
     app
 }
 
+pub mod autopilot_types;
 pub mod camera;
 pub mod controls;
-pub mod autopilot_types;
+pub mod hooks;
 pub mod probe_types;
 pub mod recorder_meta;
 pub mod recorder_types;
 pub mod runtime;
-pub mod hooks;

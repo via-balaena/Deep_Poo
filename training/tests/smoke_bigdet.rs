@@ -1,12 +1,12 @@
-use data_contracts::capture::{CaptureMetadata, PolypLabel};
-use training::dataset::{DatasetConfig, collate};
-use training::{BigDet, BigDetConfig};
-use burn::optim::{AdamConfig, GradientsParams, Optimizer};
-use burn::backend::{Autodiff, ndarray::NdArray};
-use burn::record::{BinFileRecorder, FullPrecisionSettings};
+use burn::backend::{ndarray::NdArray, Autodiff};
 use burn::module::Module;
+use burn::optim::{AdamConfig, GradientsParams, Optimizer};
+use burn::record::{BinFileRecorder, FullPrecisionSettings};
+use data_contracts::capture::{CaptureMetadata, PolypLabel};
 use std::fs;
 use std::path::PathBuf;
+use training::dataset::{collate, DatasetConfig};
+use training::{BigDet, BigDetConfig};
 
 type ADBackend = Autodiff<NdArray<f32>>;
 
@@ -71,18 +71,27 @@ fn smoke_train_step_bigdet() {
     let input = burn::tensor::Tensor::cat(vec![first_box, features], 1);
 
     let (pred_boxes, pred_scores) = model.forward_multibox(input);
-    let (obj_targets, box_targets, box_weights) =
-        training::util::build_greedy_targets(pred_boxes.clone(), batch.boxes.clone(), batch.box_mask.clone());
+    let (obj_targets, box_targets, box_weights) = training::util::build_greedy_targets(
+        pred_boxes.clone(),
+        batch.boxes.clone(),
+        batch.box_mask.clone(),
+    );
 
     // Simple loss as in training loop.
     let eps = 1e-6;
     let pred_scores_clamped = pred_scores.clamp(eps, 1.0 - eps);
-    let obj_targets_inv = burn::tensor::Tensor::<ADBackend, 2>::ones(obj_targets.dims(), &obj_targets.device())
-        - obj_targets.clone();
+    let obj_targets_inv =
+        burn::tensor::Tensor::<ADBackend, 2>::ones(obj_targets.dims(), &obj_targets.device())
+            - obj_targets.clone();
     let obj_loss = -((obj_targets.clone() * pred_scores_clamped.clone().log())
-        + (obj_targets_inv * (burn::tensor::Tensor::<ADBackend, 2>::ones(pred_scores_clamped.dims(), &pred_scores_clamped.device()) - pred_scores_clamped).log()))
-        .sum()
-        .div_scalar((obj_targets.dims()[0] * obj_targets.dims()[1]) as f32);
+        + (obj_targets_inv
+            * (burn::tensor::Tensor::<ADBackend, 2>::ones(
+                pred_scores_clamped.dims(),
+                &pred_scores_clamped.device(),
+            ) - pred_scores_clamped)
+                .log()))
+    .sum()
+    .div_scalar((obj_targets.dims()[0] * obj_targets.dims()[1]) as f32);
 
     let box_err = (pred_boxes - box_targets.clone()).abs() * box_weights.clone();
     let matched = box_weights.clone().sum().div_scalar(4.0);

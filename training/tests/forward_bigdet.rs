@@ -1,4 +1,4 @@
-use burn::backend::{Autodiff, ndarray::NdArray};
+use burn::backend::{ndarray::NdArray, Autodiff};
 use burn::tensor::Tensor;
 use training::{BigDet, BigDetConfig};
 

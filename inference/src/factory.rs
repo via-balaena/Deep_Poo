@@ -1,9 +1,9 @@
-use std::path::Path;
+use crate::{InferenceBackend, InferenceModel, InferenceModelConfig};
 use burn::module::Module;
 use burn::tensor::TensorData;
+use std::path::Path;
 use std::sync::{Arc, Mutex};
-use vision_core::interfaces::{Detector, DetectionResult, Frame};
-use crate::{InferenceBackend, InferenceModel, InferenceModelConfig};
+use vision_core::interfaces::{DetectionResult, Detector, Frame};
 
 /// Thresholds for inference (objectness + IoU).
 #[derive(Debug, Clone, Copy)]
@@ -75,13 +75,10 @@ impl Detector for BurnTinyDetDetector {
         let input = self.frame_to_tensor(frame);
         let device = <InferenceBackend as burn::tensor::backend::Backend>::Device::default();
         let model = self.model.lock().expect("model mutex poisoned");
-        let logits = model.forward(
-            burn::tensor::Tensor::<InferenceBackend, 2>::from_data(input, &device),
-        );
-        let scores = logits
-            .into_data()
-            .to_vec::<f32>()
-            .unwrap_or_default();
+        let logits = model.forward(burn::tensor::Tensor::<InferenceBackend, 2>::from_data(
+            input, &device,
+        ));
+        let scores = logits.into_data().to_vec::<f32>().unwrap_or_default();
         let confidence = scores.get(0).copied().unwrap_or(0.0);
         DetectionResult {
             frame_id: frame.id,

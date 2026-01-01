@@ -41,11 +41,7 @@ impl Recorder for JsonRecorder {
             image_present: record.frame.path.is_some(),
             camera_active: record.camera_active,
             polyp_seed: record.polyp_seed,
-            polyp_labels: record
-                .labels
-                .iter()
-                .map(label_to_polyp)
-                .collect(),
+            polyp_labels: record.labels.iter().map(label_to_polyp).collect(),
         };
         meta.validate().map_err(|e| {
             std::io::Error::new(std::io::ErrorKind::Other, format!("validation failed: {e}"))
@@ -93,7 +89,8 @@ pub fn generate_overlays(run_dir: &Path) -> anyhow::Result<()> {
             continue;
         };
         let (w, h) = img.dimensions();
-        let clamp = |v: f32, max: u32| -> u32 { v.max(0.0).min((max.saturating_sub(1)) as f32) as u32 };
+        let clamp =
+            |v: f32, max: u32| -> u32 { v.max(0.0).min((max.saturating_sub(1)) as f32) as u32 };
         for label in meta.polyp_labels.iter().filter_map(|l| l.bbox_px) {
             let bbox_px = [
                 clamp(label[0], w),

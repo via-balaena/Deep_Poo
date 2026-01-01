@@ -1,12 +1,12 @@
-use bevy::prelude::*;
 use crate::balloon_control::BalloonControl;
+use crate::polyp::PolypRemoval;
+use crate::probe::{ProbeHead, StretchState, MAX_STRETCH, MIN_STRETCH};
+use crate::tunnel::{CecumState, StartState, TUNNEL_LENGTH, TUNNEL_START_Z};
+use bevy::prelude::*;
 use sim_core::autopilot_types::{AutoDir, AutoDrive, AutoStage, DataRun, DatagenInit};
 use sim_core::camera::{Flycam, PovState, ProbePovCamera};
 use sim_core::prelude::{AutoRecordTimer, ModeSet, RecorderState};
 use sim_core::SimRunMode;
-use crate::polyp::PolypRemoval;
-use crate::probe::{ProbeHead, StretchState, MAX_STRETCH, MIN_STRETCH};
-use crate::tunnel::{CecumState, StartState, TUNNEL_LENGTH, TUNNEL_START_Z};
 
 /// Register colon-sim autopilot/data-run systems.
 pub struct AutopilotHookImpl;

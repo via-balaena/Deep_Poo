@@ -1,5 +1,5 @@
-use training::util::{TrainArgs, run_train};
 use clap::Parser;
+use training::util::{run_train, TrainArgs};
 
 fn main() -> anyhow::Result<()> {
     let args = TrainArgs::parse();
