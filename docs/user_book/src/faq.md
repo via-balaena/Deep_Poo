@@ -30,3 +30,5 @@
   By default under `checkpoints/`; TinyDet → `tinydet.bin`, BigDet → `bigdet.bin` unless you override `--checkpoint-out`.
 - **Do I need to set seeds?**  
   For reproducibility across capture/train/infer, set seeds in capture (`--seed`), keep ETL defaults, and train with the same manifest.
+- **datagen says sim_view missing in release?**  
+  Build `sim_view` in the same profile once: `cargo build --release --bin sim_view`, then rerun `datagen`.

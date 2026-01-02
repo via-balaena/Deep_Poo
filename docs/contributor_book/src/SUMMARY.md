@@ -1,15 +1,14 @@
 # Summary
 
-- Overview
+- [Overview](overview.md)
   - [Introduction](intro.md)
   - [Architecture](architecture.md)
-- Core
-  - [Core crates](core_crates.md)
-  - [Hooks / extension points](hooks.md)
-- Apps
+- [Core crates](core_crates.md)
+- [Hooks / extension points](hooks.md)
+- [Apps](apps_index.md)
   - [App patterns](apps.md)
-- Tooling
-  - [Tools crate](tools.md)
-  - [Testing / CI](testing.md)
-- Roadmap
+- [Tools crate](tools.md)
+- [Testing](testing.md)
+- [CI](ci.md)
+- [Roadmap](roadmap.md)
   - [Migration / roadmap](migration.md)

@@ -11,3 +11,8 @@ What you’ll find:
 - Happy-path walkthrough (capture → ETL → train → infer) with default commands.
 - Minimal usage for capture (sim_view/datagen), ETL, training, inference, and tools.
 - FAQ/Troubleshooting for common questions.
+
+Prereqs:
+- Rust + Cargo installed.
+- GPU optional: defaults work on CPU/Metal/NDArray; WGPU paths are opt-in via features/env.
+- Build docs: `mdbook build docs/user_book`

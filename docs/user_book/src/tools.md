@@ -27,6 +27,7 @@ Defaults:
 - Tools run with minimal flags; use defaults first, override only when needed (paths, thresholds, adapter/shell).
 - Feature flags keep the default build lean; enable only what you need.
 - Sane defaults: ETL targets `artifacts/tensor_warehouse`, prune defaults to keeping labeled frames, scheduler defaults to local machine (set shells/adapters if remote).
+- `datagen` shells out to `sim_view` in the same build profile; build `sim_view` in that profile once if it’s missing (`cargo build --release --bin sim_view` for release).
 
 Quick reference (defaults):
 - `overlay_labels <run_dir>` → writes overlays under the same run.

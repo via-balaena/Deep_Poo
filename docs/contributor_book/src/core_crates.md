@@ -1,41 +1,71 @@
 # Core crates (CortenForge substrate)
 
-- `sim_core`: Bevy plumbing (ModeSet/SimConfig/SimPlugin/SimRuntimePlugin), hooks for controls/autopilot (`SimHooks`, `ControlsHook`, `AutopilotHook`), recorder metadata/world-state types, recorder config/state, probe types, runtime helper. Detector wiring intentionally omitted.
-- Key files: `sim_core/src/lib.rs` (SimPlugin/build_app), `hooks.rs` (SimHooks), `recorder_meta.rs` (provider/world state), `recorder_types.rs` (config/state), `probe_types.rs` (shared probe structs).
-- `vision_core`: Interfaces (`Frame`, `DetectionResult`, `Label`, `FrameRecord`), `Detector`/`Recorder` traits, overlay helpers, `CaptureLimit`, optional `BurnDetectorFactory` trait (impls stay outside core).
-- Key files: `vision_core/src/interfaces.rs`, `overlay.rs`, `prelude.rs`.
-- `vision_runtime`: Bevy plugins for capture (camera/readback) and inference (DetectorHandle/kinds, overlay state, thresholds). Integrates with `SimRunMode` for mode gating.
-- Key files: `vision_runtime/src/capture.rs`, `vision_runtime/src/inference.rs`, `prelude.rs`.
-- `data_contracts`: Capture/manifest schemas + serde/validation helpers.
-- Key files: `data_contracts/src/lib.rs`, `schemas.rs`.
-- `capture_utils`: Default recorder sink (`JsonRecorder`), prune/overlay helpers.
-- Key files: `capture_utils/src/lib.rs` (recorder sinks), `overlay.rs`, `prune.rs`.
-- `models`: Detector models (TinyDet, BigDet) + configs.
-- Key files: `models/src/lib.rs` (TinyDet/BigDet, configs), `prelude.rs`.
-- `training`: Burn training/eval CLI, dataset loaders from warehouse manifests, loss/matching (TinyDet/BigDet), checkpoint load/save.
-- Key files: `training/src/bin/train.rs` (CLI), `training/src/dataset.rs`, `training/src/loss.rs`, `training/src/lib.rs` (run_train).
-- `inference`: Burn-backed detector factory (loads checkpoints via `models`, heuristic fallback), exports `InferenceFactory`/thresholds.
-- Key files: `inference/src/lib.rs`, `inference/src/factory.rs`.
-- `colon_sim_tools`: CLI utilities (overlay/prune, warehouse_etl/export/cmd, datagen scheduler, tui, single_infer) with feature flags (`tui`, `scheduler`, `gpu_nvidia`).
-- Key files: `tools/src/bin/*`, `tools/src/services.rs` (shared helpers).
+What lives in each shared crate, how they interact, and where to extend.
 
-How they work (snapshots):
-- `sim_core`: builds the Bevy app with mode sets, registers capture/inference runtime hooks, exposes `SimHooks` so apps attach controls/autopilot. Recorder lives here; apps feed metadata/world-state/sinks.
-- `vision_core`: purely data/traits; no Bevy deps. Defines the common detector interface and overlay math used by runtime, tools, and apps.
-- `vision_runtime`: plugs into Bevy to capture frames (GPU readback → FrameBuffer → FrameRecord) and to run detectors + overlay state in inference mode. Uses `SimRunMode` gating.
-- `data_contracts`: serde structs for run manifests, labels, shards; validation helpers enforce required fields and bbox ranges.
-- `capture_utils`: file sinks for recorder, plus overlay/prune helpers reused by tools and tests.
-- `models`: Burn module definitions; TinyDet/BigDet expose configs; no app logic.
-- `training`: wraps dataset loader (reads manifests), collate, loss, optimizer, checkpoint I/O; CLI parses flags and calls `run_train`.
-- `inference`: provides a factory that loads checkpoints (via `models`) and returns a `DetectorHandle` used by runtime and tools; falls back to heuristic when weights are absent.
-- `colon_sim_tools`: thin bins that compose the above crates; heavy deps gated by features.
-- Schema highlights (`data_contracts`):
-  - Run manifest: run_id, seed, camera settings, resize/letterbox flags, frame count, checksum.
-  - Frame label: bbox_norm (x0,y0,x1,y1), bbox_px, class (single class today), optional metadata (polyp seed, run ref).
-  - Validation checks required fields, bbox ranges, matching images/labels.
-- Implementation notes:
-  - Capture pipeline (vision_runtime): sets up a render target, reads back images via GPU, converts to `FrameRecord` and pushes through recorder sinks; gated by `SimRunMode`.
-  - Inference pipeline (vision_runtime): initializes detector handle (Burn or heuristic), polls on a task, updates overlay state; gated to inference mode.
-  - Training dataset: reads manifest, loads shards, collates to tensors (boxes + mask), normalizes images, and feeds the Burn model.
-  - Recorder sinks: default JSON writer lives in `capture_utils`; apps can inject their own sinks but should adhere to the same schema for ETL compatibility.
-- Screenshot/diagram marker: sequence diagram of capture → recorder → ETL → training → inference (optional).
+## sim_core
+- Purpose: Bevy scaffolding (app builder, mode sets, config), hooks for controls/autopilot, recorder types. Detector wiring is intentionally absent here.
+- Key types:
+  - `SimConfig` / `SimRunMode` / `ModeSet`.
+  - `SimPlugin` (registers config + sets) and `SimRuntimePlugin` (runtime systems).
+  - `SimHooks`, `ControlsHook`, `AutopilotHook` (app-supplied callbacks).
+  - Recorder: `RecorderConfig`, `RecorderState`, `RecorderMotion`, `RecorderWorldState`, `RecorderMetaProvider`.
+- Flow:
+  1) `build_app` seeds Bevy with DefaultPlugins + Rapier + mode sets.
+  2) Apps inject hooks/resources (controls, autopilot, recorder meta/world state).
+  3) Recorder sink defaults to JSON (from capture_utils) but can be replaced.
+- Extend: implement hooks in your app crate; add systems to the relevant sets; supply recorder meta/world updates and custom sinks.
+
+## vision_core
+- Purpose: detector/capture data model and overlay math; no Bevy dependency.
+- Key types: `Frame`, `FrameRecord`, `DetectionResult`, `Label`, `Recorder`, `Detector`, `CaptureLimit`, `draw_rect`/overlay helpers.
+- Extend: implement `Detector`/`Recorder`; reuse overlay helpers; keep this crate free of engine/runtime concerns.
+
+## vision_runtime
+- Purpose: Bevy plugins for capture and inference built on vision_core.
+- Capture pipeline:
+  - `CapturePlugin` sets up render target + GPU readback resources (`FrontCaptureTarget`, `FrontCaptureReadback`, camera tracking).
+  - Systems capture frames → `FrameRecord` → recorder sink; gated by `SimRunMode`.
+- Inference pipeline:
+  - `InferencePlugin` holds `DetectorHandle` (Burn or heuristic), thresholds, overlay state.
+  - Schedules detector tasks on captured frames; updates overlay UI state; gated to inference mode.
+- Extend: swap detector handle creation (via `inference` factory), adjust capture target sizing, or add new observers/overlays.
+
+## data_contracts
+- Purpose: serde/validation schemas for captures, manifests, shards.
+- Key schemas: run manifest (id, seed, camera, resize/letterbox, frame count, checksum), frame label (bbox_norm/bbox_px/class/metadata), warehouse shard/manifest.
+- Extend: add fields as needed; keep validation strict (bbox ranges, required fields).
+
+## capture_utils
+- Purpose: recorder sinks and capture helpers.
+- Contents: default `JsonRecorder` sink, overlay and prune helpers used by tools and tests.
+- Extend: add sinks (e.g., custom DB writer) while preserving schema compatibility for ETL.
+
+## models
+- Purpose: Burn model definitions/configs (TinyDet, BigDet).
+- Extend: add model variants/configs; keep domain logic out.
+
+## training
+- Purpose: training/eval CLI and pipeline on top of warehouse manifests.
+- Contents: dataset loader (manifest → tensors), collate, loss/matching, optimizer/checkpoint I/O; CLI (`train.rs`, `eval.rs`) drives `run_train`.
+- Extend: new losses, augmentations, schedulers; keep CLI flags in sync.
+
+## inference
+- Purpose: detector factory that loads checkpoints (via `models`) and returns a `Detector` (Burn-backed) or a heuristic fallback when weights are absent.
+- Extend: add backends or selection logic; keep the interface consistent for runtime/tools.
+
+## colon_sim_tools
+- Purpose: CLI utilities: overlay/prune, warehouse_etl/export/cmd, single_infer, tui, datagen_scheduler, helper binaries.
+- Feature flags: `tui`, `scheduler`, `gpu_nvidia` gate heavier deps.
+- Extend: add bins under `tools/src/bin/`; reuse shared parsers/services to avoid duplication.
+
+## Cross-crate interactions (happy path)
+1) sim_core builds the app and recorder scaffolding; app injects hooks + recorder meta/world state.
+2) vision_runtime capture turns renders into `FrameRecord`s; capture_utils writes JSON labels/images to disk.
+3) data_contracts defines the run/label schema; tools/ETL validate against it.
+4) warehouse_etl (tools) + training consume manifests/shards; models define TinyDet/BigDet; inference factory loads checkpoints; vision_runtime runs detectors live.
+
+## Notes for contributors
+- Keep sim_core and vision_core domain-agnostic and detector-free; domain/world logic lives in apps.
+- Prefer explicit plugin wiring and mode gating over hidden magic.
+- Gate heavy deps behind features; default to NdArray where possible for tests.
+- Preserve schema compatibility (data_contracts) so ETL/training/tools remain stable.
