@@ -21,3 +21,12 @@ resolver = "2"
 [patch.crates-io]
 burn-core = { path = "vendor/burn-core-0.14.0" }
 cortenforge-models = { path = "models" }
+cortenforge-data-contracts = { path = "data_contracts" }
+cortenforge-burn-dataset = { path = "crates/burn_dataset" }
+cortenforge-cli-support = { path = "crates/cli_support" }
+cortenforge-vision-core = { path = "vision_core" }
+cortenforge-sim-core = { path = "sim_core" }
+cortenforge-capture-utils = { path = "capture_utils" }
+cortenforge-vision-runtime = { path = "vision_runtime" }
+cortenforge-inference = { path = "inference" }
+cortenforge-training = { path = "training" }
