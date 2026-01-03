@@ -34,14 +34,14 @@ path = "src/bin/eval.rs"
 [dependencies]
 anyhow = "1.0"
 clap = { version = "4.5", features = ["derive"] }
-data_contracts = { path = "../data_contracts", version = "0.1.0" }
+data_contracts = { version = "0.1.0" }
 burn = { version = "0.14", default-features = false, features = ["autodiff", "std"] }
 burn-ndarray = { version = "0.14", default-features = false, optional = true }
 burn-wgpu = { version = "0.14", optional = true, default-features = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 image = { version = "0.24", default-features = false, features = ["png"] }
-models = { version = "0.1.0" }
+models = { package = "cortenforge-models", version = "0.1.0" }
 bincode = { version = "2.0.0-rc.3", default-features = false, features = ["alloc", "serde"] }
 
 [dev-dependencies]

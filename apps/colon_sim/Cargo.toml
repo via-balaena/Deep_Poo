@@ -13,7 +13,7 @@ sim_core = { path = "../../sim_core" }
 vision_core = { path = "../../vision_core" }
 vision_runtime = { path = "../../vision_runtime" }
 data_contracts = { path = "../../data_contracts" }
-models = { path = "../../models" }
+models = { package = "cortenforge-models", path = "../../models", version = "0.1.0" }
 anyhow = "1.0"
 rand = "0.8"
 smallvec = "1.13"

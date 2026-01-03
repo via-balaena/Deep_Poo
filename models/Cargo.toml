@@ -1,5 +1,5 @@
 [package]
-name = "models"
+name = "cortenforge-models"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
@@ -12,6 +12,9 @@ readme = "README.md"
 keywords = ["burn", "models", "detector", "ml"]
 categories = ["science", "computer-vision", "data-structures"]
 rust-version = "1.75"
+
+[lib]
+name = "models"
 
 [dependencies]
 burn = { version = "0.14", default-features = false, features = ["autodiff", "std"] }

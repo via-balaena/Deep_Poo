@@ -20,8 +20,8 @@ vision-runtime = ["vision_core", "vision_runtime"]
 capture-utils = ["dep:capture_utils", "vision-core", "data-contracts"]
 data-contracts = ["dep:data_contracts"]
 models = ["dep:models"]
-inference = ["vision-core", "sim-core", "dep:models", "dep:inference"]
-training = ["sim-core", "vision-core", "dep:models", "dep:training"]
+inference = ["vision-core", "sim-core", "models", "dep:inference"]
+training = ["sim-core", "vision-core", "models", "dep:training"]
 burn-runtime = ["inference", "training", "burn", "burn-ndarray", "bincode"]
 burn-wgpu = ["burn-runtime", "dep:burn-wgpu"]
 burn-dataset = ["burn_dataset"]
@@ -33,7 +33,7 @@ vision_core = { path = "../../vision_core", optional = true, version = "0.1.0" }
 vision_runtime = { path = "../../vision_runtime", optional = true, version = "0.1.0" }
 capture_utils = { path = "../../capture_utils", optional = true, version = "0.1.0" }
 data_contracts = { path = "../../data_contracts", optional = true, version = "0.1.0" }
-models = { path = "../../models", optional = true, version = "0.1.0" }
+models = { package = "cortenforge-models", path = "../../models", optional = true, version = "0.1.0" }
 inference = { path = "../../inference", optional = true, version = "0.1.0" }
 training = { path = "../../training", optional = true, version = "0.1.0" }
 burn_dataset = { path = "../burn_dataset", optional = true, version = "0.1.0" }
