@@ -1,81 +1,27 @@
-# Deep Poo
+# CortenForge
 
-This is a simplified, non-commercial demonstration inspired by the locomotion principles described in United States Patent Application
-[Pub. No.: US 2007/024.9906 A1](https://patentimages.storage.googleapis.com/6b/ce/a2/051225b0d2ff0a/US20070249906A1.pdf)
+Modular simulation substrate for data capture, ETL, training, and inference. CortenForge bundles the common crates, runtime wiring, and tooling; apps plug in domain logic on top.
 
-The implementation shown here does **not** replicate the full patented system.
-Instead, it demonstrates the core inchworm-style anchoring and extension concept in a reduced, abstracted form suitable for simulation and education.
+- Core crates: `sim_core`, `vision_core` / `vision_runtime`, `data_contracts`, `capture_utils`, `models`, `training`, `inference`, `colon_sim_tools`.
+- Apps: `apps/colon_sim` (reference implementation, a.k.a. Deep Poo) and `apps/hello_substrate` (minimal demo). The root crate is orchestration/CLI glue only.
+- Docs: mdBook under `docs/user_book` (user workflows) and `docs/contributor_book` (architecture, extension points).
+- License: Apache-2.0 by default; see `LICENSE` and `COMMERCIAL_LICENSE.md` for terms.
 
-On top of this abstracted mechanism, an **original automated supervisory control layer** has been added. This control layer is not described in the patent and is introduced solely for the purposes of:
-- enforcing safety interlocks,
-- coordinating motion phases,
-- and enabling higher-level autonomous or semi-autonomous operation in simulation.
+## Commercial opportunities
+- Via Balaena™ is offering a 50% profit split on commercial deals you source and help close. Reach out if you have leads or want to collaborate on deployments.
 
-No attempt is made to reproduce proprietary hardware, clinical configurations, or commercial embodiments described in the patent.
+## Quick start (defaults)
+- Interactive sim (reference app): `cargo run --bin sim_view`
+- Headless capture: `cargo run -p colon_sim_tools --bin datagen`
+- ETL: `cargo run -p colon_sim_tools --bin warehouse_etl`
+- Train: `cargo run -p training --features burn_runtime --bin train -- --manifest artifacts/tensor_warehouse/v<version>/manifest.json`
+- Inference (real-time): `cargo run --bin inference_view`
 
-**Video of auto probe in action**
-https://github.com/user-attachments/assets/cbf42edf-c61e-476c-b1e8-549b5f5b7580
+Release builds: add `--release` for smoother playback/throughput. The `datagen` wrapper shells out to the sibling `sim_view` in the same target profile; build it once (`cargo build --release --bin sim_view`) if missing.
 
+## Apps
+- Reference (Deep Poo / colon_sim): domain systems, HUD, controls/autopilot, capture settings. See `apps/colon_sim/README.md` for controls, recording shortcuts, and dataset details.
+- hello_substrate: minimal app showing how to hook a custom plugin into the substrate without domain systems.
 
-## Controls
-- `P` begin automated process
-- `C` toggle camera between free-fly and probe POV
-- `O` data recording run: enables autopilot + probe POV, auto-starts recording after a short delay, and auto-stops when reaching the tunnel end (no recording on the return leg)
-
-
-## Running
-```bash
-cargo run --release
-```
-
-## Capturing + overlays
-- Toggle to probe camera: press `C` until HUD shows `VISION :: cam=ON`.
-- Start/stop recording: press `L` (HUD shows `REC :: on`). Frames + JSON labels saved under `assets/datasets/captures/run_<timestamp>/`.
-- Data run shortcut: press `O` to enable autopilot + probe POV; recording auto-starts after ~8s and auto-stops when the probe reaches the tunnel end (no return leg captured).
-- PNGs are raw; boxes live in the JSON (`labels/frame_XXXXX.json`).
-- Render boxes onto PNGs (writes to `<run>/overlays` by default):
-  ```bash
-  cargo run --release --bin overlay_labels -- assets/datasets/captures/run_<timestamp>
-  ```
-  Or pick an output dir:
-  ```bash
-  cargo run --release --bin overlay_labels -- assets/datasets/captures/run_<timestamp> /tmp/overlays
-  ```
-
-## Polyp randomization / reproducibility
-- Each run spawns polyps with randomized count, spacing, size/shape, color, and twist.
-- Seed control: set `POLYP_SEED=<number>` before running to reproduce a layout; otherwise the seed comes from current time.
-- The seed used for a run is stored in the capture JSON (`polyp_seed`), so datasets are traceable.
-
-## Debug collider view
-- Set `RAPIER_DEBUG_WIREFRAMES` in `src/lib.rs` to `true` to show collider wireframes (orange), or `false` to hide them. Rebuild/run after changing.
-
-## License
-This project is licensed under the GNU Affero General Public License v3.0. See `LICENSE` for full terms. For commercial licensing options, see `COMMERCIAL_LICENSE.md` (no patent license is granted under the default AGPL; commercial use that practices relevant patents requires a separate agreement).
-
-## Documentation (mdBook)
-Published docs: [https://via-balaena.github.io/Deep_Poo/](https://via-balaena.github.io/Deep_Poo/)
-
-## Burn dataset loader
-See the mdBook docs above (Burn Dataset section) for how to load capture runs, split train/val, and build Burn-ready batches with letterboxing and padded boxes.
-
-## Burn training harness
-Quick start:
-```bash
-cargo run --features burn_runtime --bin train -- --help
-```
-Key flags: `--batch-size`, `--epochs`, `--lr-start/--lr-end`, `--val-ratio`, `--seed`, `--ckpt-dir`, and val metric thresholds `--val-obj-thresh/--val-iou-thresh`. See the mdBook Training section for details.
-
-## Warehouse command helper
-Generate the training one-liner with a single CLI:
-- PowerShell + AMD (DX12): `cargo run --bin warehouse_cmd -- --shell ps --adapter amd`
-- PowerShell + NVIDIA (DX12): `cargo run --bin warehouse_cmd -- --shell ps --adapter nvidia`
-- Bash + AMD (Vulkan): `cargo run --bin warehouse_cmd -- --shell sh --adapter amd`
-- Bash + NVIDIA (Vulkan): `cargo run --bin warehouse_cmd -- --shell sh --adapter nvidia`
-
-Defaults (manifest path, store/prefetch, batch/log cadence) live in `tools/warehouse_commands/lib/common.rs`. Useful overrides:
-- `--manifest artifacts/tensor_warehouse/v2/manifest.json` to point at a specific version
-- `--store stream --prefetch 4` to change backing and prefetch depth
-- `--batch-size 64 --log-every 5` to tune training cadence
-- `--backend metal --shell sh` to force a different WGPU backend
-- `--extra-args "--lr-start 5e-4 --epochs 10"` to append training flags
+## Contributing
+See `docs/contributor_book` for architecture, extension points, and testing notes.

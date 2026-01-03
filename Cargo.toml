@@ -1,101 +1,32 @@
-[package]
-name = "colon_sim"
-version = "0.1.0"
-edition = "2024"
-license = "AGPL-3.0-only"
-
-[features]
-burn_runtime = ["burn", "burn/ndarray", "burn/autodiff", "burn-ndarray"]
-burn_wgpu = ["burn", "burn/autodiff", "burn-wgpu"]
-burn_runtime_wgpu = ["burn_runtime", "burn_wgpu"]
-tui = ["ratatui", "crossterm", "sysinfo"]
-scheduler = ["sysinfo"]
-gpu_macos_helper = []
-gpu_nvidia = ["nvml-wrapper"]
-gpu_amd = []
-gpu_intel = []
-
-[[bin]]
-name = "sim_view"
-path = "src/main.rs"
-
-[[bin]]
-name = "datagen_headless"
-path = "src/bin/datagen.rs"
-
-[[bin]]
-name = "overlay_labels"
-path = "src/bin/overlay_labels.rs"
-
-[[bin]]
-name = "train"
-path = "src/bin/train.rs"
-
-[[bin]]
-name = "eval"
-path = "src/bin/eval.rs"
-
-[[bin]]
-name = "tui"
-path = "src/bin/tui.rs"
-required-features = ["tui"]
-
-[[bin]]
-name = "gpu_macos_helper"
-path = "src/bin/gpu_macos_helper.rs"
-required-features = ["gpu_macos_helper"]
-
-[[bin]]
-name = "inference_view"
-path = "src/bin/inference_view.rs"
-
-[[bin]]
-name = "single_infer"
-path = "src/bin/single_infer.rs"
-
-[[bin]]
-name = "datagen_scheduler"
-path = "src/bin/datagen_scheduler.rs"
-required-features = ["scheduler"]
-
-[[bin]]
-name = "warehouse_cmd"
-path = "tools/warehouse_commands/bin/main.rs"
-
-[dependencies]
-bevy = "0.17.3"
-bevy_rapier3d = { version = "0.32", features = [ "simd-stable", "debug-render-3d" ] }
-smallvec = "1.13"
-bevy_mesh = "0.17.3"
-futures-lite = "2.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-image = { version = "0.24", default-features = false, features = ["png", "rayon"] }
-rand = "0.8"
-clap = { version = "4.5", features = ["derive", "env"] }
-burn = { version = "0.14", optional = true }
-anyhow = "1.0"
-burn-ndarray = { version = "0.14", optional = true }
-burn-wgpu = { version = "0.14", optional = true, default-features = true }
-ratatui = { version = "0.26", optional = true, default-features = false, features = ["crossterm"] }
-crossterm = { version = "0.27", optional = true }
-sysinfo = { version = "0.30", optional = true, default-features = true, features = ["multithread"] }
-thiserror = "1.0"
-nvml-wrapper = { version = "0.8", optional = true }
-rayon = "1.8"
-sha2 = "0.10"
-arrow-array = "46"
-arrow-schema = "46"
-arrow-select = "46"
-parquet = { version = "46", features = ["arrow"] }
-memmap2 = "0.9"
-crossbeam-channel = "0.5"
-
-[target.'cfg(target_os = "macos")'.dependencies]
-metal = "0.29"
-
-[dev-dependencies]
-tempfile = "3.10"
+[workspace]
+members = [
+    "crates/colon_sim",
+    "crates/cli_support",
+    "crates/cortenforge",
+    "crates/burn_dataset",
+    "crates/hello_substrate",
+    "tools",
+    "capture_utils",
+    "sim_core",
+    "vision_core",
+    "vision_runtime",
+    "data_contracts",
+    "training",
+    "inference",
+    "models",
+    "apps/colon_sim",
+]
+resolver = "2"
 
 [patch.crates-io]
 burn-core = { path = "vendor/burn-core-0.14.0" }
+cortenforge-models = { path = "models" }
+cortenforge-data-contracts = { path = "data_contracts" }
+cortenforge-burn-dataset = { path = "crates/burn_dataset" }
+cortenforge-cli-support = { path = "crates/cli_support" }
+cortenforge-vision-core = { path = "vision_core" }
+cortenforge-sim-core = { path = "sim_core" }
+cortenforge-capture-utils = { path = "capture_utils" }
+cortenforge-vision-runtime = { path = "vision_runtime" }
+cortenforge-inference = { path = "inference" }
+cortenforge-training = { path = "training" }

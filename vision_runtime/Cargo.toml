@@ -1,0 +1,23 @@
+[package]
+name = "cortenforge-vision-runtime"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = true
+description = "Bevy plugins for capture and inference runtime built on vision_core for the CortenForge stack. Renamed from vision_runtime; old crate deprecated—use this name."
+repository = "https://github.com/via-balaena/Deep_Poo"
+homepage = "https://github.com/via-balaena/Deep_Poo"
+documentation = "https://docs.rs/cortenforge-vision-runtime"
+readme = "README.md"
+keywords = ["bevy", "vision", "capture", "inference"]
+categories = ["game-engines", "graphics", "computer-vision"]
+rust-version = "1.75"
+
+[dependencies]
+bevy = "0.17.3"
+bevy_camera = "0.17.3"
+sim_core = { package = "cortenforge-sim-core", version = "0.1.0" }
+vision_core = { package = "cortenforge-vision-core", version = "0.1.0" }
+anyhow = "1.0"
+image = { version = "0.24", default-features = false, features = ["png"] }
+futures-lite = "2.3"

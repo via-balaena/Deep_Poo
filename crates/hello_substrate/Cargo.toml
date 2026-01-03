@@ -1,0 +1,17 @@
+[package]
+name = "hello_substrate"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "hello_substrate"
+path = "src/main.rs"
+
+[dependencies]
+sim_core = { package = "cortenforge-sim-core", path = "../../sim_core" }
+bevy = "0.17.3"

@@ -1,0 +1,19 @@
+[package]
+name = "cortenforge-data-contracts"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = true
+description = "Data contracts for run manifests and capture metadata used across the CortenForge stack. Renamed to cortenforge-data-contracts; please use that crate instead."
+repository = "https://github.com/via-balaena/Deep_Poo"
+homepage = "https://github.com/via-balaena/Deep_Poo"
+documentation = "https://docs.rs/cortenforge-data-contracts"
+readme = "README.md"
+keywords = ["data", "contracts", "serde", "manifest"]
+categories = ["data-structures"]
+rust-version = "1.75"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
