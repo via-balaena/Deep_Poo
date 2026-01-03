@@ -2,6 +2,8 @@
 
 Shared detector/capture/overlay interfaces for sims, tools, and inference.
 
+> Deprecated: this crate was renamed to `cortenforge-vision-core`. Please depend on the new crate name going forward.
+
 Contents
 - `interfaces`: Frame/DetectionResult/Label/FrameRecord; Detector/FrameSource/Recorder traits.
 - `overlay`: box normalize + draw helpers.

@@ -21,5 +21,7 @@ Use `SimRuntimePlugin` to keep registration in one place; avoid detector wiring 
 Layout note
 - Root crate is orchestration/CLI only (`src/cli/*`, `run_app`); domain systems live in app crates (e.g., `apps/colon_sim`).
 
+> Deprecated: the old `sim_core` crate name was renamed to `cortenforge-sim-core`. Please depend on the new crate name.
+
 ## License
 Apache-2.0 (see `LICENSE` in the repo root).
