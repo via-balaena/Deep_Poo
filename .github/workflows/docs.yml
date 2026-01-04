@@ -1,0 +1,22 @@
+name: Docs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install mdBook
+        run: cargo install mdbook
+      - name: Install mdbook-mermaid (optional, for diagrams)
+        run: cargo install mdbook-mermaid
+      - name: Build contributor book
+        run: mdbook build docs/contributor_book
+      - name: Test contributor book
+        run: mdbook test docs/contributor_book

@@ -1,14 +1,15 @@
 # CI
 
-What runs in CI, how to mirror it locally, and expectations for contributors. Adjust specifics to your actual pipeline, but keep the split between fast defaults and opt-in heavy jobs.
+What runs in CI, how to mirror it locally, and expectations for contributors. Keep a fast default lane and an opt-in heavy lane.
 
 ## Pipeline shape (recommended)
 - Fast lane (default, required):
   - `cargo fmt -- --check`
-  - `cargo clippy --workspace --all-targets --all-features -D warnings` (or with minimal features if clippy is too heavy; keep consistent)
+  - `cargo clippy --workspace --all-targets --all-features -D warnings` (or minimal features if needed; keep consistent)
   - `cargo check --workspace`
   - `cargo test --workspace` (NdArray/backends only, no GPU requirements)
-  - mdBook lint/build: `mdbook test docs/user_book` and `mdbook test docs/contributor_book` (or at least `mdbook build`)
+  - mdBook lint/build: `mdbook test docs/contributor_book` (or at least `mdbook build`)
+  - Optional dep checks: `cargo deny check`, `cargo hakari generate && cargo hakari manage-deps`
 - Opt-in/heavy lane (manual or nightly):
   - `cargo test --workspace --all-features` (scheduler/tui/gpu_nvidia/burn_wgpu)
   - GPU/WGPU smoke (if runners have GPUs): minimal inference/capture smoke with WGPU backend.
@@ -16,7 +17,7 @@ What runs in CI, how to mirror it locally, and expectations for contributors. Ad
 
 ## Local reproduction
 - Fast pass: `cargo fmt -- --check && cargo clippy --workspace --all-targets -D warnings && cargo test --workspace`
-- Docs: `mdbook build docs/user_book && mdbook build docs/contributor_book`
+- Docs: `mdbook build docs/contributor_book`
 - Full sweep (optional): `cargo test --workspace --all-features`
 
 ## Expectations for contributors

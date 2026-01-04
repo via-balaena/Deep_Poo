@@ -1,29 +1,29 @@
-# Migration
+# Migration notes
 
-Guidance for moving code/features into the current layout and branding.
+Guidance for working in the current layout and moving code where it belongs.
 
-## Refactor snapshot
-- This repository is library-only: shared crates (sim_core, vision_core/runtime, data_contracts, capture_utils, models, training, inference, colon_sim_tools) intended for crates.io.
-- Apps (including the `colon_sim` reference and `hello_substrate` demo) live in their own repository; pull them from the app repo when you need binaries.
-- Crates.io: version `0.1.1` published for the shared crates. App repo: https://github.com/via-balaena/Deep-Poo.
-- Tools live in `colon_sim_tools`; bins reuse shared helpers via `cortenforge-cli-support` and `colon_sim_tools::services`.
+## Snapshot (current state)
+- Repo is library-only: shared crates (`sim_core`, `vision_core`/`vision_runtime`, `data_contracts`, `capture_utils`, `models`, `training`, `inference`, `colon_sim_tools`) intended for crates.io.
+- Apps (e.g., `colon_sim`, `hello_substrate`) live in their own repo: https://github.com/via-balaena/Deep-Poo.
+- Crates target: `0.1.1` (burn-core temporarily patched to vendored 0.14.0 until upstream fixes bincode).
+- Tools live in `colon_sim_tools`; bins reuse helpers via `cortenforge-cli-support` and `colon_sim_tools::services`. Plan to split app-specific bins into app repos.
 - Recorder defaults to `JsonRecorder`; apps supply metadata/world-state hooks and can inject sinks.
-- Branding: substrate is “CortenForge”; app crates consume it.
+- Branding: substrate = “CortenForge”; apps consume it.
 - See `MIGRATION.md` at repo root for detailed steps and notes.
 
-## Porting a feature to the new layout
-1) Decide if it belongs in substrate (generic) or app (domain-specific).
+## Porting a feature
+1) Decide if it’s substrate (generic) or app (domain-specific).
 2) If generic, add hooks/helpers to core crates; gate heavy deps with features.
-3) If app-only, implement it in the app repository and wire it through the app hooks/plugins.
-4) Update docs (user/contributor) and add a smoke test (NdArray) if applicable.
+3) If app-only, implement in the app repo and wire via app hooks/plugins.
+4) Update docs (contributor book) and add a smoke test (NdArray) if applicable.
 
 ## PR checklist
-- Docs updated (user and/or contributor book).
-- Defaults and CLI examples verified.
+- Docs updated (contributor book).
+- Defaults/CLI examples verified.
 - Tests: `cargo check --workspace`; add feature-gated tests if new features introduced.
 
 ## Adding a new app
-- Use the app repository template (or clone the reference app repo) as a starting point; wire hooks, bins, and tests there.
+- Use the app repo as a template; wire hooks, bins, and tests there.
 
 ## Extending tools
-- Put helpers in `tools/src/services.rs` or `tools/src/warehouse_commands/`; keep bins thin; gate heavy deps with features.
+- Put helpers in `tools/src/services.rs` or `tools/src/warehouse_commands/`; keep bins thin; gate heavy deps with features. Split app-specific tooling into app repos when feasible.

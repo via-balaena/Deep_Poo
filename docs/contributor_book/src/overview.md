@@ -1,46 +1,42 @@
 # Overview
 
-Welcome to the contributor guide for CortenForge. This book explains how the substrate crates fit together, what design choices were made, and how to extend or modify the system without getting lost.
-
-## What this is
+What this is:
 - A modular simulation substrate (CortenForge) distributed as shared crates for runtime orchestration, capture/inference, ETL, training, and tooling.
-- Apps (including the `colon_sim` reference and other demos) now live in their own repositories; this repo is library-only.
-- A map for contributors: where code lives, how pieces talk, and how to add or change behavior safely.
+- Library-only: apps (e.g., `colon_sim`, demos) live in their own repos.
+- A map for contributors: where code lives, how pieces talk, and how to change or extend behavior safely.
 
-## Crates/versions/features (crates.io)
-- Version `0.1.1` on crates.io: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`.
+Versions/features (current target `0.1.1`):
+- Crates on crates.io: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`, `cortenforge` (umbrella).
 - Feature flags:
-  - Training/inference: `backend-wgpu` for GPU; defaults to NdArray.
-  - Inference: `tinydet`/`bigdet`.
+  - Training/inference: `backend-wgpu` for GPU (default NdArray).
+  - Inference: `tinydet` / `bigdet`.
   - Tools: `scheduler`, `tui`, `gpu_nvidia` (tools crate not published by default).
-- MSRV: Rust 1.75+. `burn-core` is temporarily patched to a vendored 0.14.0; drop the patch when upstream releases a fixed version.
+- MSRV: Rust 1.75+.
+- Note: `burn-core` is temporarily patched to a vendored 0.14.0 due to a bincode publish break; drop the patch once upstream releases a fixed version.
 
-## Who should read this
-- New contributors ramping up on architecture and conventions.
-- Engineers adding features (runtime hooks, vision/capture, recorder sinks, tools).
-- Domain authors building a new app on the substrate (app-side docs live in the app repos).
+Who should read this:
+- New contributors ramping on architecture and conventions.
+- Engineers adding runtime/vision/recorder/tools features.
+- App authors wiring the substrate into their own repos (app-side docs are in those repos).
 
-## How to use this book
-- Start with **Introduction** for scope and expectations.
-- Read **Architecture** for the substrate vs. app split and the runtime/data flow.
-- Jump to the chapter that matches your work:
-  - **Core crates** if you’re inside shared runtime/vision/recorder code.
-  - **Hooks / extension points** when wiring new behavior into the sim loop or recorder.
-  - **Tools crate** for CLI utilities and adding new commands.
-  - **Testing** / **CI** for validation and pipelines.
-  - **Roadmap** for upcoming changes and migration notes.
+How to use this book:
+- Start with **Architecture & Crate Map** for the substrate vs. app split and runtime/data flow.
+- Jump to **Crate Deep Dives** for responsibilities, features, and “does/doesn’t.”
+- Use **Hooks / Extension Points** when wiring new behavior.
+- See **Runtime & Pipelines**, **Tools & CLI**, **Testing/CI**, and **Release & Publishing** for day-to-day work.
+- Check **Troubleshooting**, **Roadmap**, and **Migration Notes** for current gaps and history.
 
-## Scope
-- In scope: architecture, crate responsibilities, extension points, app wiring, tools, testing/CI, and migration guidance.
-- Out of scope: end-user gameplay instructions (see user book), hardware/patent licensing specifics (see `COMMERCIAL_LICENSE.md`), and exhaustive API docs (read the code; this book points you there).
+Scope:
+- In scope: architecture, crate responsibilities, extension points, app wiring, tools, testing/CI, release/publishing, and migration guidance.
+- Out of scope: end-user gameplay flows (maintained in app repos), licensing specifics (see `COMMERCIAL_LICENSE.md`), exhaustive API docs (read the code; this book points you there).
 
-## Repo map (at a glance)
+Repo map (at a glance):
 - `sim_core/`, `vision_core/`, `vision_runtime/`, `data_contracts/`, `capture_utils/`, `models/`, `training/`, `inference/`, `tools/`: substrate crates.
-- `crates/*`: supporting libraries (e.g., CLI support, dataset helpers).
-- App crates live elsewhere; pull them from the app repos when needed.
-- `docs/user_book/`, `docs/contributor_book/`: mdBooks (run `mdbook build docs/contributor_book`).
+- `crates/*`: supporting libraries (cli_support, burn_dataset, cortenforge umbrella).
+- App crates live elsewhere (see app repos).
+- `docs/contributor_book/`: mdBook (run `mdbook build docs/contributor_book`).
 
-## Conventions
-- Keep core crates domain-agnostic and detector-free; apps supply domain systems and sinks.
+Conventions:
+- Keep core crates domain-agnostic and detector-free; apps supply world/systems.
 - Favor small, composable surfaces (SimHooks, recorder meta/world state, vision hooks).
 - Prefer defaults and clear wiring over deep abstraction; gate heavy deps behind features.

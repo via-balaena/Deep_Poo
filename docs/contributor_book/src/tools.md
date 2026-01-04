@@ -1,6 +1,6 @@
-# Tools crate
+# Tools & CLI
 
-Contributor guide to `colon_sim_tools`: bins, shared helpers, feature flags, and how to add new commands.
+Contributor guide to `colon_sim_tools`: bins, shared helpers, feature flags, and how to add new commands. Plan: keep shared utilities here; split app-specific tooling into app repos.
 
 ## Binaries
 - Core:
@@ -33,3 +33,4 @@ Contributor guide to `colon_sim_tools`: bins, shared helpers, feature flags, and
 ## Testing tools
 - Prefer fast, backend-light tests (NdArray); gate GPU/WGPU usage behind features.
 - Add smoke tests under `tools/tests/` for new commands; reuse fixtures where possible.
+- Consider doc examples for common commands (overlay/prune/etl/export) once the book examples are in place.

@@ -1,4 +1,4 @@
-# Testing
+# Testing strategy
 
 Expectations for contributors: fast-by-default tests, heavier paths gated behind features, and clear smoke coverage.
 
@@ -14,8 +14,8 @@ Expectations for contributors: fast-by-default tests, heavier paths gated behind
 - Tools: basic CLI smoke for overlay/prune/warehouse_cmd/warehouse_etl/single_infer (minimal args).
 
 ## Recommended commands
-- Fast pass: `cargo check --workspace`
-- Default tests: `cargo test --workspace`
+- Fast pass: `cargo fmt -- --check && cargo clippy --workspace --all-targets -D warnings && cargo test --workspace`
+- Locked pass: `cargo test --workspace --locked`
 - Opt-in sweep: `cargo test --workspace --all-features` (enables scheduler/tui/gpu_nvidia/burn_wgpu where available)
 - Manual smokes: run bins with defaults on small inputs (app repo: `sim_view`/`inference_view`; this repo: `warehouse_etl`, `train`, tools).
 
@@ -26,6 +26,6 @@ Expectations for contributors: fast-by-default tests, heavier paths gated behind
 - Place tool tests under `tools/tests/`; app tests live in the app repositories; core tests stay in their crates.
 
 ## CI alignment
-- Default CI should mirror the default matrix (NdArray-only).
-- Provide an opt-in job/profile for `--all-features` if runners support GPUs.
+- Default CI mirrors the default matrix (NdArray-only).
+- Opt-in job/profile for `--all-features` if runners support GPUs.
 - Keep flaky/heavy tests out of the default path; document how to run them manually.

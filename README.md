@@ -4,14 +4,15 @@ Shared Rust crates for the CortenForge simulation substrate (capture, ETL, train
 
 - What’s here: `sim_core`, `vision_core` / `vision_runtime`, `data_contracts`, `capture_utils`, `models`, `training`, `inference`, `colon_sim_tools`, plus supporting crates under `crates/`.
 - What moved: the `colon_sim` reference app, `hello_substrate`, and other app binaries. Use the dedicated app repo to run the interactive sim or headless wrappers: https://github.com/via-balaena/Deep-Poo
-- Docs: mdBook under `docs/user_book` (workflows) and `docs/contributor_book` (architecture/extension points) focused on the substrate crates.
+- Docs: contributor mdBook under `docs/contributor_book` (architecture/extension points). The old user book has been retired; user-facing flows now live in app-specific repos.
+- User quickstart (apps): clone the app repo (e.g., `https://github.com/via-balaena/Deep-Poo`), build with `cargo run -p sim_view` or `inference_view`, and wire hooks as needed. This repo stays library-only.
 - Releases: see `RELEASE.md` for publish/tag steps.
 - License: Apache-2.0 by default; see `LICENSE` and `COMMERCIAL_LICENSE.md`.
 
 ## Quick start
 - Build/test the crates: `cargo test --workspace --locked`
 - Format: `cargo fmt --all`
-- Docs: `mdbook build docs/user_book` and `mdbook build docs/contributor_book`
+- Docs: `mdbook build docs/contributor_book`
 
 ## Using the crates from crates.io
 - Add deps with `version = "0.1.1"` (examples: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`).

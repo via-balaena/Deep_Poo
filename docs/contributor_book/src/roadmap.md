@@ -1,22 +1,19 @@
 # Roadmap
 
-Forward-looking areas to track and improve. Update this as priorities shift.
+Forward-looking areas. Keep this short and actionable; link to issues/PRs when concrete.
 
-## Near-term priorities (example placeholders)
-- Stabilize Bevy/WGPU bump plan (0.17 → next) and verify capture/inference.
-- Harden recorder extensibility: documented sink interface, sample custom sink.
-- Tooling UX: simplify warehouse_cmd, improve overlay/prune ergonomics.
-- Docs: finish contributor book chapters; keep user book in sync after renames.
+## Near-term
+- Upstream `burn-core` fix: drop the vendored patch; update deps; republish v0.1.1 crates.
+- Publish flow: finish release checklist (fmt/clippy/tests/hakari/publish order), tag/push.
+- Docs: finish contributor book deep dives and add diagrams/examples; retire any lingering user-doc references.
+- Tools: clarify colon_sim_tools split plan (shared vs app-specific) and trim app-specific bins.
 
-## Medium-term (example placeholders)
-- Model work: additional detector variants/configs; quantization/export guidance.
-- Training: more schedulers/augmentations; benchmark harness.
-- Inference: backend selection UX; performance profiling docs.
-- CI: optional GPU lane for WGPU smoke; artifact caching for ETL/train tests.
+## Medium-term
+- Crate ergonomics: add “does/doesn’t” tables and quickstarts per crate; consider a crate dependency graph in docs.
+- Testing/CI: optional GPU lane for WGPU smokes; keep default NdArray lane fast.
+- Models: document checkpoints/layout and add guidance for new variants/export.
 
-## Longer-term (example placeholders)
-- Multi-app stories: clearer templates and scaffolding for new domains.
-- Pluggable data sinks (DB/object store) with schema compatibility guarantees.
-- Telemetry/observability hooks for runtime.
-
-Keep this list short and actionable; link to issues/PRs when concrete.
+## Longer-term
+- Pluggable sinks: DB/object store options with schema compatibility guarantees.
+- Templates for new apps/domains using the substrate.
+- Telemetry/observability hooks for runtime and tools.

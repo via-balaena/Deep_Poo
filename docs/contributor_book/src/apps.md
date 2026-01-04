@@ -1,30 +1,33 @@
-# App patterns
+# Troubleshooting
 
-How apps sit on the substrate. Apps are hosted in their own repository (reference app: https://github.com/via-balaena/Deep-Poo); this chapter describes patterns when building against these crates.
+Common pitfalls and fixes when building/publishing with the substrate.
 
-## Reference app (app repo)
-- Domain systems: world/entities, HUD, controls/autopilot, recorder world-state updates.
-- Bins: `sim_view`, `inference_view` live in the app repo and exercise the substrate crates.
-- Uses `SimHooks` to register controls/autopilot; updates `RecorderWorldState` and meta; relies on default JSON sink.
-- Good for: seeing a full integration of capture + inference + recorder + UI.
+## Burn-core / bincode publish failure
+- Symptom: `cargo publish --dry-run -p burn-core` (or any dependent crate) fails with `cannot find function decode_borrowed_from_slice` in `bincode::serde`.
+- Cause: `burn-core 0.14.0` pulls `bincode 2.0.1` when there is no lockfile; that API was removed.
+- Fix (temporary): vendor/patch `burn-core 0.14.0`; drop the patch once Burn publishes a fixed release (or upstream pins bincode exact).
+- Repro to share upstream: `git checkout v0.14.0 && rm Cargo.lock && cargo publish --dry-run -p burn-core`.
 
-## Minimal demo (app repo)
-- Tiny plugin that adds a system to the substrate without domain code.
-- Good for: a clean starter layout and minimal bin wiring.
+## Cargo.lock masking issues
+- Libraries don’t ship lockfiles; `cargo publish` re-resolves deps. If a build works only with `Cargo.lock`, reproduce without it to mirror publish behavior.
 
-## Build your own app
-- In the app repo, create an app crate with:
-  - `src/lib.rs`: plugins + systems.
-  - `src/prelude.rs`: re-exports for bins/tests.
-  - Binaries (e.g., `sim_view`, `inference_view`) that parse CLI args and build the app via your orchestrator that wraps `sim_core::build_app`.
-- Wiring steps:
-  1) Start from the minimal demo in the app repo as a template.
-  2) Add your world/entities and systems; register controls/autopilot via `SimHooks`.
-  3) Add a system to update `RecorderWorldState`; provide `RecorderMetaProvider` if you need custom metadata.
-  4) Optionally insert custom recorder sinks (keep schemas compatible with data_contracts).
-  5) Include capture (`vision_runtime::CapturePlugin`) and inference plugins as needed.
-  6) Run `cargo check --workspace`; add a README describing systems/controls.
-  7) Add a smoke test or CLI example to ensure the app builds after changes.
-- Principles:
-  - Keep domain logic in the app crate; core crates stay detector- and domain-agnostic.
-  - Use `ModeSet`/`SimRunMode` to gate systems (e.g., only inference in inference mode).
+## GPU/WGPU issues
+- Symptom: WGPU init failures or GPU-only deps failing CI.
+- Fix: gate GPU paths behind features (`backend-wgpu`, `gpu_nvidia`), default to NdArray; skip GPU tests on non-GPU runners. Provide a manual repro command with the feature flags.
+
+## CLI/tool failures
+- Verify schemas: ensure outputs still match `data_contracts`.
+- Run minimal smoke: `overlay_labels`, `prune_empty`, `warehouse_etl` on small fixtures.
+- Keep feature flags minimal in tests; only enable `tui`/`scheduler`/`gpu_nvidia` when needed.
+
+## Recorder issues
+- Missing meta/world state: ensure app inserts `RecorderMetaProvider` and updates `RecorderWorldState`.
+- Custom sinks: verify they implement `RecorderSink` and preserve schema compatibility for ETL/training.
+
+## Documentation build
+- If docs fail: `mdbook build docs/contributor_book`; ensure any diagram/plugin deps (e.g., mermaid) are installed.
+
+## Debugging core paths (quick pointers)
+- Recorder failures: log meta/world state values; validate against `data_contracts`; ensure sinks are registered.
+- Runtime hangs: check mode gating (`SimRunMode`/`ModeSet`), system ordering, and that plugins are added.
+- Dataset issues: run `warehouse_etl` on a tiny capture; validate manifests with `data_contracts`; inspect schema versions.

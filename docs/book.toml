@@ -1,8 +1,0 @@
-[book]
-title = "Deep Poo"
-authors = ["Via Balaena"]
-language = "en"
-src = "book"
-
-[build]
-build-dir = "book_build"
