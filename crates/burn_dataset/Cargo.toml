@@ -20,19 +20,19 @@ default = []
 burn_runtime = ["burn", "burn-ndarray", "crossbeam-channel", "memmap2", "rayon"]
 
 [dependencies]
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-rand = "0.8"
-thiserror = "1.0"
-image = { version = "0.24", default-features = false, features = ["png", "rayon"] }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+rand = { version = "0.8" }
+thiserror = { workspace = true }
+image = { workspace = true, features = ["png", "rayon"] }
 data_contracts = { package = "cortenforge-data-contracts", version = "0.1.1" }
-burn = { version = "0.14", default-features = false, optional = true, features = ["autodiff", "std"] }
-burn-ndarray = { version = "0.14", default-features = false, optional = true }
+burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
+burn-ndarray = { workspace = true, optional = true }
 crossbeam-channel = { version = "0.5", optional = true }
 memmap2 = { version = "0.9", optional = true }
-rayon = { version = "1.8", optional = true }
-sha2 = "0.10"
+rayon = { workspace = true, optional = true }
+sha2 = { workspace = true }
 
 [dev-dependencies]
-tempfile = "3.10"
+tempfile = { workspace = true }

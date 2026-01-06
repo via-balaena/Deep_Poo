@@ -38,7 +38,7 @@ inference = { package = "cortenforge-inference", version = "0.1.1", optional = t
 training = { package = "cortenforge-training", version = "0.1.1", optional = true }
 burn_dataset = { package = "cortenforge-burn-dataset", version = "0.1.1", optional = true }
 cli_support = { package = "cortenforge-cli-support", version = "0.1.1", optional = true }
-burn = { version = "0.14", optional = true, default-features = false, features = ["autodiff", "std"] }
-burn-ndarray = { version = "0.14", optional = true, default-features = false }
-burn-wgpu = { version = "0.14", optional = true, default-features = true }
-bincode = { version = "2.0.0-rc.3", optional = true, default-features = false, features = ["alloc", "serde"] }
+burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
+burn-ndarray = { workspace = true, optional = true}
+burn-wgpu = { workspace = true, optional = true}
+bincode = { workspace = true, optional = true, features = ["alloc", "serde"] }

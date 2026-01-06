@@ -32,17 +32,17 @@ path = "src/bin/train.rs"
 name = "eval"
 path = "src/bin/eval.rs"
 [dependencies]
-anyhow = "1.0"
-clap = { version = "4.5", features = ["derive"] }
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 data_contracts = { package = "cortenforge-data-contracts", version = "0.1.1" }
-burn = { version = "0.14", default-features = false, features = ["autodiff", "std"] }
-burn-ndarray = { version = "0.14", default-features = false, optional = true }
-burn-wgpu = { version = "0.14", optional = true, default-features = true }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-image = { version = "0.24", default-features = false, features = ["png"] }
+burn = { workspace = true, features = ["autodiff", "std"] }
+burn-ndarray = { workspace = true, optional = true }
+burn-wgpu = { workspace = true, optional = true}
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+image = { workspace = true, features = ["png"] }
 models = { package = "cortenforge-models", version = "0.1.1" }
-bincode = { version = "2.0.0-rc.3", default-features = false, features = ["alloc", "serde"] }
+bincode = { workspace = true, features = ["alloc", "serde"] }
 
 [dev-dependencies]
-tempfile = "3.10"
+tempfile = { workspace = true }

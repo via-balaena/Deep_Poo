@@ -18,6 +18,7 @@ How we version, prep, and publish crates. Current target: `0.1.1`. Blocker: upst
    cargo test --workspace --locked
    mdbook build docs/contributor_book
    ```
+   - Dependency policy: shared deps should use root `[workspace.dependencies]`, but `bevy` stays per-crate until feature/default-features are unified.
 3) Verify crate metadata: `repository`/`homepage` point to this repo; license = Apache-2.0.
 4) Update release notes (RELEASE.md) and version strings in docs/README if needed.
 

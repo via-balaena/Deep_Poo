@@ -4,9 +4,8 @@
 
 - [Workspace](00_workspace/README.md)
   - [Workspace Overview](00_workspace/overview.md)
-  - [Crate Index](00_workspace/crate_index.md)
-  - [Dependency Graph](00_workspace/dependency_graph.md)
-  - [Architecture Center](00_workspace/architecture_center.md)
+  - [Workspace Metadata](00_workspace/workspace_metadata.md)
+  - [Shared Dependency Themes](00_workspace/shared_dep_themes.md)
   - [Feature Flags](00_workspace/feature_flags.md)
   - [Build & Dev Workflow](00_workspace/build_and_run.md)
   - [Dev Loop](00_workspace/dev_loop.md)

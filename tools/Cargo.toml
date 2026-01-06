@@ -23,21 +23,21 @@ vision_core = { package = "cortenforge-vision-core", version = "0.1.1" }
 data_contracts = { package = "cortenforge-data-contracts", version = "0.1.1" }
 inference = { package = "cortenforge-inference", version = "0.1.1" }
 capture_utils = { package = "cortenforge-capture-utils", version = "0.1.1" }
-clap = { version = "4.5", features = ["derive"] }
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-image = { version = "0.24", default-features = false, features = ["png", "rayon"] }
-sysinfo = { version = "0.30", optional = true, default-features = true, features = ["multithread"] }
-rayon = "1.8"
-sha2 = "0.10"
-arrow-array = "46"
-arrow-schema = "46"
-arrow-select = "46"
+clap = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+image = { workspace = true, features = ["png", "rayon"] }
+sysinfo = { version = "0.30", optional = true, features = ["multithread"] }
+rayon = { workspace = true }
+sha2 = { workspace = true }
+arrow-array = { version = "46" }
+arrow-schema = { version = "46" }
+arrow-select = { version = "46" }
 parquet = { version = "46", features = ["arrow"] }
 crossterm = { version = "0.27", optional = true }
 ratatui = { version = "0.26", optional = true, default-features = false, features = ["crossterm"] }
-thiserror = "1.0"
+thiserror = { workspace = true }
 nvml-wrapper = { version = "0.8", optional = true }
 
 [dev-dependencies]

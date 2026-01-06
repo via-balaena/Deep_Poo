@@ -25,6 +25,7 @@ What runs in CI, how to mirror it locally, and expectations for contributors. Ke
 - Ensure fmt/clippy pass with the same flags CI uses.
 - Document any new feature flags or env vars needed for tests.
 - Avoid adding flaky or long-running tests to the default lane; move them to the opt-in lane.
+- Dependency policy: shared deps should use root `[workspace.dependencies]`, but `bevy` stays per-crate until feature/default-features are unified.
 
 ## Troubleshooting
 - CI-only clippy/fmt failures: match the CI command flags locally.

@@ -40,3 +40,4 @@ Conventions:
 - Keep core crates domain-agnostic and detector-free; apps supply world/systems.
 - Favor small, composable surfaces (SimHooks, recorder meta/world state, vision hooks).
 - Prefer defaults and clear wiring over deep abstraction; gate heavy deps behind features.
+- Standardize shared third-party deps via root `[workspace.dependencies]`; prefer `workspace = true` in member crates.

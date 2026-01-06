@@ -25,7 +25,7 @@ Common pitfalls and fixes when building/publishing with the substrate.
 - Custom sinks: verify they implement `RecorderSink` and preserve schema compatibility for ETL/training.
 
 ## Documentation build
-- If docs fail: `mdbook build docs/contributor_book`; ensure any diagram/plugin deps (e.g., mermaid) are installed.
+- If docs fail: `mdbook build docs/contributor_book`; install `mdbook-mermaid` (`cargo install mdbook-mermaid`) for Mermaid diagrams.
 
 ## Debugging core paths (quick pointers)
 - Recorder failures: log meta/world state values; validate against `data_contracts`; ensure sinks are registered.

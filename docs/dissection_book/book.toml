@@ -3,3 +3,12 @@ title = "CortenForge Crate Dissection"
 authors = ["CortenForge Team"]
 language = "en"
 src = "src"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+additional-js = [
+  "theme/mermaid-init.js",
+  "theme/mermaid.min.js",
+]

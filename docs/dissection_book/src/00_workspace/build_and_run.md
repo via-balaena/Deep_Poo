@@ -23,3 +23,5 @@
 - GPU/WGPU issues: enable the right feature flags; skip on non-GPU hosts; check driver availability.
 - Tooling bins: ensure required features (`tui`, `scheduler`, `gpu_nvidia`) are enabled; keep inputs minimal for smokes.
 - Docs build: install mdBook; run `mdbook test` for doctests; mark non-runnable snippets with `ignore`.
+- Mermaid diagrams: install `mdbook-mermaid` (`cargo install mdbook-mermaid`) before building the dissection book.
+- Dependency policy: shared deps should use root `[workspace.dependencies]`, but `bevy` stays per-crate until feature/default-features are unified.

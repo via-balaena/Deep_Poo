@@ -17,7 +17,7 @@ rust-version = "1.75"
 name = "vision_core"
 
 [dependencies]
-anyhow = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-image = { version = "0.24", default-features = false, features = ["png"] }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+image = { workspace = true, features = ["png"] }
 bevy = { version = "0.17.3", default-features = false, features = ["bevy_core_pipeline"] }

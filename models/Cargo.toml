@@ -17,8 +17,8 @@ rust-version = "1.75"
 name = "models"
 
 [dependencies]
-burn = { version = "0.14", default-features = false, features = ["autodiff", "std"] }
-bincode = { version = "2.0.0-rc.3", default-features = false, features = ["alloc", "serde"] }
+burn = { workspace = true, features = ["autodiff", "std"] }
+bincode = { workspace = true, features = ["alloc", "serde"] }
 
 [features]
 default = ["tinydet"]

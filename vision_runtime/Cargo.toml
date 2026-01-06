@@ -17,10 +17,10 @@ rust-version = "1.75"
 name = "vision_runtime"
 
 [dependencies]
-bevy = "0.17.3"
-bevy_camera = "0.17.3"
+bevy = { version = "0.17.3" }
+bevy_camera = { version = "0.17.3" }
 sim_core = { package = "cortenforge-sim-core", version = "0.1.1" }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.1" }
-anyhow = "1.0"
-image = { version = "0.24", default-features = false, features = ["png"] }
-futures-lite = "2.3"
+anyhow = { workspace = true }
+image = { workspace = true, features = ["png"] }
+futures-lite = { version = "2.3" }

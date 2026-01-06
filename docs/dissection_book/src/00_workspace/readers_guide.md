@@ -14,7 +14,8 @@ Use this book to get up to speed quickly on the CortenForge crates.
 
 ## For architecture/flow questions
 - `canonical_flows.md`: how crates stitch together.
-- `dependency_graph.md` + `architecture_center.md`: who depends on whom, core vs. leaf crates.
+- `dependency_graph.md`: who depends on whom, core vs. leaf crates.
+- `workspace_metadata.md`: workspace-wide resolver, patch overrides, and feature policy.
 - `integration_contracts.md`: shared types, feature expectations, runtime assumptions.
 
 ## For docs maintenance
