@@ -8,6 +8,7 @@ Follow these steps to publish the `cortenforge-*` crates and tag a release. Adju
 - Make sure working tree is clean and on the intended release branch.
 - Ensure `cargo` is logged into crates.io and has publish rights.
 - Confirm versions: currently `0.1.x` across all crates.
+- Release notes: update the changelog entry in `docs/dissection_book/src/00_workspace/changelog.md`.
 
 ## Crate order (publish)
 1. `cortenforge-data-contracts`
@@ -37,6 +38,6 @@ Follow these steps to publish the `cortenforge-*` crates and tag a release. Adju
 8) Update docs/README with the release notes and any feature/backends notes.
 
 ## Notes
-- Burn patch: `burn-core` is currently vendor-patched (`vendor/burn-core-0.14.0`). Drop the patch only when upstream (or a fork) publishes a fixed release; bump crate versions when you remove it.
+- Burn patch: upstream has published a fixed `burn-core` release; remove the vendored patch (`vendor/burn-core-0.14.0`) and drop the `[patch.crates-io]` override before publishing.
 - Keep path deps out of manifests; use versioned deps only.
 - If publishing `colon_sim_tools`, set `publish = true` in `tools/Cargo.toml` and ensure its deps are published first.

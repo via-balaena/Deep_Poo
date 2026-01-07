@@ -31,7 +31,6 @@ tempfile = "3.10"
 thiserror = "1.0"
 
 [patch.crates-io]
-burn-core = { path = "vendor/burn-core-0.14.0" }
 cortenforge-models = { path = "models" }
 cortenforge-data-contracts = { path = "data_contracts" }
 cortenforge-burn-dataset = { path = "crates/burn_dataset" }

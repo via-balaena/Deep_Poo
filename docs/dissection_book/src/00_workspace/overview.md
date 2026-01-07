@@ -53,11 +53,17 @@ flowchart LR
 ## Interpretation
 | Area | Details |
 | --- | --- |
-| Core runtime path | `sim_core` + `vision_core` + `vision_runtime` form the runtime/capture/inference stack; `inference` wires detectors; `models` provides TinyDet/BigDet. |
+| Core runtime path | `sim_core`, `vision_core`, and `vision_runtime` drive runtime, capture, and inference; inference hooks up detectors; models provides TinyDet/BigDet. |
+| Runtime entry point | Apps typically start with `sim_core::build_app`, then add `vision_runtime` capture/inference plugins; hooks wire controls/autopilot. |
+| Capture output | `vision_runtime` emits `FrameRecord`s; `capture_utils` recorders write JSON + images using `data_contracts` schemas. |
 | Data path | `data_contracts` defines schemas; `capture_utils` and tools use them; `burn_dataset` consumes schemas for Burn loaders. |
-| Training path | `training` depends on `models` and `data_contracts` to produce checkpoints; `inference` consumes them. |
+| Dataset ingestion | `burn_dataset` indexes/validates capture runs, builds Burn-compatible batches/iterators used by `training`. |
+| Training path | `training` depends on `models` and `data_contracts` to produce <a href="https://dataconomy.com/2025/05/09/what-is-machine-learning-checkpointing/">checkpoints</a>; `inference` consumes them. |
+| Training to inference | `training` writes checkpoints; `inference` loads them to build detectors used by runtime or tools. |
 | Tooling | `colon_sim_tools` wraps CLI helpers (`cli_support`), recorder/capture (`capture_utils`), schemas (`data_contracts`), dataset (`burn_dataset`), and inference/models; **planned to be split into app-agnostic vs. app-specific pieces in the future.** |
 | Umbrella | `cortenforge` re-exports the stack with feature wiring. |
+| Dependency direction | Arrows generally point from higher-level crates to lower-level foundations; `data_contracts` and `vision_core` sit on many paths. |
+| Change impact | Schema changes in `data_contracts` or interface changes in `vision_core` ripple across capture, training, and tools. |
 </details>
 
 <br> 
@@ -127,4 +133,3 @@ The umbrella crate is a facade that re-exports the stack with feature wiring.
 </details>
 
 <br>
-

@@ -11,6 +11,8 @@ version = "0.1.1"
 edition = "2021"
 license = "Apache-2.0"
 publish = false
+repository = "https://github.com/via-balaena/CortenForge"
+homepage = "https://github.com/via-balaena/CortenForge"
 
 [lib]
 name = "colon_sim_tools"

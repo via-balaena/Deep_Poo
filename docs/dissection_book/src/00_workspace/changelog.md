@@ -20,11 +20,16 @@ How to track workspace changes and keep the book current.
 
 ## Template entry
 ```text
-## 2024-XX-YY (v0.1.z)
+## YYYY-MM-DD (v{x}.{x}.{x})
 - Changed: <describe change and crates affected>
 - Impact: <breaking?/compatible?>; <any migration steps>
 - Actions taken: <pages updated, diagrams refreshed>
 ```
+
+## 2026-01-07 (v0.1.1)
+- Changed: aligned workspace crates to `0.1.1`; refreshed docs/version references; prepped for burn-core upstream fix.
+- Impact: compatible; no API breaks expected beyond version alignment.
+- Actions taken: updated crate metadata/release checklist; staged publish order and notes.
 
 ## Tips
 - Keep entries concise; link to PRs or commits for detail.
