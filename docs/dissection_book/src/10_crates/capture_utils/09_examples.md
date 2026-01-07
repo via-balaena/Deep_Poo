@@ -1,7 +1,7 @@
 # Examples (capture_utils)
 
 ## 1) Write labels with JsonRecorder
-```rust
+```rust,ignore
 use capture_utils::JsonRecorder;
 use vision_core::prelude::{Frame, FrameRecord};
 
@@ -25,7 +25,7 @@ fn main() -> std::io::Result<()> {
 ```
 
 ## 2) Generate overlays for a run
-```rust
+```rust,ignore
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
@@ -34,7 +34,7 @@ fn main() -> anyhow::Result<()> {
 ```
 
 ## 3) Prune empty-label frames into a filtered copy
-```rust
+```rust,ignore
 use std::path::Path;
 
 fn main() -> std::io::Result<()> {

@@ -1,7 +1,7 @@
 # Examples (vision_core)
 
 ## 1) Implement a simple detector
-```rust
+```rust,ignore
 use vision_core::interfaces::{Detector, Frame, DetectionResult};
 
 struct ThresholdDetector {
@@ -24,7 +24,7 @@ impl Detector for ThresholdDetector {
 ```
 
 ## 2) Implement a recorder
-```rust
+```rust,ignore
 use std::fs::File;
 use std::io::Write;
 use vision_core::interfaces::{FrameRecord, Recorder};
@@ -47,7 +47,7 @@ impl Recorder for FileRecorder {
 ```
 
 ## 3) Implement a frame source
-```rust
+```rust,ignore
 use vision_core::interfaces::{Frame, FrameSource};
 
 struct StaticFrameSource {

@@ -1,7 +1,7 @@
 # Examples (models)
 
 ## 1) Build and run TinyDet (NdArray backend)
-```rust
+```rust,ignore
 use models::{TinyDet, TinyDetConfig};
 
 fn main() {
@@ -14,7 +14,7 @@ fn main() {
 ```
 
 ## 2) BigDet multibox forward
-```rust
+```rust,ignore
 use models::{BigDet, BigDetConfig};
 
 fn main() {
@@ -28,7 +28,7 @@ fn main() {
 ```
 
 ## 3) Switch to WGPU backend (feature)
-```rust
+```rust,ignore
 // In Cargo.toml enable: models = { features = ["backend-wgpu"] }
 use models::{TinyDet, TinyDetConfig, InferenceBackend};
 

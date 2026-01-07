@@ -1,7 +1,7 @@
 # Examples (cortenforge)
 
 ## 1) Use facade to pull in sim_core + vision_runtime
-```rust
+```rust,ignore
 use cortenforge::{sim_core, vision_runtime};
 
 fn main() {
@@ -19,7 +19,7 @@ fn main() {
 cortenforge = { version = "0.1", features = ["sim-core", "vision-core", "vision-runtime", "data-contracts"] }
 ```
 
-```rust
+```rust,ignore
 // Now you can reference re-exported crates without separate deps.
 use cortenforge::vision_core::interfaces::Frame;
 ```

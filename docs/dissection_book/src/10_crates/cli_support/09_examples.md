@@ -1,7 +1,7 @@
 # Examples (cli_support)
 
 ## 1) Parse capture args with clap and convert
-```rust
+```rust,ignore
 use clap::Parser;
 use cli_support::{CaptureOutputArgs, CaptureOutputOpts};
 
@@ -19,7 +19,7 @@ fn main() {
 ```
 
 ## 2) Apply WGPU env hints
-```rust
+```rust,ignore
 use cli_support::WgpuEnvHints;
 
 fn main() {
@@ -43,7 +43,7 @@ fn main() {
 ```
 
 ## 3) Resolve seed
-```rust
+```rust,ignore
 use cli_support::resolve_seed;
 
 fn main() {

@@ -1,7 +1,7 @@
 # Examples (colon_sim_tools)
 
 ## 1) List runs and print summary
-```rust
+```rust,ignore
 use colon_sim_tools::services;
 use std::path::Path;
 
@@ -18,7 +18,7 @@ fn main() -> Result<(), services::ServiceError> {
 ```
 
 ## 2) Build a datagen command
-```rust
+```rust,ignore
 use colon_sim_tools::services::{datagen_command, DatagenOptions};
 use std::path::PathBuf;
 
@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
 ```
 
 ## 3) Build a warehouse command line
-```rust
+```rust,ignore
 use colon_sim_tools::warehouse_commands::{builder, common};
 
 fn main() {

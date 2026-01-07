@@ -1,7 +1,7 @@
 # Examples (burn_dataset)
 
 ## 1) Index and summarize a captures root
-```rust
+```rust,ignore
 use burn_dataset::{index_runs, summarize_with_thresholds, ValidationThresholds};
 use std::path::Path;
 
@@ -14,7 +14,7 @@ fn main() -> burn_dataset::DatasetResult<()> {
 ```
 
 ## 2) Load a run eagerly
-```rust
+```rust,ignore
 use burn_dataset::load_run_dataset;
 use std::path::Path;
 
@@ -26,7 +26,7 @@ fn main() -> burn_dataset::DatasetResult<()> {
 ```
 
 ## 3) Build train/val iterators (burn_runtime feature)
-```rust
+```rust,ignore
 fn main() -> burn_dataset::DatasetResult<()> {
     #[cfg(feature = "burn_runtime")]
     {

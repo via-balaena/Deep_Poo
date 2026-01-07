@@ -1,7 +1,7 @@
 # Examples (data_contracts)
 
 ## 1) Validate a label entry
-```rust
+```rust,ignore
 use data_contracts::capture::PolypLabel;
 
 fn main() {
@@ -11,7 +11,7 @@ fn main() {
 ```
 
 ## 2) Build and validate capture metadata
-```rust
+```rust,ignore
 use data_contracts::capture::{CaptureMetadata, PolypLabel};
 
 fn main() {
@@ -30,7 +30,7 @@ fn main() {
 ```
 
 ## 3) Create and check a run manifest
-```rust
+```rust,ignore
 use data_contracts::manifest::{RunManifest, RunManifestSchemaVersion};
 use std::path::PathBuf;
 

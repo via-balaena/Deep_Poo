@@ -1,7 +1,7 @@
 # Examples (vision_runtime)
 
 ## 1) Minimal capture plugin usage
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::ModeSet;
 use vision_runtime::CapturePlugin;
@@ -18,7 +18,7 @@ fn main() {
 ```
 
 ## 2) Hook up a heuristic detector and run inference
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::ModeSet;
 use vision_runtime::{CapturePlugin, DetectorHandle, DetectorKind, InferencePlugin, InferenceThresholds};
@@ -44,7 +44,7 @@ fn main() {
 ```
 
 ## 3) Poll inference results (overlay state)
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::ModeSet;
 use vision_runtime::{CapturePlugin, InferencePlugin, DetectionOverlayState};

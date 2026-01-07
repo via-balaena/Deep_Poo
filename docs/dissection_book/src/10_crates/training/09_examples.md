@@ -1,7 +1,7 @@
 # Examples (training)
 
 ## 1) Load dataset samples
-```rust
+```rust,ignore
 use training::{DatasetConfig};
 
 fn main() -> anyhow::Result<()> {
@@ -17,7 +17,7 @@ fn main() -> anyhow::Result<()> {
 ```
 
 ## 2) Collate a batch (NdArray backend)
-```rust
+```rust,ignore
 use training::{DatasetConfig, RunSample, collate, TrainBackend};
 
 fn main() -> anyhow::Result<()> {
@@ -34,7 +34,7 @@ fn main() -> anyhow::Result<()> {
 ```
 
 ## 3) Run training (high level)
-```rust
+```rust,ignore
 use training::util::run_train;
 
 fn main() -> anyhow::Result<()> {

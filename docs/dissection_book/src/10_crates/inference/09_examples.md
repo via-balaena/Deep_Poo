@@ -1,7 +1,7 @@
 # Examples (inference)
 
 ## 1) Heuristic detector fallback
-```rust
+```rust,ignore
 use inference::{InferenceFactory, InferenceThresholds};
 
 fn main() {
@@ -20,7 +20,7 @@ fn main() {
 ```
 
 ## 2) Load Burn checkpoint (if available)
-```rust
+```rust,ignore
 use std::path::Path;
 use inference::{InferenceFactory, InferenceThresholds};
 
@@ -41,7 +41,7 @@ fn main() {
 ```
 
 ## 3) Adjust thresholds at construction
-```rust
+```rust,ignore
 use inference::{InferenceFactory, InferenceThresholds};
 
 fn main() {

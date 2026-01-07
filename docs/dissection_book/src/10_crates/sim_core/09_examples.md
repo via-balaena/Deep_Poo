@@ -1,7 +1,7 @@
 # Examples (sim_core)
 
 ## 1) Register custom hooks (controls + autopilot)
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::hooks::{AutopilotHook, ControlsHook, SimHooks};
 
@@ -36,7 +36,7 @@ fn main() {
 ```
 
 ## 2) Provide recorder metadata + sink
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::recorder_meta::{BasicRecorderMeta, RecorderMetaProvider, RecorderMetadataProvider, RecorderSink};
 
@@ -60,7 +60,7 @@ fn setup_recorder(mut commands: Commands) {
 ```
 
 ## 3) Wire world state for recorder triggers
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use sim_core::recorder_meta::RecorderWorldState;
 

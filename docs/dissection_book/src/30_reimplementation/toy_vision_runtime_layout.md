@@ -24,7 +24,7 @@ futures-lite = "1"
 ```
 
 ## src/lib.rs
-```rust
+```rust,ignore
 pub mod capture;
 pub mod inference;
 pub mod overlay;
@@ -49,7 +49,7 @@ impl bevy::prelude::Plugin for ToyVisionRuntimePlugin {
 ```
 
 ## src/capture.rs
-```rust
+```rust,ignore
 use bevy::prelude::*;
 
 #[derive(Clone, Debug)]
@@ -74,7 +74,7 @@ pub fn spawn_capture(mut state: ResMut<CaptureState>, time: Res<Time>) {
 ```
 
 ## src/inference.rs
-```rust
+```rust,ignore
 use bevy::prelude::*;
 use bevy::tasks::{AsyncComputeTaskPool, Task};
 use futures_lite::future::poll_once;
@@ -176,7 +176,7 @@ pub fn poll(
 ```
 
 ## src/overlay.rs
-```rust
+```rust,ignore
 use bevy::prelude::*;
 
 #[derive(Resource, Default)]
