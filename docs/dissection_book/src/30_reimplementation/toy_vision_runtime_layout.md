@@ -1,7 +1,7 @@
 # toy_vision_runtime: Layout & Stubs
 
 File tree:
-```
+```text
 toy_vision_runtime/
 ├─ Cargo.toml
 └─ src/
