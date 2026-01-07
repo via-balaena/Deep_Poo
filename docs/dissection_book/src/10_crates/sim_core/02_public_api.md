@@ -37,3 +37,38 @@
 | pov_toggle_system | fn | Bevy system to toggle POV |
 | register_runtime_systems | fn | Install runtime systems into App |
 | Modules (pub mod) | module | autopilot_types, camera, controls, hooks, probe_types, recorder_meta, recorder_types, runtime, prelude |
+
+## Usage map (high level)
+
+```mermaid
+flowchart TB
+  build_app --> SimConfig
+  build_app --> SimPlugin
+  build_app --> SimRuntimePlugin
+  build_app --> ModeSet
+  build_app --> SimRunMode
+
+  SimRuntimePlugin --> register_runtime_systems
+  register_runtime_systems --> ControlsHook
+  register_runtime_systems --> AutopilotHook
+  register_runtime_systems --> RecorderConfig
+  register_runtime_systems --> RecorderState
+  register_runtime_systems --> RecorderWorldState
+  register_runtime_systems --> AutoRecordTimer
+  register_runtime_systems --> setup_camera
+  register_runtime_systems --> camera_controller
+  register_runtime_systems --> pov_toggle_system
+
+  ControlsHook --> ControlParams
+  AutopilotHook --> AutoStage
+  AutopilotHook --> AutoDir
+  AutopilotHook --> AutoDrive
+
+  RecorderMetaProvider --> RecorderMetadataProvider
+  RecorderMetaProvider --> BasicRecorderMeta
+  RecorderSink --> RecorderConfig
+
+  ProbeSegment --> SegmentSpring
+  PovState --> ProbePovCamera
+  PovState --> UiOverlayCamera
+```

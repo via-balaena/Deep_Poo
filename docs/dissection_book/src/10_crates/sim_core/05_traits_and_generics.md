@@ -10,6 +10,39 @@
 - `RecorderMetaProvider` (Resource) wraps a boxed `RecorderMetadataProvider`.
 - `RecorderSink` (Resource) holds a boxed `vision_core::Recorder` (trait object) for output sinks.
 
+## Mermaid maps
+
+### Trait-to-resource wiring
+```mermaid
+flowchart TB
+  ControlsHook --> SimHooks
+  AutopilotHook --> SimHooks
+  RecorderMetadataProvider --> RecorderMetaProvider
+  RecorderSink --> vision_core::Recorder
+
+  SimHooks --> App["Bevy App"]
+  RecorderMetaProvider --> App
+  RecorderSink --> App
+```
+
+### Lifecycle view
+```mermaid
+sequenceDiagram
+  participant App as Bevy App
+  participant Caller as App code
+  participant SimHooks as SimHooks (Resource)
+  participant C as ControlsHook
+  participant A as AutopilotHook
+  participant R as RecorderMetaProvider
+
+  Caller->>SimHooks: set optional C/A
+  Caller->>R: set provider
+  Caller->>App: insert_resource(SimHooks, R)
+  Caller->>SimHooks: apply(&mut App)
+  SimHooks->>C: register(&mut App)
+  SimHooks->>A: register(&mut App)
+```
+
 ## Generics and bounds
 - No generic types in this crate; extensibility is via trait objects with `Send + Sync + 'static` to satisfy Bevy resource requirements.
 - Hooks require `&mut App` to register systems/plugins, keeping ownership straightforward and avoiding lifetime gymnastics.

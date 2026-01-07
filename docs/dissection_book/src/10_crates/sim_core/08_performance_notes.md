@@ -15,3 +15,22 @@
 
 ## Improvements
 - None needed at this layer. Keep hook invocation minimal and avoid duplicate registration to keep startup cost low.
+
+## Mermaid maps
+
+### Performance surface
+```mermaid
+flowchart TB
+  SimCore["sim_core scaffolding"] --> Setup["Setup time only"]
+  Setup --> LowCost["Negligible runtime cost"]
+  Downstream["Downstream systems and recorders"] --> HotPath["Per frame work"]
+  HotPath --> Budget["Primary perf budget"]
+```
+
+### Allocation timing
+```mermaid
+flowchart LR
+  Startup["Startup"] --> Boxes["Boxed trait objects allocated"]
+  Boxes --> Idle["No per frame allocations in sim_core"]
+  Runtime["Runtime"] --> DownstreamAlloc["Allocations in downstream crates"]
+```

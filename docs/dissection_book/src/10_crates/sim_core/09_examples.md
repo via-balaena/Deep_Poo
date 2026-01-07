@@ -71,3 +71,22 @@ fn update_world_state(mut state: ResMut<RecorderWorldState>) {
     }
 }
 ```
+
+## Mermaid maps
+
+### Examples overview
+```mermaid
+flowchart TB
+  Hooks["ControlsHook + AutopilotHook"] --> App["Bevy App setup"]
+  App --> Runtime["SimRuntimePlugin systems"]
+  Recorder["RecorderMetaProvider + RecorderSink"] --> Runtime
+  World["RecorderWorldState"] --> Runtime
+```
+
+### Recorder pipeline
+```mermaid
+flowchart LR
+  Meta["RecorderMetaProvider"] --> Rec["RecorderSink"]
+  World["RecorderWorldState"] --> Rec
+  Rec --> Output["recorded frames"]
+```

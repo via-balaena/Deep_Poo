@@ -16,3 +16,47 @@
 
 ## Risks / notes
 - Minimal; ensure custom hook/recorder implementations honor `Send + Sync` and avoid interior mutability pitfalls beyond what Bevy expects.
+
+## Mermaid maps
+
+### Ownership flow (resources)
+```mermaid
+flowchart TB
+  App["Bevy App"] --> Resources["Resources owned by App"]
+  Resources --> SimHooks
+  Resources --> RecorderMetaProvider
+  Resources --> RecorderSink
+  Resources --> RecorderWorldState
+
+  SimHooks --> ControlsHook
+  SimHooks --> AutopilotHook
+  RecorderMetaProvider --> RecorderMetadataProvider
+  RecorderSink --> RecorderTrait["vision_core::Recorder"]
+```
+
+### Concurrency boundaries
+```mermaid
+flowchart LR
+  Hooks["Hook trait objects"] --> Bounds["Send + Sync + 'static"]
+  Meta["Metadata provider"] --> Bounds
+  Sink["Recorder sink"] --> Bounds
+  Bounds --> Scheduler["Bevy multi-threaded schedule"]
+```
+
+### Setup-time borrowing
+```mermaid
+sequenceDiagram
+  participant App as Bevy App
+  participant RunP as SimRuntimePlugin
+  participant Hooks as SimHooks
+  participant C as ControlsHook
+  participant A as AutopilotHook
+  participant Rec as Recorder resources
+
+  App->>RunP: add plugin and systems
+  App->>Rec: insert recorder resources
+  App->>Hooks: apply(&mut App)
+  Hooks->>C: register(&mut App)
+  Hooks->>A: register(&mut App)
+  App-->>Hooks: release mutable borrow
+```
