@@ -2,6 +2,8 @@
 
 Target version: `0.1.3`
 
+Note: For the next releases (1.4), you can bump all workspace crates to a single shared version (e.g., 0.1.4) for simplicity. (currently each individual crate is at 0.1.2 and umbrella is at 0.1.3)
+
 Follow these steps to publish the `cortenforge-*` crates and tag a release. Adjust the crate list if new crates are added.
 
 ## Prereqs

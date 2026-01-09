@@ -17,6 +17,6 @@ rust-version = "1.75"
 name = "sim_core"
 
 [dependencies]
-bevy = { version = "0.17.3" }
-bevy_rapier3d = { version = "0.32", features = ["simd-stable", "debug-render-3d"] }
+bevy = { workspace = true, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_winit"] }
+bevy_rapier3d = { workspace = true, features = ["simd-stable", "debug-render-3d"] }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.2" }

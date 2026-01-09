@@ -28,7 +28,7 @@ path = "src/lib.rs"
 anyhow = { workspace = true }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.2" }
 sim_core = { package = "cortenforge-sim-core", version = "0.1.2" }
-bevy = { version = "0.17.3" }
+bevy = { workspace = true }
 burn = { workspace = true, features = ["autodiff"] }
 burn-ndarray = { workspace = true, optional = true }
 burn-wgpu = { workspace = true, optional = true}

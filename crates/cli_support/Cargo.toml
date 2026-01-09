@@ -21,4 +21,4 @@ bevy-resource = ["bevy"]
 
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
-bevy = { version = "0.17.3", optional = true, default-features = false }
+bevy = { workspace = true, optional = true, default-features = false }

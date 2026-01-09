@@ -20,4 +20,4 @@ name = "vision_core"
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 image = { workspace = true, features = ["png"] }
-bevy = { version = "0.17.3", default-features = false, features = ["bevy_core_pipeline"] }
+bevy = { workspace = true, default-features = false, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset"] }

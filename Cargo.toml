@@ -22,6 +22,9 @@ burn = { version = "0.14", default-features = false }
 burn-ndarray = { version = "0.14", default-features = false }
 burn-wgpu = { version = "0.14", default-features = true }
 clap = "4.5"
+bevy = { version = "0.17.3", default-features = false }
+bevy_camera = "0.17.3"
+bevy_rapier3d = "0.32"
 image = { version = "0.24", default-features = false }
 rayon = "1.8"
 serde = "1.0"

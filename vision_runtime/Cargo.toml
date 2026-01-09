@@ -17,8 +17,8 @@ rust-version = "1.75"
 name = "vision_runtime"
 
 [dependencies]
-bevy = { version = "0.17.3" }
-bevy_camera = { version = "0.17.3" }
+bevy = { workspace = true, features = ["bevy_render", "bevy_asset", "bevy_core_pipeline", "bevy_winit", "bevy_log"] }
+bevy_camera = { workspace = true }
 sim_core = { package = "cortenforge-sim-core", version = "0.1.2" }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.2" }
 anyhow = { workspace = true }
