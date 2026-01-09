@@ -34,6 +34,9 @@ Copy/paste scaffold for new release notes.
 - Actions taken: <pages updated, diagrams refreshed>
 ```
 
+### 2026-01-09 (v0.1.3)
+- Changed: publish `cortenforge-tools` and add it as an optional feature in the `cortenforge` umbrella.
+
 ### 2026-01-09 (v0.1.2)
 - Changed: consolidated docs into `cortenforge_book` and removed legacy books.
 - Changed: added a calm “Building Apps” path and simplified the crate overview/deep‑dive split.

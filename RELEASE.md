@@ -1,6 +1,6 @@
 # Release checklist (CortenForge crates)
 
-Target version: `0.1.2`
+Target version: `0.1.3`
 
 Follow these steps to publish the `cortenforge-*` crates and tag a release. Adjust the crate list if new crates are added.
 
