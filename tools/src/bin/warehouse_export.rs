@@ -9,6 +9,7 @@ use parquet::file::properties::WriterProperties;
 use std::fs::File;
 use std::path::PathBuf;
 use std::sync::Arc;
+use cortenforge_tools::ToolConfig;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -22,15 +23,19 @@ struct Args {
     #[arg(long)]
     manifest: Option<PathBuf>,
     /// Output parquet path.
-    #[arg(long, default_value = "warehouse_summary.parquet")]
-    out: PathBuf,
+    #[arg(long)]
+    out: Option<PathBuf>,
 }
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+    let cfg = ToolConfig::load();
     let manifest_path = args
         .manifest
         .unwrap_or_else(|| args.output.output_root.join("manifest.json"));
+    let out_path = args
+        .out
+        .unwrap_or_else(|| cfg.assets_root.join("warehouse_summary.parquet"));
     let manifest = WarehouseManifest::load(&manifest_path)
         .with_context(|| format!("loading manifest {}", manifest_path.display()))?;
 
@@ -140,8 +145,8 @@ fn main() -> anyhow::Result<()> {
         concat_batches(&std::sync::Arc::new(schema.clone()), &batches)?
     };
 
-    let file = File::create(&args.out)
-        .with_context(|| format!("creating parquet {}", args.out.display()))?;
+    let file = File::create(&out_path)
+        .with_context(|| format!("creating parquet {}", out_path.display()))?;
     let props = WriterProperties::builder().build();
     let mut writer = ArrowWriter::try_new(file, merged.schema(), Some(props))?;
     writer.write(&merged)?;
@@ -149,7 +154,7 @@ fn main() -> anyhow::Result<()> {
 
     println!(
         "Wrote Parquet summary to {} (rows={})",
-        args.out.display(),
+        out_path.display(),
         merged.num_rows()
     );
     Ok(())

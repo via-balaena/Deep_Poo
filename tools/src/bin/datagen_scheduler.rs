@@ -4,7 +4,8 @@ use std::thread;
 use std::time::Duration;
 
 use clap::Parser;
-use colon_sim_tools::services::{self, DatagenOptions};
+use cortenforge_tools::services::{self, DatagenOptions};
+use cortenforge_tools::ToolConfig;
 #[cfg(target_os = "macos")]
 use serde::Deserialize;
 use sysinfo::System;
@@ -39,8 +40,8 @@ struct Args {
     #[arg(long)]
     max_gpu_mem_mb: Option<u64>,
     /// Output root for captures.
-    #[arg(long, default_value = "assets/datasets/captures")]
-    output_root: PathBuf,
+    #[arg(long)]
+    output_root: Option<PathBuf>,
     /// Optional output root for pruned runs (defaults to <output_root>_filtered).
     #[arg(long)]
     prune_output_root: Option<PathBuf>,
@@ -77,15 +78,23 @@ struct GpuStats {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let mut sys = System::new_all();
+    let cfg = ToolConfig::load();
     let mut launched = 0usize;
     let mut running: Vec<Running> = Vec::new();
+    let output_root = args.output_root.clone().unwrap_or_else(|| cfg.captures_root.clone());
     let prune_root = args
         .prune_output_root
         .clone()
-        .or_else(|| default_prune_root(&args.output_root));
+        .or_else(|| Some(cfg.captures_filtered_root.clone()))
+        .or_else(|| default_prune_root(&output_root));
     let poll = Duration::from_secs(args.poll_secs);
     let gpu_vendor = detect_gpu_vendor();
     log_gpu_probe(gpu_vendor);
+    if gpu_vendor.is_none() && (args.max_gpu.is_some() || args.max_gpu_mem_mb.is_some()) {
+        println!(
+            "GPU probe unavailable; max_gpu/max_gpu_mem_mb will be ignored unless a probe is found."
+        );
+    }
 
     while launched < args.count || !running.is_empty() {
         // Drop finished
@@ -105,7 +114,7 @@ fn main() -> anyhow::Result<()> {
         {
             let run_idx = launched as u64;
             let opts = DatagenOptions {
-                output_root: args.output_root.clone(),
+                output_root: output_root.clone(),
                 seed: args.seed.map(|s| s + run_idx),
                 max_frames: args.max_frames,
                 headless: args.headless,
@@ -119,7 +128,7 @@ fn main() -> anyhow::Result<()> {
                         launched + 1,
                         args.count,
                         child.id(),
-                        args.output_root.display(),
+                        output_root.display(),
                         prune_root
                             .as_ref()
                             .map(|p| p.display().to_string())

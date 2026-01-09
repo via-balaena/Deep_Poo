@@ -8,10 +8,10 @@ case "${1:-}" in
     exec tools/extract_for_book.sh
     ;;
   build)
-    exec mdbook build docs/dissection_book
+    exec mdbook build docs/cortenforge_book
     ;;
   serve)
-    exec mdbook serve docs/dissection_book --open
+    exec mdbook serve docs/cortenforge_book --open
     ;;
   doc)
     exec cargo doc --no-deps --workspace

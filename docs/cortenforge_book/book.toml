@@ -1,0 +1,14 @@
+[book]
+title = "CortenForge Book"
+authors = ["CortenForge Team"]
+language = "en"
+src = "src"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+additional-js = [
+  "theme/mermaid.min.js",
+  "theme/mermaid-init.js",
+]

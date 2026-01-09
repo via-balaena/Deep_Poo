@@ -1,0 +1,22 @@
+sim_bin = "sim_view"
+train_bin = "train"
+assets_root = "assets"
+captures_root = "assets/datasets/captures"
+captures_filtered_root = "assets/datasets/captures_filtered"
+warehouse_manifest = "assets/warehouse/manifest.json"
+logs_root = "logs"
+metrics_path = "logs/metrics.jsonl"
+train_log_path = "logs/train.log"
+train_status_paths = ["logs/train_hp_status.json", "logs/train_status.json"]
+
+[datagen]
+args = ["--mode", "datagen"]
+
+[training]
+args = ["--input-root", "assets/datasets/captures_filtered", "--val-ratio", "0.2", "--batch-size", "2", "--epochs", "1"]
+
+[warehouse]
+train_template = "cargo train_hp --model ${MODEL} --batch-size ${BATCH} --log-every ${LOG_EVERY} ${EXTRA_ARGS}"
+
+[ui]
+title = "CortenForge Tools"

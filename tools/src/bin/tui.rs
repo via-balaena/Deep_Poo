@@ -17,7 +17,7 @@ use ratatui::{
 };
 use serde_json::json;
 
-use colon_sim_tools::services;
+use cortenforge_tools::{services, ToolConfig};
 
 #[derive(Clone, Copy)]
 struct Theme {
@@ -46,8 +46,8 @@ impl Default for Theme {
     }
 }
 
-#[derive(Default)]
 struct AppState {
+    cfg: ToolConfig,
     runs: Vec<services::RunInfo>,
     status: String,
     selected: usize,
@@ -75,7 +75,9 @@ fn run_app() -> io::Result<()> {
 
     let tick_rate = Duration::from_millis(250);
     let mut last_tick = Instant::now();
+    let cfg = ToolConfig::load();
     let mut state = AppState {
+        cfg,
         runs: Vec::new(),
         status: "Press q to quit".into(),
         selected: 0,
@@ -116,7 +118,7 @@ fn run_app() -> io::Result<()> {
 fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
     match code {
         KeyCode::Char('q') | KeyCode::Esc => return Ok(true),
-        KeyCode::Char('r') => match services::list_runs(Path::new("assets/datasets/captures")) {
+        KeyCode::Char('r') => match services::list_runs(&state.cfg.captures_root) {
             Ok(runs) => {
                 state.runs = runs;
                 state.status = "Refreshed runs".into();
@@ -126,30 +128,36 @@ fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
         },
         KeyCode::Char('d') => {
             let opts = services::DatagenOptions {
-                output_root: Path::new("assets/datasets/captures").to_path_buf(),
+                output_root: state.cfg.captures_root.clone(),
                 seed: None,
                 max_frames: None,
                 headless: true,
                 prune_empty: true,
-                prune_output_root: Some(
-                    Path::new("assets/datasets/captures_filtered").to_path_buf(),
-                ),
+                prune_output_root: Some(state.cfg.captures_filtered_root.clone()),
             };
-            match services::datagen_command(&opts).and_then(|cmd| services::spawn(&cmd)) {
+            match services::datagen_command_with_config(&state.cfg, &opts)
+                .and_then(|cmd| services::spawn(&cmd))
+            {
                 Ok(child) => {
                     state.datagen_pid = Some(child.id());
                     state.status = format!(
-                        "Started datagen (pid {}), pruning -> assets/datasets/captures_filtered",
-                        child.id()
+                        "Started datagen (pid {}), pruning -> {}",
+                        child.id(),
+                        state.cfg.captures_filtered_root.display()
                     );
                 }
                 Err(err) => state.status = format!("Datagen start failed: {err}"),
             }
         }
         KeyCode::Char('t') => {
-            let status_path = Path::new("logs/train_status.json").to_path_buf();
+            let status_path = state
+                .cfg
+                .train_status_paths
+                .first()
+                .cloned()
+                .unwrap_or_else(|| Path::new("logs/train_status.json").to_path_buf());
             let opts = services::TrainOptions {
-                input_root: Path::new("assets/datasets/captures_filtered").to_path_buf(),
+                input_root: state.cfg.captures_filtered_root.clone(),
                 val_ratio: 0.2,
                 batch_size: 2,
                 epochs: 1,
@@ -158,7 +166,9 @@ fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
                 real_val_dir: None,
                 status_file: Some(status_path),
             };
-            match services::train_command(&opts).and_then(|cmd| services::spawn(&cmd)) {
+            match services::train_command_with_config(&state.cfg, &opts)
+                .and_then(|cmd| services::spawn(&cmd))
+            {
                 Ok(child) => {
                     state.train_pid = Some(child.id());
                     state.status = format!("Started train (pid {})", child.id());
@@ -169,7 +179,7 @@ fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
             }
         }
         KeyCode::Char('m') => {
-            match services::read_metrics(Path::new("checkpoints/metrics.jsonl"), Some(1)) {
+            match services::read_metrics(&state.cfg.metrics_path, Some(1)) {
                 Ok(mut rows) if !rows.is_empty() => {
                     let last = rows.pop().unwrap();
                     state.status = format!("Last metric: {}", last);
@@ -179,7 +189,7 @@ fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
                 Err(err) => state.status = format!("Read metrics failed: {err}"),
             }
         }
-        KeyCode::Char('l') => match services::read_log_tail(Path::new("logs/train.log"), 5) {
+        KeyCode::Char('l') => match services::read_log_tail(&state.cfg.train_log_path, 5) {
             Ok(lines) => {
                 state.logs = lines;
                 state.status = "Tailed logs (last 5 lines)".into();
@@ -205,7 +215,7 @@ fn tick(state: &mut AppState) {
     if state.status.is_empty() {
         state.status = "Press q to quit".into();
     }
-    if let Ok(mut rows) = services::read_metrics(Path::new("checkpoints/metrics.jsonl"), Some(1)) {
+    if let Ok(mut rows) = services::read_metrics(&state.cfg.metrics_path, Some(1)) {
         if let Some(last) = rows.pop() {
             let epoch = last.get("epoch").and_then(|v| v.as_u64()).unwrap_or(0);
             let val = last
@@ -217,18 +227,17 @@ fn tick(state: &mut AppState) {
             state.metrics = vec![format!("epoch {epoch}: {val}")];
         }
     }
-    if let Ok(lines) = services::read_log_tail(Path::new("logs/train.log"), 5) {
+    if let Ok(lines) = services::read_log_tail(&state.cfg.train_log_path, 5) {
         state.logs = lines;
     }
-    if let Some(status) = read_train_status() {
+    if let Some(status) = read_train_status(&state.cfg) {
         state.train_status = Some(status);
     }
 }
 
-fn read_train_status() -> Option<serde_json::Value> {
-    const PATHS: &[&str] = &["logs/train_hp_status.json", "logs/train_status.json"];
-    for path in PATHS {
-        if let Some(status) = services::read_status(Path::new(path)) {
+fn read_train_status(cfg: &ToolConfig) -> Option<serde_json::Value> {
+    for path in &cfg.train_status_paths {
+        if let Some(status) = services::read_status(path) {
             return Some(status);
         }
     }
@@ -250,7 +259,7 @@ fn draw_ui(f: &mut ratatui::Frame<'_>, state: &AppState) {
         )
         .split(f.size());
 
-    let title = Paragraph::new("Deep Poo")
+    let title = Paragraph::new(state.cfg.ui_title.as_str())
         .style(Style::default().fg(theme.title_fg).bg(theme.title_bg))
         .alignment(Alignment::Center);
     f.render_widget(title, root[0]);

@@ -1,13 +1,13 @@
 .PHONY: docs docs-watch docs-test
 
-# Build the contributor book
+# Build the CortenForge book
 .docs: ;
 
 docs:
-	mdbook build docs/contributor_book
+	mdbook build docs/cortenforge_book
 
 docs-watch:
-	mdbook serve docs/contributor_book --open
+	mdbook serve docs/cortenforge_book --open
 
 docs-test:
-	mdbook test docs/contributor_book
+	mdbook test docs/cortenforge_book

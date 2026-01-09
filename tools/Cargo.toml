@@ -6,7 +6,7 @@ scheduler = ["sysinfo"]
 gpu_nvidia = ["nvml-wrapper"]
 
 [package]
-name = "colon_sim_tools"
+name = "cortenforge-tools"
 version = "0.1.1"
 edition = "2021"
 license = "Apache-2.0"
@@ -15,7 +15,7 @@ repository = "https://github.com/via-balaena/CortenForge"
 homepage = "https://github.com/via-balaena/CortenForge"
 
 [lib]
-name = "colon_sim_tools"
+name = "cortenforge_tools"
 path = "src/lib.rs"
 
 [dependencies]
@@ -29,6 +29,7 @@ clap = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+toml = "0.8"
 image = { workspace = true, features = ["png", "rayon"] }
 sysinfo = { version = "0.30", optional = true, features = ["multithread"] }
 rayon = { workspace = true }

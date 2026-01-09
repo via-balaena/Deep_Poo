@@ -10,6 +10,8 @@ use serde::Deserialize;
 use sysinfo::{Pid, ProcessRefreshKind, RefreshKind, System};
 use thiserror::Error;
 
+use crate::ToolConfig;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct RunManifestSummary {
     pub schema_version: Option<u32>,
@@ -122,10 +124,26 @@ pub struct DatagenOptions {
 
 /// Build a command to launch datagen (headless by default).
 pub fn datagen_command(opts: &DatagenOptions) -> io::Result<ServiceCommand> {
-    let bin = bin_path("sim_view")?;
+    let cfg = ToolConfig::load();
+    datagen_command_with_config(&cfg, opts)
+}
+
+pub fn datagen_command_with_config(
+    cfg: &ToolConfig,
+    opts: &DatagenOptions,
+) -> io::Result<ServiceCommand> {
+    let bin = if cfg.sim_bin.is_absolute() {
+        cfg.sim_bin.clone()
+    } else {
+        bin_path(cfg.sim_bin.to_string_lossy().as_ref())?
+    };
     let mut args = Vec::new();
-    args.push("--mode".into());
-    args.push("datagen".into());
+    if cfg.datagen_args.is_empty() {
+        args.push("--mode".into());
+        args.push("datagen".into());
+    } else {
+        args.extend(cfg.datagen_args.iter().cloned());
+    }
     if let Some(seed) = opts.seed {
         args.push("--seed".into());
         args.push(seed.to_string());
@@ -166,17 +184,34 @@ pub struct TrainOptions {
 
 /// Build a command to launch the training binary with common options.
 pub fn train_command(opts: &TrainOptions) -> io::Result<ServiceCommand> {
-    let bin = bin_path("train")?;
-    let mut args = vec![
-        "--input-root".into(),
-        opts.input_root.display().to_string(),
-        "--val-ratio".into(),
-        opts.val_ratio.to_string(),
-        "--batch-size".into(),
-        opts.batch_size.to_string(),
-        "--epochs".into(),
-        opts.epochs.to_string(),
-    ];
+    let cfg = ToolConfig::load();
+    train_command_with_config(&cfg, opts)
+}
+
+pub fn train_command_with_config(
+    cfg: &ToolConfig,
+    opts: &TrainOptions,
+) -> io::Result<ServiceCommand> {
+    let bin = if cfg.train_bin.is_absolute() {
+        cfg.train_bin.clone()
+    } else {
+        bin_path(cfg.train_bin.to_string_lossy().as_ref())?
+    };
+    let mut args = Vec::new();
+    if cfg.training_args.is_empty() {
+        args.extend([
+            "--input-root".into(),
+            opts.input_root.display().to_string(),
+            "--val-ratio".into(),
+            opts.val_ratio.to_string(),
+            "--batch-size".into(),
+            opts.batch_size.to_string(),
+            "--epochs".into(),
+            opts.epochs.to_string(),
+        ]);
+    } else {
+        args.extend(cfg.training_args.iter().cloned());
+    }
     if let Some(seed) = opts.seed {
         args.push("--seed".into());
         args.push(seed.to_string());

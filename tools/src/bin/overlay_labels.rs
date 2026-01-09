@@ -1,17 +1,18 @@
-use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use data_contracts::capture::CaptureMetadata;
 use image::Rgba;
 use vision_core::overlay::{draw_rect, normalize_box};
+use cortenforge_tools::ToolConfig;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut args = env::args().skip(1);
+    let cfg = ToolConfig::load();
+    let mut args = std::env::args().skip(1);
     let run_dir = args
         .next()
         .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("assets/datasets/captures"));
+        .unwrap_or_else(|| cfg.captures_root.clone());
     let out_dir = args
         .next()
         .map(PathBuf::from)

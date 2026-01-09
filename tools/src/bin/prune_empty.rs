@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::Parser;
+use cortenforge_tools::ToolConfig;
 use data_contracts::capture::CaptureMetadata;
 
 #[derive(Parser, Debug)]
@@ -12,22 +13,27 @@ use data_contracts::capture::CaptureMetadata;
 )]
 struct Args {
     /// Input root containing run_* directories.
-    #[arg(long, default_value = "assets/datasets/captures")]
-    input: PathBuf,
+    #[arg(long)]
+    input: Option<PathBuf>,
     /// Output root where filtered runs will be written.
-    #[arg(long, default_value = "assets/datasets/captures_filtered")]
-    output: PathBuf,
+    #[arg(long)]
+    output: Option<PathBuf>,
 }
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    fs::create_dir_all(&args.output).context("create output root")?;
+    let cfg = ToolConfig::load();
+    let input = args.input.unwrap_or_else(|| cfg.captures_root.clone());
+    let output = args
+        .output
+        .unwrap_or_else(|| cfg.captures_filtered_root.clone());
+    fs::create_dir_all(&output).context("create output root")?;
 
     let mut runs_processed = 0usize;
     let mut frames_kept = 0usize;
     let mut frames_skipped = 0usize;
 
-    for entry in fs::read_dir(&args.input).context("read input root")? {
+    for entry in fs::read_dir(&input).context("read input root")? {
         let entry = entry?;
         let run_path = entry.path();
         if !run_path.is_dir() {
@@ -46,7 +52,7 @@ fn main() -> Result<()> {
             .file_name()
             .map(|s| s.to_owned())
             .expect("run dir has a name");
-        let out_run = args.output.join(run_name);
+        let out_run = output.join(run_name);
         fs::create_dir_all(out_run.join("labels")).context("create labels dir")?;
         fs::create_dir_all(out_run.join("images")).context("create images dir")?;
         fs::create_dir_all(out_run.join("overlays")).context("create overlays dir")?;

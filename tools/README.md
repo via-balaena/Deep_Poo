@@ -1,6 +1,7 @@
-# colon_sim_tools
+# cortenforge-tools
 
 [![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#) (not published to crates.io)
+Package name: `cortenforge-tools`; Rust crate: `cortenforge_tools`.
 
 CLI utilities packaged in the `tools` crate:
 
@@ -15,9 +16,9 @@ Shared deps:
 - `vision_core` for overlay helpers (used by `overlay_labels`).
 
 Usage examples:
-- `cargo run -p colon_sim_tools --bin prune_empty -- --input ... --output ...`
-- `cargo run -p colon_sim_tools --features tui --bin tui -- --help`
-- `cargo run -p colon_sim_tools --features scheduler --bin datagen_scheduler -- --help`
+- `cargo run -p cortenforge-tools --bin prune_empty -- --input ... --output ...`
+- `cargo run -p cortenforge-tools --features tui --bin tui -- --help`
+- `cargo run -p cortenforge-tools --features scheduler --bin datagen_scheduler -- --help`
 
 Quick sanity check:
-- `cargo check -p colon_sim_tools --all-features`
+- `cargo check -p cortenforge-tools --all-features`

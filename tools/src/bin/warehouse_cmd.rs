@@ -1,11 +1,12 @@
 //! Unified warehouse command generator CLI.
 
 use clap::{Parser, Subcommand, ValueEnum};
-use colon_sim_tools::warehouse_commands::{
+use cortenforge_tools::warehouse_commands::{
     builder::{build_command, Shell},
     common::CmdConfig,
     common::{ModelKind, WarehouseStore},
 };
+use cortenforge_tools::ToolConfig;
 use std::path::PathBuf;
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -145,15 +146,21 @@ fn apply_preset(cli: &Cli, cfg: &mut CmdConfig<'_>, shell: &mut Shell) {
 
 fn main() {
     let cli = Cli::parse();
+    let cfg_file = ToolConfig::load();
 
     let mut cfg = CmdConfig::default();
     let mut shell: Shell = cli.shell.into();
 
     apply_preset(&cli, &mut cfg, &mut shell);
 
-    let manifest = cli
-        .manifest
-        .unwrap_or_else(|| cli.output.output_root.join("manifest.json"));
+    let default_cfg = ToolConfig::default();
+    let manifest = cli.manifest.unwrap_or_else(|| {
+        if cfg_file.warehouse_manifest != default_cfg.warehouse_manifest {
+            cfg_file.warehouse_manifest.clone()
+        } else {
+            cli.output.output_root.join("manifest.json")
+        }
+    });
     cfg = cfg.with_manifest(manifest.display().to_string());
 
     if let Some(store) = cli.store {
