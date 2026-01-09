@@ -42,4 +42,3 @@ cortenforge-vision-runtime = { path = "vision_runtime" }
 cortenforge-inference = { path = "inference" }
 cortenforge-training = { path = "training" }
 cortenforge = { path = "crates/cortenforge" }
-cortenforge-tools = { path = "tools" }
