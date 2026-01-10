@@ -206,17 +206,10 @@ fn default_prune_root(output_root: &Path) -> Option<PathBuf> {
 }
 
 fn detect_gpu_vendor() -> Option<GpuVendor> {
-    // Optional macOS helper probe (feature gated); returns Apple if the helper runs.
+    // Optional macOS helper probe; returns Apple if the probe yields stats.
     #[cfg(target_os = "macos")]
-    {
-        let helper = Command::new("gpu_macos_helper")
-            .arg("--help")
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status();
-        if helper.as_ref().is_ok_and(|s| s.success()) {
-            return Some(GpuVendor::Apple);
-        }
+    if sample_apple_helper().is_some() {
+        return Some(GpuVendor::Apple);
     }
     // Prefer NVIDIA: use presence of `nvidia-smi` as a quick probe.
     let probe = Command::new("nvidia-smi")
@@ -487,10 +480,16 @@ fn sample_intel_mem_text(text: &str) -> Option<u64> {
 fn sample_apple_helper() -> Option<GpuStats> {
     #[cfg(target_os = "macos")]
     {
-        let output = Command::new("gpu_macos_helper").output().ok()?;
-        if !output.status.success() {
-            return None;
+        let mut output = None;
+        for cmd in ["gpu_probe", "gpu_macos_helper"] {
+            if let Ok(attempt) = Command::new(cmd).output() {
+                if attempt.status.success() {
+                    output = Some(attempt);
+                    break;
+                }
+            }
         }
+        let output = output?;
         #[derive(Deserialize)]
         struct HelperPayload {
             available: bool,

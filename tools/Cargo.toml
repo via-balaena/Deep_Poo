@@ -5,6 +5,7 @@ scheduler = ["sysinfo"]
 # Optional GPU feature flag to mirror root workspace flag.
 # TODO(v0.3+): if we add a `gpu-nvidia` alias, drop `gpu_nvidia` in the next breaking release.
 gpu_nvidia = ["nvml-wrapper"]
+gpu_amd_windows = []
 
 [package]
 name = "cortenforge-tools"
@@ -53,6 +54,10 @@ pretty_assertions = "1.4"
 name = "tui"
 path = "src/bin/tui.rs"
 required-features = ["tui"]
+
+[[bin]]
+name = "gpu_probe"
+path = "src/bin/gpu_probe.rs"
 
 [[bin]]
 name = "datagen_scheduler"
