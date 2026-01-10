@@ -90,4 +90,3 @@ cortenforge-capture-utils = { path = "crates/capture_utils" }
 cortenforge-vision-runtime = { path = "crates/vision_runtime" }
 cortenforge-inference = { path = "crates/inference" }
 cortenforge-training = { path = "crates/training" }
-cortenforge-tools = { path = "tools" }
