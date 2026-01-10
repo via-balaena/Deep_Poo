@@ -38,7 +38,7 @@ Common failure modes and the fastest fix.
 
 | Issue | Guidance |
 | --- | --- |
-| Build fails due to burn-core/bincode | Ensure burn-core is 0.14.1+ and refresh the lockfile; publish may fail without a lockfile. |
+| Build fails due to burn-core/bincode | Ensure burn-core is 0.19.1+ and bincode is 2.0.1; refresh the lockfile; publish may fail without a lockfile. |
 | GPU/WGPU issues | Enable the right feature flags; skip on non-GPU hosts; check driver availability. |
 | Tooling bins | Ensure required features (`tui`, `scheduler`, `gpu_nvidia`) are enabled; keep inputs minimal for smokes. |
 | Docs build | Install mdBook; run `mdbook test` for doctests; mark non-runnable snippets with `ignore`. |

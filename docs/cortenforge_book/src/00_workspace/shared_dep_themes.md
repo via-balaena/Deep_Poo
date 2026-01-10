@@ -7,7 +7,7 @@ map, not a full inventory.
 
 | Theme | Details |
 | --- | --- |
-| Burn | Burn 0.14 (burn-core 0.14.1) across models/training/inference; burn-ndarray and burn-wgpu backends. |
+| Burn | Burn 0.19.1 across models/training/inference; burn-ndarray and burn-wgpu backends. |
 | Errors/serde | serde/serde_json, anyhow/thiserror for errors. |
 | Serialization | bincode 2.0.1 for checkpoint/weight formats (3.0.0 is a stub on crates.io; revisit when real). |
 | Bevy/Rapier | bevy for sim_core/vision_runtime and some tools; bevy_rapier3d for physics integration in sim_core. |

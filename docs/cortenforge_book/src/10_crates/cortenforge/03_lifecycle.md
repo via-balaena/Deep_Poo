@@ -14,4 +14,4 @@ Quick read: How data flows through this crate in practice.
 - The umbrella exposes the member crates; lifecycle is managed by those crates. This crate is a facade only.
 
 ## Notes
-- Keep features aligned with member crates; burn-core 0.14.1 fixes the prior publish break.
+- Keep features aligned with member crates; burn-core 0.19.1 avoids the prior publish break.

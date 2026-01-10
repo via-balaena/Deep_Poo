@@ -12,7 +12,7 @@ High-level defaults and stack-wide feature expectations.
 | Model variants | `tinydet`/`bigdet` across models/training/inference. |
 | Tools | `tui`, `scheduler`, `gpu_nvidia` gate app-specific/heavy bins in cortenforge-tools. |
 | Umbrella crate | `cortenforge` re-exports features to enable stacks (sim-core, vision-core/runtime, training/inference). |
-| Burn-core | 0.14.1 fixes the prior bincode publish break; no patch required. |
+| Burn-core | 0.19.1 avoids the prior bincode publish break; no patch required. |
 
 ## Per-crate highlights
 Quick reference for feature toggles that matter most per crate.

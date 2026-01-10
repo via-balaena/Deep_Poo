@@ -6,7 +6,7 @@
 ## Lockfile policy
 How we keep local builds and publishes deterministic.
 - Use the workspace `Cargo.lock` for local builds/tests; enforce with `--locked` before publish.
-    - Note: published crates resolve without a lockfile; burn-core 0.14.1 fixes the prior bincode break.
+    - Note: published crates resolve without a lockfile; burn-core 0.19.1 avoids the prior bincode publish break (bincode remains at 2.0.1 until 3.x is real).
 
 ## MSRV
 Minimum Rust version and how to keep it consistent.

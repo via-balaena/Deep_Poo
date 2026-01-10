@@ -26,5 +26,5 @@ Key checkpoints to keep documentation aligned with code changes.
 | --- | --- |
 | APIs change | Update crate pages (overview/API/examples) and dependency graph if edges shift. |
 | Features change | Update `feature_flags.md` and per-crate examples/snippets. |
-| Releases | Refresh version strings, confirm burn-core note (0.14.1, no patch), and changelog. |
+| Releases | Refresh version strings, confirm burn-core note (0.19.1, no patch), and changelog. |
 | Before merge | Run `mdbook test` and `mdbook build`. |
