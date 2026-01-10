@@ -2362,7 +2362,7 @@ dependencies = [
  "cortenforge-inference",
  "cortenforge-models",
  "cortenforge-sim-core",
- "cortenforge-tools",
+ "cortenforge-tools 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortenforge-training",
  "cortenforge-vision-core",
  "cortenforge-vision-runtime",
@@ -2476,6 +2476,33 @@ dependencies = [
  "serde_json",
  "sha2",
  "sysinfo 0.37.2",
+ "thiserror 2.0.17",
+ "toml",
+]
+
+[[package]]
+name = "cortenforge-tools"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "424f7ccc6cb804555055ca9a90bad305fe64c85969f4dabac1569b58e36e8588"
+dependencies = [
+ "anyhow",
+ "arrow-array",
+ "arrow-schema",
+ "arrow-select",
+ "clap",
+ "cortenforge-burn-dataset",
+ "cortenforge-capture-utils",
+ "cortenforge-cli-support",
+ "cortenforge-data-contracts",
+ "cortenforge-inference",
+ "cortenforge-vision-core",
+ "image",
+ "parquet",
+ "rayon",
+ "serde",
+ "serde_json",
+ "sha2",
  "thiserror 2.0.17",
  "toml",
 ]
