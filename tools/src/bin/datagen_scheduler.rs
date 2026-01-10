@@ -483,6 +483,7 @@ fn sample_intel_mem_text(text: &str) -> Option<u64> {
     None
 }
 
+#[allow(dead_code)] // only used when wiring macOS GPU sampling paths
 fn sample_apple_helper() -> Option<GpuStats> {
     #[cfg(target_os = "macos")]
     {
