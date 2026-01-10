@@ -2349,7 +2349,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "bincode",
  "burn",
@@ -2362,7 +2362,7 @@ dependencies = [
  "cortenforge-inference",
  "cortenforge-models",
  "cortenforge-sim-core",
- "cortenforge-tools 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortenforge-tools",
  "cortenforge-training",
  "cortenforge-vision-core",
  "cortenforge-vision-runtime",
@@ -2370,7 +2370,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-burn-dataset"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "burn",
@@ -2390,7 +2390,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-capture-utils"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "cortenforge-data-contracts",
@@ -2403,7 +2403,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-cli-support"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "bevy",
  "clap",
@@ -2411,7 +2411,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-data-contracts"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2420,7 +2420,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-inference"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "bevy",
@@ -2435,7 +2435,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-models"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "bincode",
  "burn",
@@ -2443,7 +2443,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-sim-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "bevy",
  "bevy_rapier3d",
@@ -2452,7 +2452,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-tools"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "arrow-array",
@@ -2481,35 +2481,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "cortenforge-tools"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9f9ef4aadbd8ae0e6aef1eacd01c54c57a2e8fbe6f5c08a11aadb3b65b4fca"
-dependencies = [
- "anyhow",
- "arrow-array",
- "arrow-schema",
- "arrow-select",
- "clap",
- "cortenforge-burn-dataset",
- "cortenforge-capture-utils",
- "cortenforge-cli-support",
- "cortenforge-data-contracts",
- "cortenforge-inference",
- "cortenforge-vision-core",
- "image",
- "parquet",
- "rayon",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 2.0.17",
- "toml",
-]
-
-[[package]]
 name = "cortenforge-training"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2527,7 +2500,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-vision-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "bevy",
@@ -2537,7 +2510,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-vision-runtime"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "bevy",

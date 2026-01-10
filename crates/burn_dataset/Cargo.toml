@@ -1,6 +1,6 @@
 [package]
 name = "cortenforge-burn-dataset"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "Apache-2.0"
 description = "Dataset loading, splitting, and Burn-compatible batching utilities for CortenForge."
@@ -27,7 +27,7 @@ serde_json = { workspace = true }
 rand = { workspace = true }
 thiserror = { workspace = true }
 image = { workspace = true, features = ["png", "rayon"] }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.2.0" }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.2.1" }
 burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
 burn-ndarray = { workspace = true, optional = true }
 crossbeam-channel = { workspace = true, optional = true }
