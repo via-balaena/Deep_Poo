@@ -1,5 +1,5 @@
 use clap::Parser;
-use image::io::Reader as ImageReader;
+use image::ImageReader;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 

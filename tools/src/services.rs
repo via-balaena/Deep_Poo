@@ -7,7 +7,7 @@ use std::process::{Child, Command};
 
 use serde::Deserialize;
 #[cfg(any(feature = "tui", feature = "scheduler"))]
-use sysinfo::{Pid, ProcessRefreshKind, RefreshKind, System};
+use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, RefreshKind, System};
 use thiserror::Error;
 
 use crate::ToolConfig;
@@ -263,10 +263,12 @@ pub fn read_log_tail(path: &Path, limit: usize) -> Result<Vec<String>, ServiceEr
 
 #[cfg(any(feature = "tui", feature = "scheduler"))]
 pub fn is_process_running(pid: u32) -> bool {
-    let mut sys =
-        System::new_with_specifics(RefreshKind::new().with_processes(ProcessRefreshKind::new()));
+    let mut sys = System::new_with_specifics(
+        RefreshKind::nothing().with_processes(ProcessRefreshKind::everything()),
+    );
     let pid = Pid::from_u32(pid);
-    sys.refresh_process(pid)
+    sys.refresh_processes(ProcessesToUpdate::Some(&[pid]), false);
+    sys.process(pid).is_some()
 }
 
 #[cfg(any(feature = "tui", feature = "scheduler"))]

@@ -169,9 +169,9 @@ fn resources_ok(
     max_gpu: Option<f32>,
     max_gpu_mem_mb: Option<u64>,
 ) -> bool {
-    sys.refresh_cpu();
+    sys.refresh_cpu_all();
     sys.refresh_memory();
-    let cpu = sys.global_cpu_info().cpu_usage();
+    let cpu = sys.global_cpu_usage();
     let free_mb = sys.available_memory() / 1024 / 1024;
     if cpu > max_cpu {
         return false;

@@ -42,7 +42,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 image = { workspace = true, features = ["png"] }
 models = { package = "cortenforge-models", version = "0.1.5" }
-bincode = { workspace = true, features = ["alloc", "serde"] }
+bincode = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

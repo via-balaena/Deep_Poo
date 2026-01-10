@@ -255,7 +255,7 @@ fn draw_ui(f: &mut ratatui::Frame<'_>, state: &AppState) {
             ]
             .as_ref(),
         )
-        .split(f.size());
+        .split(f.area());
 
     let title = Paragraph::new(state.cfg.ui_title.as_str())
         .style(Style::default().fg(theme.title_fg).bg(theme.title_bg))

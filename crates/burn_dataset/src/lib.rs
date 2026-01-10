@@ -78,7 +78,7 @@ pub fn split_runs(
     }
     let mut runs: Vec<_> = by_run.into_iter().collect();
     if val_ratio > 0.0 {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         runs.shuffle(&mut rng);
     }
     let total = runs.len().max(1);
@@ -116,7 +116,7 @@ pub fn split_runs_stratified(
     }
     let mut rng: Box<dyn rand::RngCore> = match seed {
         Some(s) => Box::new(rand::rngs::StdRng::seed_from_u64(s)),
-        None => Box::new(rand::thread_rng()),
+        None => Box::new(rand::rng()),
     };
     let mut train = Vec::new();
     let mut val = Vec::new();
@@ -326,7 +326,7 @@ impl TransformPipeline {
             seeded_rng = rand::rngs::StdRng::seed_from_u64(mixed);
             &mut seeded_rng
         } else {
-            rng_local = rand::thread_rng();
+            rng_local = rand::rng();
             &mut rng_local
         };
 
@@ -1389,7 +1389,7 @@ pub(crate) fn maybe_hflip(
     if prob <= 0.0 {
         return;
     }
-    if rng.gen_range(0.0..1.0) < prob {
+    if rng.random_range(0.0..1.0) < prob {
         image::imageops::flip_horizontal_in_place(img);
         for b in boxes.iter_mut() {
             let x0 = b[0];
@@ -1409,11 +1409,11 @@ pub(crate) fn maybe_jitter(
     if prob <= 0.0 || strength <= 0.0 {
         return;
     }
-    if rng.gen_range(0.0..1.0) >= prob {
+    if rng.random_range(0.0..1.0) >= prob {
         return;
     }
-    let bright = 1.0 + rng.gen_range(-strength..strength);
-    let contrast = 1.0 + rng.gen_range(-strength..strength);
+    let bright = 1.0 + rng.random_range(-strength..strength);
+    let contrast = 1.0 + rng.random_range(-strength..strength);
     for pixel in img.pixels_mut() {
         for c in 0..3 {
             let v = pixel[c] as f32 / 255.0;
@@ -1433,12 +1433,12 @@ pub(crate) fn maybe_noise(
     if prob <= 0.0 || strength <= 0.0 {
         return;
     }
-    if rng.gen_range(0.0..1.0) >= prob {
+    if rng.random_range(0.0..1.0) >= prob {
         return;
     }
     for pixel in img.pixels_mut() {
         for c in 0..3 {
-            let noise = rng.gen_range(-strength..strength);
+            let noise = rng.random_range(-strength..strength);
             let v = (pixel[c] as f32 / 255.0 + noise).clamp(0.0, 1.0);
             pixel[c] = (v * 255.0) as u8;
         }
@@ -1456,10 +1456,10 @@ pub(crate) fn maybe_scale_jitter(
     if prob <= 0.0 || min_scale <= 0.0 || max_scale <= 0.0 {
         return;
     }
-    if rng.gen_range(0.0..1.0) >= prob {
+    if rng.random_range(0.0..1.0) >= prob {
         return;
     }
-    let scale = rng.gen_range(min_scale..max_scale);
+    let scale = rng.random_range(min_scale..max_scale);
     let (w, h) = img.dimensions();
     let new_w = max(1, (w as f32 * scale).round() as u32);
     let new_h = max(1, (h as f32 * scale).round() as u32);
@@ -1523,7 +1523,7 @@ pub(crate) fn maybe_blur(
     if prob <= 0.0 || sigma <= 0.0 {
         return;
     }
-    if rng.gen_range(0.0..1.0) >= prob {
+    if rng.random_range(0.0..1.0) >= prob {
         return;
     }
     let blurred = image::imageops::blur(img, sigma);
@@ -1576,9 +1576,10 @@ impl BatchIter {
 
     pub fn from_indices(mut indices: Vec<SampleIndex>, cfg: DatasetConfig) -> DatasetResult<Self> {
         use rand::seq::SliceRandom;
+        use rand::SeedableRng;
         let mut rng = match cfg.seed {
             Some(seed) => rand::rngs::StdRng::seed_from_u64(seed),
-            None => rand::rngs::StdRng::from_entropy(),
+            None => rand::rngs::StdRng::from_rng(&mut rand::rng()),
         };
         if cfg.shuffle {
             indices.shuffle(&mut rng);
@@ -3065,13 +3066,13 @@ fn load_shard_streamed(root: &Path, meta: &ShardMetadata) -> DatasetResult<Shard
 #[cfg(test)]
 mod aug_tests {
     use super::maybe_hflip;
-    use rand::thread_rng;
+    use rand::rng;
 
     #[test]
     fn hflip_boxes_are_inverted() {
         let mut img = image::RgbImage::new(2, 2);
         let mut boxes = vec![[0.25, 0.0, 0.75, 1.0]];
-        let mut rng = thread_rng();
+        let mut rng = rng();
         maybe_hflip(&mut img, &mut boxes, 1.0, &mut rng);
         let flipped = boxes[0];
         assert!((flipped[0] - 0.25).abs() < 1e-6);

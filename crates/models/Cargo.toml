@@ -18,7 +18,7 @@ name = "models"
 
 [dependencies]
 burn = { workspace = true, features = ["autodiff", "std"] }
-bincode = { workspace = true, features = ["alloc", "serde"] }
+bincode = { workspace = true }
 
 [features]
 default = ["tinydet"]

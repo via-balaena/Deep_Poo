@@ -43,7 +43,7 @@ cortenforge_tools = { package = "cortenforge-tools", version = "0.1.5", optional
 burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
 burn-ndarray = { workspace = true, optional = true }
 burn-wgpu = { workspace = true, optional = true }
-bincode = { workspace = true, optional = true, features = ["alloc", "serde"] }
+bincode = { workspace = true, optional = true }
 
 [workspace]
 members = [
@@ -62,22 +62,35 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1.0"
-bincode = { version = "2.0.0-rc.3", default-features = false }
-burn = { version = "0.14", default-features = false }
-burn-ndarray = { version = "0.14", default-features = false }
-burn-wgpu = { version = "0.14", default-features = true }
-clap = "4.5"
+anyhow = "1.0.100"
+bincode = { version = "2.0.1", default-features = false, features = ["alloc", "std"] }
+burn = { version = "0.19.1", default-features = false }
+burn-ndarray = { version = "0.19.1", default-features = false }
+burn-wgpu = { version = "0.19.1", default-features = true }
+clap = "4.5.54"
 bevy = { version = "0.17.3", default-features = false }
 bevy_camera = "0.17.3"
-bevy_rapier3d = "0.32"
-image = { version = "0.24", default-features = false }
-rayon = "1.8"
-serde = "1.0"
-serde_json = "1.0"
-sha2 = "0.10"
-tempfile = "3.10"
-thiserror = "1.0"
+bevy_rapier3d = "0.32.0"
+crossbeam-channel = "0.5.15"
+crossterm = "0.29.0"
+futures-lite = "2.6.1"
+image = { version = "0.25.9", default-features = false }
+memmap2 = "0.9.9"
+nvml-wrapper = "0.11.0"
+parquet = { version = "57.1.0", features = ["arrow"] }
+arrow-array = "57.1.0"
+arrow-schema = "57.1.0"
+arrow-select = "57.1.0"
+rand = "0.9.2"
+rayon = "1.11.0"
+serde = "1.0.228"
+serde_json = "1.0.149"
+sha2 = "0.10.9"
+tempfile = "3.24.0"
+thiserror = "2.0.17"
+toml = "0.9.11"
+ratatui = { version = "0.30.0", default-features = false, features = ["crossterm"] }
+sysinfo = { version = "0.37.2", features = ["multithread"] }
 
 [patch.crates-io]
 cortenforge-models = { path = "crates/models" }

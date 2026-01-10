@@ -33,4 +33,4 @@ burn = { workspace = true, features = ["autodiff"] }
 burn-ndarray = { workspace = true, optional = true }
 burn-wgpu = { workspace = true, optional = true}
 models = { package = "cortenforge-models", version = "0.1.5" }
-bincode = { workspace = true, features = ["alloc", "serde"] }
+bincode = { workspace = true }

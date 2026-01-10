@@ -46,5 +46,6 @@ Follow these steps to publish the `cortenforge-*` crates and tag a release. Adju
 
 ## Notes
 - Burn patch: upstream has published a fixed `burn-core` release; remove the vendored patch (`vendor/burn-core-0.14.0`) and drop the `[patch.crates-io]` override before publishing.
+- Bincode note: `bincode 3.0.0` is a stub on crates.io (compile_error); use `2.0.1` until 3.x is real.
 - Keep path deps out of manifests; use versioned deps only.
 - If publishing `cortenforge-tools`, set `publish = true` in `tools/Cargo.toml` and ensure its deps are published first.
