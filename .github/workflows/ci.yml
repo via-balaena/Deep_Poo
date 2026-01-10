@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
 
 jobs:
   rust:
@@ -28,8 +31,37 @@ jobs:
       - name: clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-      - name: tests
-        run: cargo test --workspace --locked
+      - name: tests (core)
+        run: >
+          cargo test --workspace --locked
+          --exclude cortenforge
+          --exclude cortenforge-sim-core
+          --exclude cortenforge-vision-runtime
+          --exclude cortenforge-tools
+
+  heavy-tests:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        # Pinned to 1.89.0 for winit type inference fixes and newer tool deps (mdbook/cargo-deny).
+        uses: dtolnay/rust-toolchain@1.89.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
+          sudo apt-get clean
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: tests (full)
+        run: cargo test --workspace --locked --all-features
 
   cargo-deny:
     runs-on: ubuntu-latest
