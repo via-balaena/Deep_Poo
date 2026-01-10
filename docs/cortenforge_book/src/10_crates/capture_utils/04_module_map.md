@@ -13,4 +13,4 @@ Cross-module dependencies:
 - Consumed by runtime/apps/tools.
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

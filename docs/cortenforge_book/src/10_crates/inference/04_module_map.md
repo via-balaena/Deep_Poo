@@ -12,6 +12,6 @@ Cross-module dependencies:
 - consumers (runtime/tools) use factory and/or plugin.
 
 ## Links
-- Source: `inference/src/lib.rs`
-- Module: `inference/src/factory.rs`
-- Module: `inference/src/plugin.rs`
+- Source: `crates/inference/src/lib.rs`
+- Module: `crates/inference/src/factory.rs`
+- Module: `crates/inference/src/plugin.rs`

@@ -40,8 +40,8 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | Modules (pub mod) | module | autopilot_types, camera, controls, hooks, probe_types, recorder_meta, recorder_types, runtime, prelude |
 
 ## Links
-- Source: `sim_core/src/lib.rs`
-- Module: `sim_core/src/runtime.rs`
+- Source: `crates/sim_core/src/lib.rs`
+- Module: `crates/sim_core/src/runtime.rs`
 
 ## Usage map (high level)
 

@@ -21,8 +21,8 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | Modules (pub mod) | module | capture, interfaces, overlay, prelude |
 
 ## Links
-- Source: `vision_core/src/lib.rs`
-- Module: `vision_core/src/interfaces.rs`
-- Module: `vision_core/src/overlay.rs`
-- Module: `vision_core/src/capture.rs`
+- Source: `crates/vision_core/src/lib.rs`
+- Module: `crates/vision_core/src/interfaces.rs`
+- Module: `crates/vision_core/src/overlay.rs`
+- Module: `crates/vision_core/src/capture.rs`
 - Docs.rs: https://docs.rs/cortenforge-vision-core

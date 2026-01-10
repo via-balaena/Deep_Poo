@@ -10,4 +10,4 @@ Cross-module dependencies:
 - consumers are capture/utils/tools/training.
 
 ## Links
-- Source: `data_contracts/src/lib.rs`
+- Source: `crates/data_contracts/src/lib.rs`

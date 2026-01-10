@@ -5,6 +5,7 @@ use burn_dataset::{
     ValidationThresholds, WarehouseManifest,
 };
 use clap::Parser;
+use cortenforge_tools::ToolConfig;
 use rayon::prelude::*;
 use sha2::Digest;
 use std::env;
@@ -12,7 +13,6 @@ use std::fs::{self, File};
 use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use cortenforge_tools::ToolConfig;
 
 #[derive(Parser, Debug)]
 #[command(

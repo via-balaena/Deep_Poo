@@ -67,4 +67,4 @@ fn main() {
 ```
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

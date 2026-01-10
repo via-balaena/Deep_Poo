@@ -20,5 +20,5 @@ Provide recorder sinks and capture helpers (overlay/prune) compatible with Corte
 - Contributors adding sinks while preserving schema compatibility.
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`
 - Docs.rs: https://docs.rs/cortenforge-capture-utils

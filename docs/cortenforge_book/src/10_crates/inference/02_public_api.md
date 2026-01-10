@@ -14,7 +14,7 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | Re-exports | re-export | InferenceFactory, InferenceThresholds, InferencePlugin |
 
 ## Links
-- Source: `inference/src/lib.rs`
-- Module: `inference/src/factory.rs`
-- Module: `inference/src/plugin.rs`
+- Source: `crates/inference/src/lib.rs`
+- Module: `crates/inference/src/factory.rs`
+- Module: `crates/inference/src/plugin.rs`
 - Docs.rs: https://docs.rs/cortenforge-inference

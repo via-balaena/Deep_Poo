@@ -15,4 +15,4 @@ Cross-module dependencies:
 - prelude re-exports common items.
 
 ## Links
-- Source: `vision_core/src/lib.rs`
+- Source: `crates/vision_core/src/lib.rs`

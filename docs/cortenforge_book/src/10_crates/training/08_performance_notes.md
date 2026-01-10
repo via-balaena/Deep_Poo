@@ -21,4 +21,4 @@ Quick read: Hot paths, tradeoffs, and perf boundaries.
 - Parallelize image decode/loading across batches if IO becomes the bottleneck.
 
 ## Links
-- Source: `training/src/dataset.rs`
+- Source: `crates/training/src/dataset.rs`

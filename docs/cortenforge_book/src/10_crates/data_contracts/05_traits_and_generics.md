@@ -17,5 +17,5 @@ Quick read: Extension points and the constraints they impose.
 - Validation is minimal; downstream loaders should still handle IO/shape errors.
 
 ## Links
-- Source: `data_contracts/src/capture.rs`
-- Source: `data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/capture.rs`
+- Source: `crates/data_contracts/src/manifest.rs`

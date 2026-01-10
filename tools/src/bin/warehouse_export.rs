@@ -4,12 +4,12 @@ use arrow_schema::{DataType, Field, Schema};
 use arrow_select::concat::concat_batches;
 use burn_dataset::WarehouseManifest;
 use clap::Parser;
+use cortenforge_tools::ToolConfig;
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
 use std::fs::File;
 use std::path::PathBuf;
 use std::sync::Arc;
-use cortenforge_tools::ToolConfig;
 
 #[derive(Parser, Debug)]
 #[command(

@@ -93,5 +93,5 @@ flowchart LR
 ```
 
 ## Links
-- Source: `sim_core/src/hooks.rs`
-- Source: `sim_core/src/recorder_meta.rs`
+- Source: `crates/sim_core/src/hooks.rs`
+- Source: `crates/sim_core/src/recorder_meta.rs`

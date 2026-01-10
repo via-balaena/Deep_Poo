@@ -178,17 +178,15 @@ fn handle_key(code: KeyCode, state: &mut AppState) -> io::Result<bool> {
                 Err(err) => state.status = format!("Train start failed: {err}"),
             }
         }
-        KeyCode::Char('m') => {
-            match services::read_metrics(&state.cfg.metrics_path, Some(1)) {
-                Ok(mut rows) if !rows.is_empty() => {
-                    let last = rows.pop().unwrap();
-                    state.status = format!("Last metric: {}", last);
-                    state.metrics = vec![last.to_string()];
-                }
-                Ok(_) => state.status = "No metrics found".into(),
-                Err(err) => state.status = format!("Read metrics failed: {err}"),
+        KeyCode::Char('m') => match services::read_metrics(&state.cfg.metrics_path, Some(1)) {
+            Ok(mut rows) if !rows.is_empty() => {
+                let last = rows.pop().unwrap();
+                state.status = format!("Last metric: {}", last);
+                state.metrics = vec![last.to_string()];
             }
-        }
+            Ok(_) => state.status = "No metrics found".into(),
+            Err(err) => state.status = format!("Read metrics failed: {err}"),
+        },
         KeyCode::Char('l') => match services::read_log_tail(&state.cfg.train_log_path, 5) {
             Ok(lines) => {
                 state.logs = lines;

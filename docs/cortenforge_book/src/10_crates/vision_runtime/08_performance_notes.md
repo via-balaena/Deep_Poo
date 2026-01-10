@@ -23,4 +23,4 @@ Quick read: Hot paths, tradeoffs, and perf boundaries.
 - Consider dropping heuristic detector logs/allocations when model loaded to reduce noise.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

@@ -19,4 +19,4 @@ Quick read: How errors are surfaced and handled.
 - Silent (logged) fallback keeps CLI usable but hides error specifics; consider returning a typed error or result alongside the detector when model availability matters.
 
 ## Links
-- Source: `inference/src/factory.rs`
+- Source: `crates/inference/src/factory.rs`

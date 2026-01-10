@@ -1,0 +1,48 @@
+[features]
+default = ["backend-ndarray", "tinydet"]
+backend-ndarray = ["burn-ndarray", "burn/ndarray"]
+backend-wgpu = ["burn-wgpu", "burn/wgpu"]
+tinydet = ["models/tinydet"]
+bigdet = ["models/bigdet"]
+
+[package]
+name = "cortenforge-training"
+version = "0.1.4"
+edition = "2021"
+license = "Apache-2.0"
+publish = true
+description = "Burn-based training and eval for TinyDet/BigDet models in the CortenForge stack."
+repository = "https://github.com/via-balaena/CortenForge"
+homepage = "https://github.com/via-balaena/CortenForge"
+documentation = "https://docs.rs/cortenforge-training"
+readme = "README.md"
+keywords = ["burn", "training", "computer-vision", "detection"]
+categories = ["science", "computer-vision"]
+rust-version = "1.75"
+
+[lib]
+name = "training"
+path = "src/lib.rs"
+
+[[bin]]
+name = "train"
+path = "src/bin/train.rs"
+
+[[bin]]
+name = "eval"
+path = "src/bin/eval.rs"
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.1.4" }
+burn = { workspace = true, features = ["autodiff", "std"] }
+burn-ndarray = { workspace = true, optional = true }
+burn-wgpu = { workspace = true, optional = true}
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+image = { workspace = true, features = ["png"] }
+models = { package = "cortenforge-models", version = "0.1.4" }
+bincode = { workspace = true, features = ["alloc", "serde"] }
+
+[dev-dependencies]
+tempfile = { workspace = true }

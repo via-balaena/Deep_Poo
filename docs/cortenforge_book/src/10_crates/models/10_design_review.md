@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Add basic tests/benchmarks to track perf/regressions as models evolve.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

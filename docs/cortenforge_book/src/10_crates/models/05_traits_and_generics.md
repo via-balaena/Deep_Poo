@@ -16,4 +16,4 @@ Quick read: Extension points and the constraints they impose.
 - `forward_multibox` enforces box ordering/clamping procedurally—no trait/generic constraints there.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

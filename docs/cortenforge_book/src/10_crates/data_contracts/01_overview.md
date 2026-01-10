@@ -21,7 +21,7 @@ Define and validate shared schemas for captures, manifests, and warehouse shards
 - Contributors updating schemas with strict validation.
 
 ## Links
-- Source: `data_contracts/src/lib.rs`
-- Module: `data_contracts/src/capture.rs`
-- Module: `data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/lib.rs`
+- Module: `crates/data_contracts/src/capture.rs`
+- Module: `crates/data_contracts/src/manifest.rs`
 - Docs.rs: https://docs.rs/cortenforge-data-contracts

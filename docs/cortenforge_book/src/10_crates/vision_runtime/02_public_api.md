@@ -26,5 +26,5 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | Modules (pub mod) | module | prelude |
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`
 - Docs.rs: https://docs.rs/cortenforge-vision-runtime

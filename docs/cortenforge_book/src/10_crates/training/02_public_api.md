@@ -20,7 +20,7 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | Modules (pub mod) | module | dataset, util |
 
 ## Links
-- Source: `training/src/lib.rs`
-- Module: `training/src/dataset.rs`
-- Module: `training/src/util.rs`
+- Source: `crates/training/src/lib.rs`
+- Module: `crates/training/src/dataset.rs`
+- Module: `crates/training/src/util.rs`
 - Docs.rs: https://docs.rs/cortenforge-training

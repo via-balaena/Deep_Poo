@@ -162,14 +162,8 @@ impl ToolConfig {
             metrics_path,
             train_log_path,
             train_status_paths,
-            datagen_args: file
-                .datagen
-                .and_then(|d| d.args)
-                .unwrap_or_default(),
-            training_args: file
-                .training
-                .and_then(|t| t.args)
-                .unwrap_or_default(),
+            datagen_args: file.datagen.and_then(|d| d.args).unwrap_or_default(),
+            training_args: file.training.and_then(|t| t.args).unwrap_or_default(),
             warehouse_train_template: file
                 .warehouse
                 .and_then(|w| w.train_template)

@@ -19,5 +19,5 @@ Provide Bevy plugins for capture and inference built on `vision_core`, wiring de
 - Contributors extending capture/inference plugins or overlay state handling.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`
 - Docs.rs: https://docs.rs/cortenforge-vision-runtime

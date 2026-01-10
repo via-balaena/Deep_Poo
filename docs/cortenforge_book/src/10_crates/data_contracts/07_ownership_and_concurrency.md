@@ -18,5 +18,5 @@ Quick read: Ownership, threading, and async expectations.
 - Safe to share across threads if caller needs (serde types are Send/Sync); concurrency behavior is entirely caller-controlled.
 
 ## Links
-- Source: `data_contracts/src/capture.rs`
-- Source: `data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/capture.rs`
+- Source: `crates/data_contracts/src/manifest.rs`

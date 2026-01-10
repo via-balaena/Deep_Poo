@@ -14,6 +14,6 @@ Cross-module dependencies:
 - util constructs models from `models` and uses dataset loaders. Consumers are training bin and external callers.
 
 ## Links
-- Source: `training/src/lib.rs`
-- Module: `training/src/dataset.rs`
-- Module: `training/src/util.rs`
+- Source: `crates/training/src/lib.rs`
+- Module: `crates/training/src/dataset.rs`
+- Module: `crates/training/src/util.rs`

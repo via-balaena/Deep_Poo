@@ -1,6 +1,6 @@
 [package]
 name = "cortenforge-cli-support"
-version = "0.1.2"
+version = "0.1.4"
 edition = "2021"
 license = "Apache-2.0"
 description = "Shared CLI argument helpers for CortenForge tools and apps (capture, warehouse, seeds, thresholds)."
@@ -21,4 +21,4 @@ bevy-resource = ["bevy"]
 
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
-bevy = { version = "0.17.3", optional = true, default-features = false }
+bevy = { workspace = true, optional = true, default-features = false }

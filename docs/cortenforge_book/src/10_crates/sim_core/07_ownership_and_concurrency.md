@@ -63,5 +63,5 @@ sequenceDiagram
 ```
 
 ## Links
-- Source: `sim_core/src/hooks.rs`
-- Module: `sim_core/src/runtime.rs`
+- Source: `crates/sim_core/src/hooks.rs`
+- Module: `crates/sim_core/src/runtime.rs`

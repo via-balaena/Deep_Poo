@@ -18,5 +18,5 @@ Quick read: How errors are surfaced and handled.
 - Errors include context (file paths, reasons) in message form; sufficient for CLIs.
 
 ## Links
-- Source: `training/src/dataset.rs`
-- Source: `training/src/util.rs`
+- Source: `crates/training/src/dataset.rs`
+- Source: `crates/training/src/util.rs`

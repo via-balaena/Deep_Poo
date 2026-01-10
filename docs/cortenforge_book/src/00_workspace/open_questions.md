@@ -16,6 +16,6 @@ Use this page to track unknowns and where to investigate. Add/remove entries as 
 
 ### Example:
 **Question**: Should `capture_utils::generate_overlays` log skipped files?  
-**Where to look**: `capture_utils/src/lib.rs`, overlay generation loop.  
+**Where to look**: `crates/capture_utils/src/lib.rs`, overlay generation loop.  
 **Status**: Unanswered.  
 **Notes**: Currently silent; consider adding logging for missing images.

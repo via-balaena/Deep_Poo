@@ -31,4 +31,4 @@ fn main() {
 ```
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

@@ -49,4 +49,4 @@ fn main() -> std::io::Result<()> {
 ```
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

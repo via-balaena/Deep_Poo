@@ -21,4 +21,4 @@ Quick read: Ownership, threading, and async expectations.
 - Concurrent writes to the same run directory from multiple recorders could collide; caller must coordinate if using in multithreaded scenarios.
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

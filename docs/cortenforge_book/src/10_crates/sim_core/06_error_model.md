@@ -36,4 +36,4 @@ flowchart TB
 ```
 
 ## Links
-- Source: `sim_core/src/lib.rs`
+- Source: `crates/sim_core/src/lib.rs`

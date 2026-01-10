@@ -18,4 +18,4 @@ Quick read: How errors are surfaced and handled.
 - If richer observability is needed (e.g., metrics/alerts), add events/resources to record failure counts instead of panicking.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

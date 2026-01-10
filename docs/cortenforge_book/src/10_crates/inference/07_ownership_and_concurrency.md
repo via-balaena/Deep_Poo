@@ -21,4 +21,4 @@ Quick read: Ownership, threading, and async expectations.
 - If high-throughput is needed, consider removing the mutex by using cloneable models or separate detectors per thread.
 
 ## Links
-- Source: `inference/src/factory.rs`
+- Source: `crates/inference/src/factory.rs`

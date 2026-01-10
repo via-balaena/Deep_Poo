@@ -15,4 +15,4 @@ Quick read: Extension points and the constraints they impose.
 - If additional detectors are added, extend the factory (or add a new trait) but keep the trait-object boundary for runtime swapping.
 
 ## Links
-- Source: `inference/src/factory.rs`
+- Source: `crates/inference/src/factory.rs`

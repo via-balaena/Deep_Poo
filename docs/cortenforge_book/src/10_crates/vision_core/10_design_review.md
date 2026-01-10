@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Offer an optional error-aware detector trait (or return `Result`) for cases where distinguishing failure vs. negative detection matters.
 
 ## Links
-- Source: `vision_core/src/interfaces.rs`
+- Source: `crates/vision_core/src/interfaces.rs`

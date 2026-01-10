@@ -16,4 +16,4 @@ Quick read: Extension points and the constraints they impose.
 - If additional recorder types are added, implement `vision_core::Recorder` rather than introducing new traits to keep consumers unified.
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

@@ -16,5 +16,5 @@ Quick read: Strengths, risks, and refactor ideas.
 - If performance becomes an issue, consider borrowed deserialization (serde `Cow`) to avoid cloning strings/paths.
 
 ## Links
-- Source: `data_contracts/src/capture.rs`
-- Source: `data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/capture.rs`
+- Source: `crates/data_contracts/src/manifest.rs`

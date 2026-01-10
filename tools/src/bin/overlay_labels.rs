@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use cortenforge_tools::ToolConfig;
 use data_contracts::capture::CaptureMetadata;
 use image::Rgba;
 use vision_core::overlay::{draw_rect, normalize_box};
-use cortenforge_tools::ToolConfig;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cfg = ToolConfig::load();

@@ -47,5 +47,5 @@ fn main() -> anyhow::Result<()> {
 ```
 
 ## Links
-- Source: `training/src/dataset.rs`
-- Source: `training/src/util.rs`
+- Source: `crates/training/src/dataset.rs`
+- Source: `crates/training/src/util.rs`

@@ -16,4 +16,4 @@ Quick read: Extension points and the constraints they impose.
 - If adding new data sources, prefer composing on `RunSample`/`collate` instead of introducing new traits unless multiple loaders must coexist.
 
 ## Links
-- Source: `training/src/dataset.rs`
+- Source: `crates/training/src/dataset.rs`

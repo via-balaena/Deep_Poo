@@ -22,4 +22,4 @@ Quick read: Hot paths, tradeoffs, and perf boundaries.
 - Parallelize overlay generation/pruning per file for speedups (currently sequential).
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

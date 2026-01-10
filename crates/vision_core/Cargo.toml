@@ -1,0 +1,23 @@
+[package]
+name = "cortenforge-vision-core"
+version = "0.1.4"
+edition = "2021"
+license = "Apache-2.0"
+publish = true
+description = "Core vision interfaces and capture/overlay helpers for the CortenForge stack. Renamed from vision_core; old crate deprecated—use this name."
+repository = "https://github.com/via-balaena/CortenForge"
+homepage = "https://github.com/via-balaena/CortenForge"
+documentation = "https://docs.rs/cortenforge-vision-core"
+readme = "README.md"
+keywords = ["vision", "graphics", "capture", "overlay", "serde"]
+categories = ["graphics", "computer-vision", "game-engines"]
+rust-version = "1.75"
+
+[lib]
+name = "vision_core"
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+image = { workspace = true, features = ["png"] }
+bevy = { workspace = true, default-features = false, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset"] }

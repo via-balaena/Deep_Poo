@@ -1,8 +1,10 @@
 [advisories]
-vulnerability = "deny"
-unmaintained = "warn"
+unmaintained = "all"
 yanked = "warn"
-notice = "warn"
+ignore = [
+    { id = "RUSTSEC-2025-0141", reason = "bincode is unmaintained but still required by burn-core 0.14.x" },
+    { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained but still required by current wgpu/bevy stack" },
+]
 
 [licenses]
 allow = [
@@ -11,11 +13,12 @@ allow = [
     "BSD-3-Clause",
     "BSD-2-Clause",
     "ISC",
+    "MIT-0",
+    "MPL-2.0",
     "Zlib",
-    "Unicode-DFS-2016",
+    "Unicode-3.0",
     "CC0-1.0",
 ]
-default = "deny"
 
 [bans]
 multiple-versions = "warn"
@@ -23,7 +26,7 @@ wildcards = "deny"
 highlight = "all"
 
 [sources]
-allow-unknown-registry = false
-allow-unknown-git = false
+unknown-registry = "deny"
+unknown-git = "deny"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = []

@@ -9,8 +9,8 @@ Standardize source links to keep references consistent and stable.
 How to format links so they stay stable and readable.
 - Use repo-relative paths with line anchors: ``crate/path/to/file.rs:L123``.
 - Examples:
-  - `sim_core/src/hooks.rs:L10`
-  - `vision_runtime/src/lib.rs:L75`
+  - `crates/sim_core/src/hooks.rs:L10`
+  - `crates/vision_runtime/src/lib.rs:L75`
   - `docs/cortenforge_book/src/00_workspace/overview.md:L1` (for book refs)
 - Avoid range anchors; link to the first relevant line.
 

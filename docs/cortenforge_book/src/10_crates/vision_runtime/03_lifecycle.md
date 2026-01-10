@@ -32,4 +32,4 @@ Quick read: How data flows through this crate in practice.
 - Runs as Bevy plugins; depends on sim_core-built app context.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

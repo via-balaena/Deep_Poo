@@ -19,5 +19,5 @@ Provide Bevy-based scaffolding for CortenForge apps: building the runtime, confi
 - Contributors extending runtime hooks or recorder scaffolding while keeping the core domain-agnostic.
 
 ## Links
-- Source: `sim_core/src/lib.rs`
+- Source: `crates/sim_core/src/lib.rs`
 - Docs.rs: https://docs.rs/cortenforge-sim-core

@@ -20,5 +20,5 @@ Define Burn-based model architectures/configs (TinyDet/BigDet) used across train
 - Contributors adding model variants or adjusting configs.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`
 - Docs.rs: https://docs.rs/models

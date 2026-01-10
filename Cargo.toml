@@ -1,17 +1,17 @@
 [workspace]
 members = [
     "crates/cli_support",
-    "crates/cortenforge",
     "crates/burn_dataset",
+    "crates/sim_core",
+    "crates/vision_core",
+    "crates/vision_runtime",
+    "crates/data_contracts",
+    "crates/capture_utils",
+    "crates/models",
+    "crates/training",
+    "crates/inference",
     "tools",
-    "capture_utils",
-    "sim_core",
-    "vision_core",
-    "vision_runtime",
-    "data_contracts",
-    "training",
-    "inference",
-    "models",
+    "crates/cortenforge",
 ]
 resolver = "2"
 
@@ -22,6 +22,9 @@ burn = { version = "0.14", default-features = false }
 burn-ndarray = { version = "0.14", default-features = false }
 burn-wgpu = { version = "0.14", default-features = true }
 clap = "4.5"
+bevy = { version = "0.17.3", default-features = false }
+bevy_camera = "0.17.3"
+bevy_rapier3d = "0.32"
 image = { version = "0.24", default-features = false }
 rayon = "1.8"
 serde = "1.0"
@@ -31,14 +34,14 @@ tempfile = "3.10"
 thiserror = "1.0"
 
 [patch.crates-io]
-cortenforge-models = { path = "models" }
-cortenforge-data-contracts = { path = "data_contracts" }
+cortenforge-models = { path = "crates/models" }
+cortenforge-data-contracts = { path = "crates/data_contracts" }
 cortenforge-burn-dataset = { path = "crates/burn_dataset" }
 cortenforge-cli-support = { path = "crates/cli_support" }
-cortenforge-vision-core = { path = "vision_core" }
-cortenforge-sim-core = { path = "sim_core" }
-cortenforge-capture-utils = { path = "capture_utils" }
-cortenforge-vision-runtime = { path = "vision_runtime" }
-cortenforge-inference = { path = "inference" }
-cortenforge-training = { path = "training" }
+cortenforge-vision-core = { path = "crates/vision_core" }
+cortenforge-sim-core = { path = "crates/sim_core" }
+cortenforge-capture-utils = { path = "crates/capture_utils" }
+cortenforge-vision-runtime = { path = "crates/vision_runtime" }
+cortenforge-inference = { path = "crates/inference" }
+cortenforge-training = { path = "crates/training" }
 cortenforge = { path = "crates/cortenforge" }

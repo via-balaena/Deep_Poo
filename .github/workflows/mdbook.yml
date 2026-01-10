@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        # Pinned to 1.89.0 for mdbook's minimum rustc requirement.
+        uses: dtolnay/rust-toolchain@1.89.0
       - name: Install mdBook
         run: |
           cargo install mdbook --version 0.5.2
@@ -31,36 +33,13 @@ jobs:
           which mdbook-mermaid || true
           mdbook --version
           mdbook-mermaid --version
-      - name: Build contributor book
+      - name: Build CortenForge book
         run: |
-          RUST_LOG=mdbook_mermaid=debug RUST_BACKTRACE=1 mdbook build docs/contributor_book
+          RUST_LOG=mdbook_mermaid=debug RUST_BACKTRACE=1 mdbook build docs/cortenforge_book
           mkdir -p docs/site_build
-          cp -r docs/contributor_book/book docs/site_build/contributor
-      - name: Test contributor book
-        run: mdbook test docs/contributor_book
-      - name: Build dissection book
-        run: |
-          mdbook build docs/dissection_book
-          mkdir -p docs/site_build
-          cp -r docs/dissection_book/book docs/site_build/dissection
-      - name: Test dissection book
-        run: mdbook test docs/dissection_book
-      - name: Build docs index
-        run: |
-          mkdir -p docs/site_build
-          cat > docs/site_build/index.html <<'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head><meta charset="UTF-8"><title>CortenForge Docs</title></head>
-          <body>
-          <h1>CortenForge Documentation</h1>
-          <ul>
-            <li><a href="contributor/">Contributor Guide</a></li>
-            <li><a href="dissection/">Crate Dissection Book</a></li>
-          </ul>
-          </body>
-          </html>
-          EOF
+          cp -r docs/cortenforge_book/book/* docs/site_build/
+      - name: Test CortenForge book
+        run: mdbook test docs/cortenforge_book
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

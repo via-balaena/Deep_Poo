@@ -19,4 +19,4 @@ Quick read: Ownership, threading, and async expectations.
 - Sharing a model across threads is backend-dependent; Burn modules are typically `Send + Sync` for CPU/WGPU backends, but verify if using custom backends.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

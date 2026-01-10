@@ -34,6 +34,12 @@ Copy/paste scaffold for new release notes.
 - Actions taken: <pages updated, diagrams refreshed>
 ```
 
+### 2026-01-09 (v0.1.4)
+- Changed: moved core crates under `crates/` and updated workspace members/patches to match.
+- Changed: unified Bevy version usage and refreshed source-link paths in the book.
+- Impact: compatible; no API surface changes expected beyond the path/layout refactor.
+- Actions taken: updated crate layout docs and ignored generated mdBook output.
+
 ### 2026-01-09 (v0.1.3)
 - Changed: publish `cortenforge-tools` and add it as an optional feature in the `cortenforge` umbrella.
 

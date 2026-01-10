@@ -20,4 +20,4 @@ Quick read: Hot paths, tradeoffs, and perf boundaries.
 - For CPU, consider reducing hidden/depth/max_boxes for faster demos, or fuse operations if profiling shows bottlenecks.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

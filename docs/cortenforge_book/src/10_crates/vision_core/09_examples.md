@@ -69,4 +69,4 @@ impl FrameSource for StaticFrameSource {
 ```
 
 ## Links
-- Source: `vision_core/src/interfaces.rs`
+- Source: `crates/vision_core/src/interfaces.rs`

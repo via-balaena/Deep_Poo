@@ -12,4 +12,4 @@ Cross-module dependencies:
 - relies on vision_core types, inference detectors, and sim_core/Bevy app context.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

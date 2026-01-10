@@ -19,5 +19,5 @@ Quick read: How data flows through this crate in practice.
 - Pure data types/validation; no runtime lifecycle. Initialization/teardown managed by callers.
 
 ## Links
-- Source: `data_contracts/src/manifest.rs`
-- Source: `data_contracts/src/capture.rs`
+- Source: `crates/data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/capture.rs`

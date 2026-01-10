@@ -19,7 +19,7 @@ Provide Burn-based training and evaluation pipelines for TinyDet/BigDet models u
 - Contributors adding losses/augmentations/schedulers or adjusting CLI flags.
 
 ## Links
-- Source: `training/src/lib.rs`
-- Module: `training/src/dataset.rs`
-- Module: `training/src/util.rs`
+- Source: `crates/training/src/lib.rs`
+- Module: `crates/training/src/dataset.rs`
+- Module: `crates/training/src/util.rs`
 - Docs.rs: https://docs.rs/cortenforge-training

@@ -22,4 +22,4 @@ Quick read: Extension points and the constraints they impose.
 - If adding async paths, consider separate async traits or adapters to keep current sync trait objects intact.
 
 ## Links
-- Source: `vision_core/src/interfaces.rs`
+- Source: `crates/vision_core/src/interfaces.rs`

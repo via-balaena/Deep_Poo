@@ -29,11 +29,7 @@ pub fn build_command(cfg: &CmdConfig<'_>, shell: Shell) -> String {
     build_command_with_template(cfg, shell, &tools_cfg.warehouse_train_template)
 }
 
-pub fn build_command_with_template(
-    cfg: &CmdConfig<'_>,
-    shell: Shell,
-    template: &str,
-) -> String {
+pub fn build_command_with_template(cfg: &CmdConfig<'_>, shell: Shell, template: &str) -> String {
     let mut env_parts = Vec::new();
     env_parts.push(shell.env_kv("TENSOR_WAREHOUSE_MANIFEST", cfg.manifest.as_ref()));
     env_parts.push(shell.env_kv("WAREHOUSE_STORE", cfg.store.as_str()));

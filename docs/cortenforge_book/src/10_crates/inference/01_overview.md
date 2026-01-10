@@ -20,7 +20,7 @@ Provide a detector factory that loads model checkpoints (TinyDet/BigDet via mode
 - Contributors adding backends or selection logic.
 
 ## Links
-- Source: `inference/src/lib.rs`
-- Module: `inference/src/factory.rs`
-- Module: `inference/src/plugin.rs`
+- Source: `crates/inference/src/lib.rs`
+- Module: `crates/inference/src/factory.rs`
+- Module: `crates/inference/src/plugin.rs`
 - Docs.rs: https://docs.rs/cortenforge-inference

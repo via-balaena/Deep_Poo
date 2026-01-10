@@ -21,4 +21,4 @@ Quick read: Extension points and the constraints they impose.
 - Future extensibility: could generalize inference scheduling via a trait, but current code is purposely concrete to keep Bevy wiring simple.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

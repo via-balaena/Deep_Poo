@@ -21,4 +21,4 @@ Quick read: How errors are surfaced and handled.
 - `anyhow` in factory allows rich context; consider a typed error if multiple backends are added and need programmatic handling.
 
 ## Links
-- Source: `vision_core/src/interfaces.rs`
+- Source: `crates/vision_core/src/interfaces.rs`

@@ -24,4 +24,4 @@ Quick read: Ownership, threading, and async expectations.
 - Ensure detectors used here truly satisfy `Send + Sync` due to cross-thread execution.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Add basic instrumentation (counts, timing) around collation to spot bottlenecks.
 
 ## Links
-- Source: `training/src/dataset.rs`
+- Source: `crates/training/src/dataset.rs`

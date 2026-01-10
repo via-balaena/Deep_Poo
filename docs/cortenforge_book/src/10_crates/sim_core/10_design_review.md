@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Provide a small fan-out recorder combinator (e.g., `Vec<Box<Recorder>>`) for multi-sink use cases.
 
 ## Links
-- Source: `sim_core/src/recorder_meta.rs`
+- Source: `crates/sim_core/src/recorder_meta.rs`

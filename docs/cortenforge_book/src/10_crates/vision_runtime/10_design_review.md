@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Expose metrics/events for failures, fallback usage, inference latency distributions.
 
 ## Links
-- Source: `vision_runtime/src/lib.rs`
+- Source: `crates/vision_runtime/src/lib.rs`

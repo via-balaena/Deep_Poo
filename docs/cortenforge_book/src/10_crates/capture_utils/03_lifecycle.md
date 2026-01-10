@@ -35,4 +35,4 @@ Quick read: How data flows through this crate in practice.
 - Stateless helpers; lifecycle driven by callers (runtime/tools).
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

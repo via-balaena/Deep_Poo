@@ -19,5 +19,5 @@ Quick read: How data flows through this crate in practice.
 - Stateless beyond factory/detector instances; lifecycle managed by caller.
 
 ## Links
-- Source: `inference/src/factory.rs`
-- Source: `inference/src/plugin.rs`
+- Source: `crates/inference/src/factory.rs`
+- Source: `crates/inference/src/plugin.rs`

@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Consider pluggable recorder formats (e.g., msgpack) to reduce size or improve speed while keeping contract compatibility.
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`

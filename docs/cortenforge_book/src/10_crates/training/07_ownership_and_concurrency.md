@@ -21,4 +21,4 @@ Quick read: Ownership, threading, and async expectations.
 - Concurrent collation on shared inputs would require callers to avoid mutating the same samples concurrently.
 
 ## Links
-- Source: `training/src/dataset.rs`
+- Source: `crates/training/src/dataset.rs`

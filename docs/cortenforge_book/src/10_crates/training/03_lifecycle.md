@@ -20,4 +20,4 @@ Quick read: How data flows through this crate in practice.
 - Backends/features: `backend-ndarray` default, `backend-wgpu` opt-in; `tinydet`/`bigdet` variants.
 
 ## Links
-- Source: `training/src/util.rs`
+- Source: `crates/training/src/util.rs`

@@ -49,7 +49,7 @@ sequenceDiagram
 - Hooks require `&mut App` to register systems/plugins, keeping ownership straightforward and avoiding lifetime gymnastics.
 
 ## Links
-- Source: `sim_core/src/hooks.rs`
+- Source: `crates/sim_core/src/hooks.rs`
 
 ## Design notes
 - Trait-object approach keeps app integration simple (no generics on `App`), at the cost of dynamic dispatch; fine for setup-time hooks.

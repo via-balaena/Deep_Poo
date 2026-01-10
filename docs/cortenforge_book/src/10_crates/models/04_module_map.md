@@ -9,4 +9,4 @@ Cross-module dependencies:
 - consumed by training and inference.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

@@ -49,5 +49,5 @@ fn main() {
 ```
 
 ## Links
-- Source: `data_contracts/src/capture.rs`
-- Source: `data_contracts/src/manifest.rs`
+- Source: `crates/data_contracts/src/capture.rs`
+- Source: `crates/data_contracts/src/manifest.rs`

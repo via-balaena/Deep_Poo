@@ -81,7 +81,10 @@ fn main() -> anyhow::Result<()> {
     let cfg = ToolConfig::load();
     let mut launched = 0usize;
     let mut running: Vec<Running> = Vec::new();
-    let output_root = args.output_root.clone().unwrap_or_else(|| cfg.captures_root.clone());
+    let output_root = args
+        .output_root
+        .clone()
+        .unwrap_or_else(|| cfg.captures_root.clone());
     let prune_root = args
         .prune_output_root
         .clone()
@@ -480,6 +483,7 @@ fn sample_intel_mem_text(text: &str) -> Option<u64> {
     None
 }
 
+#[allow(dead_code)] // only used when wiring macOS GPU sampling paths
 fn sample_apple_helper() -> Option<GpuStats> {
     #[cfg(target_os = "macos")]
     {

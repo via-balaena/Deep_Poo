@@ -8,5 +8,5 @@ Quick read: The public surface; use docs.rs for exact signatures.
 | prune_run | fn | Copy a run into a filtered root and return kept/skipped counts |
 
 ## Links
-- Source: `capture_utils/src/lib.rs`
+- Source: `crates/capture_utils/src/lib.rs`
 - Docs.rs: https://docs.rs/cortenforge-capture-utils

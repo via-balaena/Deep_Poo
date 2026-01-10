@@ -18,4 +18,4 @@ Quick read: How data flows through this crate in practice.
 - Stateless definitions; lifecycle controlled by training/inference code.
 
 ## Links
-- Source: `models/src/lib.rs`
+- Source: `crates/models/src/lib.rs`

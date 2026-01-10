@@ -17,4 +17,4 @@ Quick read: Strengths, risks, and refactor ideas.
 - Provide an option to create per-thread detectors to avoid mutex contention, or use a thread-safe queue of detectors.
 
 ## Links
-- Source: `inference/src/factory.rs`
+- Source: `crates/inference/src/factory.rs`
