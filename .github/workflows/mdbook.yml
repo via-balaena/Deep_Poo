@@ -16,8 +16,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Rust
-        # Pinned to 1.88.0 for mdbook's minimum rustc requirement.
-        uses: dtolnay/rust-toolchain@1.88.0
+        # Pinned to 1.89.0 for mdbook's minimum rustc requirement.
+        uses: dtolnay/rust-toolchain@1.89.0
       - name: Install mdBook
         run: |
           cargo install mdbook --version 0.5.2

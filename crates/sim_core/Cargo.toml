@@ -17,6 +17,6 @@ rust-version = "1.75"
 name = "sim_core"
 
 [dependencies]
-bevy = { workspace = true, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_winit"] }
+bevy = { workspace = true, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_winit", "x11"] } # x11 required for winit on Linux CI
 bevy_rapier3d = { workspace = true, features = ["simd-stable", "debug-render-3d"] }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.4" }

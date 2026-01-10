@@ -17,7 +17,7 @@ rust-version = "1.75"
 name = "vision_runtime"
 
 [dependencies]
-bevy = { workspace = true, features = ["bevy_render", "bevy_asset", "bevy_core_pipeline", "bevy_winit", "bevy_log"] }
+bevy = { workspace = true, features = ["bevy_render", "bevy_asset", "bevy_core_pipeline", "bevy_winit", "bevy_log", "x11"] } # x11 required for winit on Linux CI
 bevy_camera = { workspace = true }
 sim_core = { package = "cortenforge-sim-core", version = "0.1.4" }
 vision_core = { package = "cortenforge-vision-core", version = "0.1.4" }

@@ -14,8 +14,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        # Pinned to 1.88.0 for winit type inference fixes and newer tool deps (mdbook/cargo-deny).
-        uses: dtolnay/rust-toolchain@1.88.0
+        # Pinned to 1.89.0 for winit type inference fixes and newer tool deps (mdbook/cargo-deny).
+        uses: dtolnay/rust-toolchain@1.89.0
         with:
           components: rustfmt, clippy
 
@@ -38,8 +38,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        # Pinned to 1.88.0 for cargo-deny's minimum rustc requirement.
-        uses: dtolnay/rust-toolchain@1.88.0
+        # Pinned to 1.89.0 for cargo-deny's minimum rustc requirement.
+        uses: dtolnay/rust-toolchain@1.89.0
         with:
           components: rustfmt
 
@@ -47,7 +47,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install cargo-deny
-        run: cargo install cargo-deny --version 0.19.0
+        run: cargo install cargo-deny --version 0.19.0 --locked
 
       - name: cargo deny check
         run: cargo deny check
