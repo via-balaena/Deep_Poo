@@ -18,6 +18,6 @@ Quick reference for workspace-wide configuration and publish posture.
 
             - Under the old resolver, if one crate enabled a feature on a shared dependency, every other crate using that dependency inherited it automatically. That often resulted in unexpected behavior, larger binaries, and optional dependencies being pulled in without intent. With resolver 2, each crate resolves features independently, so only the features a crate explicitly opts into are activated.
 
-- Burn-core is fixed in 0.14.1; no vendored patch is required.
+- Burn-core is fixed in 0.19.1; no vendored patch is required.
 
 - `cortenforge-tools` stays unpublished because it includes app-specific bins; plan is to split shared helpers from app-facing pieces.
