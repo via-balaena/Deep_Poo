@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "crates/cli_support",
-    "crates/cortenforge",
     "crates/burn_dataset",
     "crates/sim_core",
     "crates/vision_core",
@@ -12,6 +11,7 @@ members = [
     "crates/training",
     "crates/inference",
     "tools",
+    "crates/cortenforge",
 ]
 resolver = "2"
 
