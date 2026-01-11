@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/cortenforge-sim-core.svg)](https://crates.io/crates/cortenforge-sim-core) [![docs.rs](https://docs.rs/cortenforge-sim-core/badge.svg)](https://docs.rs/cortenforge-sim-core) [![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#)
 
-Sim runtime primitives shared by Bevy apps (sim, datagen, inference). It owns:
+Bevy runtime scaffolding, hooks, and recorder types shared by sim/datagen/inference apps. It owns:
 - ModeSet + SimRunMode: system sets for common vs sim/datagen vs inference paths.
 - SimConfig: mode, headless, capture output/prune settings, max_frames, optional capture interval.
 - Plugins: SimPlugin (mode sets), SimRuntimePlugin (default runtime resources); app crates wire their own systems (e.g., their `AppSystemsPlugin`).

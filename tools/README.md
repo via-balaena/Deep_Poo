@@ -1,7 +1,9 @@
 # cortenforge-tools
 
-[![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#) (not published to crates.io)
+[![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#)
 Package name: `cortenforge-tools`; Rust crate: `cortenforge_tools`.
+
+App-agnostic tooling bins and helpers for capture, ETL, and inference workflows.
 
 CLI utilities packaged in the `tools` crate:
 

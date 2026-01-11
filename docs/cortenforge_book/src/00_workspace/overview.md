@@ -74,6 +74,40 @@ flowchart LR
 
 <br> 
 
+## Layering (core → runtime → app)
+Quick mental model for where each crate sits in the stack.
+
+```mermaid
+flowchart TD
+    subgraph Core
+        SC[sim_core]
+        VC[vision_core]
+        DC[data_contracts]
+        M[models]
+    end
+
+    subgraph Runtime
+        VR[vision_runtime]
+        CU[capture_utils]
+        BD[burn_dataset]
+        TR[training]
+        INF[inference]
+        CLI[cli_support]
+    end
+
+    subgraph App
+        TOOLS[cortenforge-tools]
+        APP[App repo]
+    end
+
+    Core --> Runtime --> App
+    CF[cortenforge] -. umbrella .- Core
+    CF -. umbrella .- Runtime
+    CF -. umbrella .- App
+```
+
+<br>
+
 ## Core crates (high centrality)
 Critical foundations for runtime, contracts, and model definitions.
 | Crate | Version | Path | Type | Edition | Notes |

@@ -1,6 +1,6 @@
 # burn_dataset
 
-Dataset loading, validation, splitting, and Burn-compatible batching utilities used by the CortenForge stack.
+Burn dataset loading, validation, splitting, and batching utilities used by the CortenForge stack.
 
 ## Features
 - `burn_runtime` (off by default): enables Burn-backed batching, mmap/crossbeam/rayon helpers.

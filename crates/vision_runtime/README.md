@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/cortenforge-vision-runtime.svg)](https://crates.io/crates/cortenforge-vision-runtime) [![docs.rs](https://docs.rs/cortenforge-vision-runtime/badge.svg)](https://docs.rs/cortenforge-vision-runtime) [![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#)
 
-Bevy-facing vision runtime for capture and inference, built on `vision_core`.
+Bevy capture/inference plugins built on `vision_core`.
 
 > Deprecated: the old `vision_runtime` crate name was renamed to `cortenforge-vision-runtime`. Please depend on the new crate name.
 

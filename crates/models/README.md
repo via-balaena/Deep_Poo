@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/cortenforge-models.svg)](https://crates.io/crates/cortenforge-models) [![docs.rs](https://docs.rs/cortenforge-models/badge.svg)](https://docs.rs/cortenforge-models) [![MSRV](https://img.shields.io/badge/rustc-1.75+-orange.svg)](#)
 
-Burn-based model definitions for the CortenForge stack.
+TinyDet and BigDet model definitions for the CortenForge stack.
 
 ## Contents
 - `TinyDet` / `TinyDetConfig`: small detector MLP.
