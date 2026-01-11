@@ -7,7 +7,7 @@ bigdet = ["models/bigdet"]
 
 [package]
 name = "cortenforge-training"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 license = "Apache-2.0"
 publish = true
@@ -34,14 +34,14 @@ path = "src/bin/eval.rs"
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.2.1" }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.3.0" }
 burn = { workspace = true, features = ["autodiff", "std"] }
 burn-ndarray = { workspace = true, optional = true }
 burn-wgpu = { workspace = true, optional = true}
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 image = { workspace = true, features = ["png"] }
-models = { package = "cortenforge-models", version = "0.2.1" }
+models = { package = "cortenforge-models", version = "0.3.0" }
 bincode = { workspace = true }
 
 [dev-dependencies]

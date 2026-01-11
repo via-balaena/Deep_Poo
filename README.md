@@ -25,14 +25,15 @@ Shared Rust crates for the CortenForge simulation substrate (capture, ETL, train
 - Tools config: create `cortenforge-tools.toml` at repo root (or set `CORTENFORGE_TOOLS_CONFIG`) to customize paths/commands.
 
 ## Using the crates from crates.io
-- Add deps with `version = "0.2.0"` (examples: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`, `cortenforge-tools`).
-- Umbrella crate: `cortenforge` is at `0.2.0` (includes an optional `tools` feature).
+- Add deps with `version = "0.3.0"` (examples: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`, `cortenforge-tools`).
+- Umbrella crate: `cortenforge` is at `0.3.0` (includes an optional `tools` feature).
 - Feature flags:
   - `cortenforge-training`: `backend-wgpu` (optional GPU); defaults to NdArray.
   - `cortenforge-inference`: `backend-wgpu` (optional GPU); defaults to NdArray; `tinydet`/`bigdet` feature gates.
-  - Tools (`cortenforge-tools`): `scheduler`, `tui`, `gpu_nvidia` (now published).
+  - Tools (`cortenforge-tools`): `scheduler`, `tui`, `gpu-nvidia`.
   - Vision/runtime crates are lean by default; enable only what you need.
 - Feature policy: keep defaults light, gate heavy backends/tools behind explicit flags, and document any new feature in the book’s feature matrix.
+- Note: 0.3.0 removes legacy feature aliases; use `burn-runtime` and `gpu-nvidia` only.
 - MSRV: Rust 1.85+ across crates (CI uses 1.89.0 for toolchain compatibility).
 - Note: `burn-core` is now on the fixed 0.19.1 release; no vendored patch is required.
 

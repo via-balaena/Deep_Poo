@@ -7,7 +7,7 @@ Provide dataset loading, splitting, and Burn-compatible batching utilities for C
 ## Scope
 - Dataset loader from capture/warehouse manifests to Burn tensors.
 - Splitting, batching, and optional mmap/rayon support via features.
-- `burn_runtime` feature enables Burn integrations (burn + burn-ndarray).
+- `burn-runtime` feature enables Burn integrations (burn + burn-ndarray).
 
 ## Non-goals
 - No model definitions or training loop; feeds training crate.

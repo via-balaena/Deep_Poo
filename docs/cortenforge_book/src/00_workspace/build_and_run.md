@@ -20,9 +20,9 @@ Default behavior and opt-in switches for common workflows.
 
 | Topic | Default | Notes |
 | --- | --- | --- |
-| Backends | NdArray | GPU/WGPU opt‑in via `backend-wgpu` (training/inference/models); `gpu_nvidia` on tools. |
+| Backends | NdArray | GPU/WGPU opt‑in via `backend-wgpu` (training/inference/models); `gpu-nvidia` on tools. |
 | Model variants | `tinydet` | `bigdet` optional. |
-| Tools | none | `tui`, `scheduler`, `gpu_nvidia` gate app‑specific bins. |
+| Tools | none | `tui`, `scheduler`, `gpu-nvidia` gate app‑specific bins. |
 
 ## Common flags
 Flags that change dependency resolution or feature surfaces.
@@ -40,7 +40,7 @@ Common failure modes and the fastest fix.
 | --- | --- |
 | Build fails due to burn-core/bincode | Ensure burn-core is 0.19.1+ and bincode is 2.0.1; refresh the lockfile; publish may fail without a lockfile. |
 | GPU/WGPU issues | Enable the right feature flags; skip on non-GPU hosts; check driver availability. |
-| Tooling bins | Ensure required features (`tui`, `scheduler`, `gpu_nvidia`) are enabled; keep inputs minimal for smokes. |
+| Tooling bins | Ensure required features (`tui`, `scheduler`, `gpu-nvidia`) are enabled; keep inputs minimal for smokes. |
 | Docs build | Install mdBook; run `mdbook test` for doctests; mark non-runnable snippets with `ignore`. |
 | Mermaid diagrams | Install `mdbook-mermaid` (`cargo install mdbook-mermaid`) before building this book. |
 | Dependency policy | Shared deps should use root `[workspace.dependencies]`, but `bevy` stays per-crate until feature/default-features are unified. |

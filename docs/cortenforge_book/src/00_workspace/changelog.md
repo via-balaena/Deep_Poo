@@ -39,6 +39,11 @@ Copy/paste scaffold for new release notes.
 - Impact: compatible; `gpu_macos_helper` remains as a deprecated alias (planned removal in v0.3+).
 - Actions taken: updated tools crate docs to prefer `gpu_probe` and note alias/deprecation.
 
+### 2026-01-10 (v0.3.0)
+- Changed: removed legacy feature aliases (`burn_runtime`, `gpu_nvidia`) and standardized on `burn-runtime`/`gpu-nvidia`.
+- Impact: breaking; update feature flags in downstream crates and docs to match new names.
+- Actions taken: updated manifests, docs, and release notes to reference normalized flags only.
+
 ### 2026-01-10 (v0.2.0)
 - Changed: bumped workspace dependencies to latest stable (Burn 0.19.1, bincode 2.0.1, Arrow/Parquet 57.1.0, sysinfo 0.37.2, ratatui 0.30.0).
 - Impact: potentially breaking (Burn API changes); bincode 3.x deferred because crates.io 3.0.0 is a stub.

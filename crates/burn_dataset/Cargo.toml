@@ -1,6 +1,6 @@
 [package]
 name = "cortenforge-burn-dataset"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "Dataset loading, splitting, and Burn-compatible batching utilities for CortenForge."
@@ -17,8 +17,7 @@ name = "burn_dataset"
 
 [features]
 default = []
-# TODO(v0.3+): if we add a `burn-runtime` alias, drop `burn_runtime` in the next breaking release.
-burn_runtime = ["burn", "burn-ndarray", "crossbeam-channel", "memmap2", "rayon"]
+burn-runtime = ["burn", "burn-ndarray", "crossbeam-channel", "memmap2", "rayon"]
 
 [dependencies]
 anyhow = { workspace = true }
@@ -27,7 +26,7 @@ serde_json = { workspace = true }
 rand = { workspace = true }
 thiserror = { workspace = true }
 image = { workspace = true, features = ["png", "rayon"] }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.2.1" }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.3.0" }
 burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
 burn-ndarray = { workspace = true, optional = true }
 crossbeam-channel = { workspace = true, optional = true }

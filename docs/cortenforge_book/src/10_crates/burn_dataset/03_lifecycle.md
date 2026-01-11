@@ -21,11 +21,11 @@ Quick read: How data flows through this crate in practice.
 ## Execution flow
 - Index runs → create SampleIndex list.
 - Summarize/validate with thresholds as needed.
-- Load samples for ETL or build train/val iterators to feed Burn training (requires `burn_runtime` feature).
+- Load samples for ETL or build train/val iterators to feed Burn training (requires `burn-runtime`).
 - Optionally use shard metadata/manifest helpers for warehouse storage/loading.
 
 ## Notes
-- Backends/features: iterators/tensors require `burn_runtime`; otherwise use indexing/summary helpers.
+- Backends/features: iterators/tensors require `burn-runtime`; otherwise use indexing/summary helpers.
 
 ## Links
 - Source: `crates/burn_dataset/src/lib.rs`

@@ -32,6 +32,14 @@ jobs:
             exit 1
           fi
 
+      - name: Legacy feature alias lint (non-blocking)
+        run: |
+          if rg -n "burn_runtime|gpu_nvidia" README.md docs/cortenforge_book/src crates/**/README.md tools/README.md; then
+            echo "Warning: legacy feature names still present in docs. Update to burn-runtime/gpu-nvidia."
+          else
+            echo "Legacy feature names not found in docs."
+          fi
+
       - name: fmt
         run: cargo fmt --all -- --check
 
