@@ -11,6 +11,13 @@ Shared Rust crates for the CortenForge simulation substrate (capture, ETL, train
 - Releases: see `RELEASE.md` for publish/tag steps.
 - License: Apache-2.0 by default; see `LICENSE` and `COMMERCIAL_LICENSE.md`.
 
+## Repository layout
+- `Cargo.toml`: workspace root + umbrella crate (`cortenforge`).
+- `crates/`: core and mid‑layer libraries (`sim_core`, `vision_*`, `data_contracts`, `models`, `training`, `inference`, `capture_utils`, `burn_dataset`, `cli_support`).
+- `tools/`: `cortenforge-tools` crate (app‑agnostic tooling bins and helpers).
+- `docs/`: books and release material (`docs/cortenforge_book` is the primary book).
+- `todo/`: local planning (gitignored).
+
 ## Quick start
 - Build/test the crates: `cargo test --workspace --locked`
 - Format: `cargo fmt --all`

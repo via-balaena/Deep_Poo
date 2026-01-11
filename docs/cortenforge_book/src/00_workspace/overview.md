@@ -66,7 +66,7 @@ flowchart LR
 | Dataset ingestion | `burn_dataset` indexes/validates capture runs, builds Burn-compatible batches/iterators used by `training`. |
 | Training path | `training` depends on `models` and `data_contracts` to produce <a href="https://dataconomy.com/2025/05/09/what-is-machine-learning-checkpointing/">checkpoints</a>; `inference` consumes them. |
 | Training to inference | `training` writes checkpoints; `inference` loads them to build detectors used by runtime or tools. |
-| Tooling | `cortenforge-tools` wraps CLI helpers (`cli_support`), recorder/capture (`capture_utils`), schemas (`data_contracts`), dataset (`burn_dataset`), and inference/models; **planned to be split into app-agnostic vs. app-specific pieces in the future.** |
+| Tooling | `cortenforge-tools` wraps CLI helpers (`cli_support`), recorder/capture (`capture_utils`), schemas (`data_contracts`), dataset (`burn_dataset`), and inference/models; tooling is now app‑agnostic and config‑driven. |
 | Umbrella | `cortenforge` re-exports the stack with feature wiring. |
 | Dependency direction | Arrows generally point from higher-level crates to lower-level foundations; `data_contracts` and `vision_core` sit on many paths. |
 | Change impact | Schema changes in `data_contracts` or interface changes in `vision_core` ripple across capture, training, and tools. |
@@ -117,7 +117,7 @@ Runtime glue and app-facing tooling crates with fewer inward dependencies.
 | Crate | Version | Path | Type | Edition | Notes |
 | ----- | ------- | ---- | ---- | ------- | ----- |
 | **cortenforge-vision-runtime** | 0.2.0 | crates/vision_runtime | lib | 2021 | Capture/inference plugins for Bevy |
-| **cortenforge-tools** | 0.2.0 | tools | lib + bins | 2021 | Tooling crate (crate `cortenforge_tools`); bins include overlay/prune/etl/export/cmd/single_infer; app-facing bins gated by features |
+| **cortenforge-tools** | 0.2.0 | tools | lib + bins | 2021 | Tooling crate (crate `cortenforge_tools`); app‑agnostic bins with feature‑gated optional tooling |
 
 <br>
 <details>
