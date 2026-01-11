@@ -39,6 +39,11 @@ Copy/paste scaffold for new release notes.
 - Impact: compatible; `gpu_macos_helper` alias removed in v0.3+ (use `gpu_probe`).
 - Actions taken: updated tools crate docs to prefer `gpu_probe` and note alias/deprecation.
 
+### 2026-01-10 (v0.3.1)
+- Changed: removed `gpu_macos_helper` alias bin; `datagen_scheduler` now calls `gpu_probe` only.
+- Impact: compatible for users already on `gpu_probe`; breaking for callers still invoking `gpu_macos_helper`.
+- Actions taken: updated tools crate docs and changelog to drop the alias.
+
 ### 2026-01-10 (v0.3.0)
 - Changed: removed legacy feature aliases (`burn_runtime`, `gpu_nvidia`) and standardized on `burn-runtime`/`gpu-nvidia`.
 - Impact: breaking; update feature flags in downstream crates and docs to match new names.

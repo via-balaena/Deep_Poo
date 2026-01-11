@@ -1,6 +1,6 @@
 [package]
 name = "cortenforge-sim-core"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 license = "Apache-2.0"
 publish = true
@@ -19,4 +19,4 @@ name = "sim_core"
 [dependencies]
 bevy = { workspace = true, features = ["bevy_core_pipeline", "bevy_render", "bevy_asset", "bevy_pbr", "bevy_winit", "x11"] } # x11 required for winit on Linux CI
 bevy_rapier3d = { workspace = true, features = ["simd-stable", "debug-render-3d"] }
-vision_core = { package = "cortenforge-vision-core", version = "0.3.0" }
+vision_core = { package = "cortenforge-vision-core", version = "0.3.1" }
