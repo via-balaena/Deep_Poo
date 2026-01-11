@@ -5,7 +5,7 @@ Quick read: How data flows through this crate in practice.
 - Add dependency and select features instead of pinning individual crates:
   ```toml
   [dependencies]
-  cortenforge = { version = "0.2.0", features = ["sim-core", "vision-core", "vision-runtime", "training", "inference", "models", "capture-utils"] }
+  cortenforge = { version = "0.3.0", features = ["sim-core", "vision-core", "vision-runtime", "training", "inference", "models", "capture-utils"] }
   ```
 - Import from prelude or modules as needed; underlying crates are re-exported.
 
