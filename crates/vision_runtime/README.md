@@ -12,7 +12,7 @@ Contents:
 - Overlay helper: `recorder_draw_rect` wraps the shared overlay helper for tools.
 
 Runtime flags/backends:
-- Burn runtime is controlled by the main crate features (`burn_runtime` / `burn_wgpu`); when Burn is unavailable, the detector kind is `Heuristic` and the overlay shows a fallback banner.
+- Burn runtime is controlled by the main crate features (`burn-runtime` / `burn-wgpu`); when Burn is unavailable, the detector kind is `Heuristic` and the overlay shows a fallback banner.
 - No additional features are defined in this crate; it consumes whatever detector is provided by the inference crate via `DetectorHandle`.
 
 Hooks / integration:

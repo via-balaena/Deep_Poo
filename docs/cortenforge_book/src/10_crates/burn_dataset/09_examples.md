@@ -29,10 +29,10 @@ fn main() -> burn_dataset::DatasetResult<()> {
 }
 ```
 
-## 3) Build train/val iterators (burn_runtime feature)
+## 3) Build train/val iterators (burn-runtime feature; alias `burn_runtime`)
 ```rust,ignore
 fn main() -> burn_dataset::DatasetResult<()> {
-    #[cfg(feature = "burn_runtime")]
+    #[cfg(feature = "burn-runtime")]
     {
         use burn_dataset::{build_train_val_iters, DatasetConfig, BatchIter};
         let train_cfg = DatasetConfig::default();

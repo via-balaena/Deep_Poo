@@ -30,9 +30,10 @@ Shared Rust crates for the CortenForge simulation substrate (capture, ETL, train
 - Feature flags:
   - `cortenforge-training`: `backend-wgpu` (optional GPU); defaults to NdArray.
   - `cortenforge-inference`: `backend-wgpu` (optional GPU); defaults to NdArray; `tinydet`/`bigdet` feature gates.
-  - Tools (`cortenforge-tools`): `scheduler`, `tui`, `gpu_nvidia` (now published).
+  - Tools (`cortenforge-tools`): `scheduler`, `tui`, `gpu-nvidia` (alias `gpu_nvidia`).
   - Vision/runtime crates are lean by default; enable only what you need.
 - Feature policy: keep defaults light, gate heavy backends/tools behind explicit flags, and document any new feature in the book’s feature matrix.
+- Note: Feature names will be normalized in the 0.3.0 release. Expect alias period and update flags accordingly.
 - MSRV: Rust 1.85+ across crates (CI uses 1.89.0 for toolchain compatibility).
 - Note: `burn-core` is now on the fixed 0.19.1 release; no vendored patch is required.
 

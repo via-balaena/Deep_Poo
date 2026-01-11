@@ -168,7 +168,8 @@ pub fn platform_probe() -> Box<dyn GpuProbe> {
     #[cfg(all(
         feature = "gpu_nvidia",
         not(target_os = "windows"),
-        not(target_os = "linux")
+        not(target_os = "linux"),
+        not(target_os = "macos")
     ))]
     {
         return Box::new(NvidiaGpuProbe);
