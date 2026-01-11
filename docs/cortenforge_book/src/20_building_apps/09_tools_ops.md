@@ -8,7 +8,7 @@ Tooling helps run and observe the pipeline: scheduling, overlays, exports, and c
 
 **How it fits**
 - `cli_support` keeps commands consistent.
-- `cortenforge-tools` holds bins and shared helpers (not published).
+- `cortenforge-tools` holds bins and shared helpers (published; add as a direct dependency).
 
 **Try it**
 - `cargo check -p cortenforge-cli-support -p cortenforge-tools`
@@ -16,7 +16,7 @@ Tooling helps run and observe the pipeline: scheduling, overlays, exports, and c
 **Learn more**
 - Crate page: [cli_support](../10_crates/cli_support/README.md)
 - Crate page: [cortenforge-tools](../10_crates/cortenforge_tools/README.md)
-- docs.rs: https://docs.rs/cortenforge-cli-support (tools are unpublished)
+- docs.rs: https://docs.rs/cortenforge-cli-support and https://docs.rs/cortenforge-tools
 
 **Unlocked**
 You now have a full, runnable mission stack.

@@ -26,6 +26,3 @@ pub use training;
 
 #[cfg(feature = "burn-dataset")]
 pub use burn_dataset;
-
-#[cfg(feature = "cli-support")]
-pub use cli_support;

@@ -81,5 +81,5 @@ Steps:
 3. Build warehouse command lines with `warehouse_commands` for scripted runs.
 
 Notes:
-- `cortenforge-tools` is slated for split/trim; app-specific bins should move to the app repo.
-- Keep `cortenforge-tools` unpublished; shared bits can migrate into other crates over time.
+- `cortenforge-tools` is app-agnostic; app-specific bins live in the app repo.
+- `cortenforge-tools` is published; shared bits remain in the tools crate.

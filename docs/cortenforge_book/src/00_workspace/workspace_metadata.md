@@ -9,7 +9,7 @@ Quick reference for workspace-wide configuration and publish posture.
 | --- | --- |
 | resolver | `2` |
 | Patch overrides | <ul><li>local paths for all cortenforge crates (workspace dev convenience).</li></ul> |
-| Publish status | <ul><li>most crates publishable</li><li>`cortenforge-tools` marked `publish = false`.</li></ul> |
+| Publish status | <ul><li>most crates publishable</li><li>`cortenforge-tools` is published and app-agnostic.</li></ul> |
 
 ## Notes
 - resolver = 2 
@@ -20,4 +20,4 @@ Quick reference for workspace-wide configuration and publish posture.
 
 - Burn-core is fixed in 0.19.1; no vendored patch is required.
 
-- `cortenforge-tools` stays unpublished because it includes app-specific bins; plan is to split shared helpers from app-facing pieces.
+- `cortenforge-tools` is published and stays app-agnostic; add it directly instead of via the umbrella crate.

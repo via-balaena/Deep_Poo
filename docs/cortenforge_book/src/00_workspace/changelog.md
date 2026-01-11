@@ -44,6 +44,11 @@ Copy/paste scaffold for new release notes.
 - Impact: compatible for users already on `gpu_probe`; breaking for callers still invoking `gpu_macos_helper`.
 - Actions taken: updated tools crate docs and changelog to drop the alias.
 
+### 2026-01-11 (v0.4.0)
+- Changed: removed `cli-support` and `tools` from the `cortenforge` umbrella features; both are now direct deps only.
+- Impact: breaking; add `cortenforge-cli-support` and/or `cortenforge-tools` explicitly in downstream `Cargo.toml`.
+- Actions taken: updated umbrella feature wiring and docs/README to match.
+
 ### 2026-01-10 (v0.3.0)
 - Changed: removed legacy feature aliases (`burn_runtime`, `gpu_nvidia`) and standardized on `burn-runtime`/`gpu-nvidia`.
 - Impact: breaking; update feature flags in downstream crates and docs to match new names.

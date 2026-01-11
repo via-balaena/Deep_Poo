@@ -35,7 +35,7 @@ Operational assumptions that affect how runtime and tooling behave.
 | Capture layout (`run_dir/images`, `labels`, `overlays`) | Recorders/datasets/tools expect this structure. |
 | `burn_dataset::BatchIter` size expectations | Consistent image sizes required unless `target_size` forces resizing. |
 | Permissive env vars | `BURN_DATASET_*`/`WAREHOUSE_*` affect behavior; CI/publish should set explicitly. |
-| `cortenforge-tools` unpublished | App-specific bins belong in app repos; shared helpers may migrate. |
+| `cortenforge-tools` published | Tooling is app-agnostic; app-specific bins live in app repos. |
 
 ## Error/compatibility expectations
 How failures propagate and what must stay in sync.

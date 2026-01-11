@@ -12,8 +12,8 @@ High-level defaults and stack-wide feature expectations.
 | --- | --- |
 | Default backend | training/inference/models enable `backend-ndarray` by default; GPU/WGPU is opt-in via `backend-wgpu`. |
 | Model variants | `tinydet`/`bigdet` across models/training/inference. |
-| Tools | `tui`, `scheduler`, `gpu-nvidia` gate app-specific/heavy bins in cortenforge-tools. |
-| Umbrella crate | `cortenforge` re-exports features to enable stacks (sim-core, vision-core/runtime, training/inference); `burn-runtime`. |
+| Tools | `tui`, `scheduler`, `gpu-nvidia` gate optional bins in cortenforge-tools. |
+| Umbrella crate | `cortenforge` re-exports core stacks (sim-core, vision-core/runtime, training/inference); `burn-runtime`. |
 | Burn-core | 0.19.1 avoids the prior bincode publish break; no patch required. |
 
 ## Per-crate highlights
@@ -24,7 +24,7 @@ Quick reference for feature toggles that matter most per crate.
 | models | `tinydet` (default), `bigdet`. |
 | training | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
 | inference | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
-| cortenforge (umbrella) | Features map to member crates (sim-core, vision-core/runtime, models, training, inference, capture-utils, cli-support, burn-dataset); `burn-runtime`/`burn-wgpu` stacks wire burn deps. |
+| cortenforge (umbrella) | Features map to member crates (sim-core, vision-core/runtime, models, training, inference, capture-utils, burn-dataset); `burn-runtime`/`burn-wgpu` stacks wire burn deps. |
 | cortenforge-tools | `tui`, `scheduler`, `gpu-nvidia`; defaults are lean (no extra features). |
 | cli_support | Optional `bevy`/`bevy-resource` for resource integration. |
 | burn_dataset | `burn-runtime` enables burn + rayon/memmap2/crossbeam. |
@@ -34,7 +34,7 @@ Single view of defaults vs opt-in flags across key crates.
 
 | Crate | Default features | Opt-in features |
 | --- | --- | --- |
-| cortenforge (umbrella) | `sim-core`, `vision-core` | `vision-runtime`, `capture-utils`, `data-contracts`, `models`, `inference`, `training`, `burn-runtime`, `burn-wgpu`, `burn-dataset`, `cli-support`, `tools` |
+| cortenforge (umbrella) | `sim-core`, `vision-core` | `vision-runtime`, `capture-utils`, `data-contracts`, `models`, `inference`, `training`, `burn-runtime`, `burn-wgpu`, `burn-dataset` |
 | models | `tinydet` | `bigdet` |
 | training | `backend-ndarray`, `tinydet` | `backend-wgpu`, `bigdet` |
 | inference | `backend-ndarray`, `tinydet` | `backend-wgpu`, `bigdet` |

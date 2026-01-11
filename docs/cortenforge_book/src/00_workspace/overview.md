@@ -5,6 +5,9 @@
 
 Package names use hyphens (e.g., `cortenforge-tools`), while Rust crate imports use underscores (e.g., `cortenforge_tools`).
 
+## Workspace layout
+The umbrella crate lives at the workspace root; libraries live under `crates/`, and tooling lives under `tools/`.
+
 # Dependency Graph
 One diagram that shows how the crates lean on each other.
 
@@ -48,9 +51,7 @@ flowchart LR
     CF --> M
     CF --> TR
     CF --> INF
-    CF --> CLI
     CF --> BD
-    CF --> TOOLS
 ```
 
 <details>
@@ -66,8 +67,8 @@ flowchart LR
 | Dataset ingestion | `burn_dataset` indexes/validates capture runs, builds Burn-compatible batches/iterators used by `training`. |
 | Training path | `training` depends on `models` and `data_contracts` to produce <a href="https://dataconomy.com/2025/05/09/what-is-machine-learning-checkpointing/">checkpoints</a>; `inference` consumes them. |
 | Training to inference | `training` writes checkpoints; `inference` loads them to build detectors used by runtime or tools. |
-| Tooling | `cortenforge-tools` wraps CLI helpers (`cli_support`), recorder/capture (`capture_utils`), schemas (`data_contracts`), dataset (`burn_dataset`), and inference/models; tooling is now app‑agnostic and config‑driven. |
-| Umbrella | `cortenforge` re-exports the stack with feature wiring. |
+| Tooling | `cortenforge-tools` wraps CLI helpers (`cli_support`), recorder/capture (`capture_utils`), schemas (`data_contracts`), dataset (`burn_dataset`), and inference/models; tooling is app‑agnostic and config‑driven. |
+| Umbrella | `cortenforge` re-exports core stacks with feature wiring (excluding tools/cli-support). |
 | Dependency direction | Arrows generally point from higher-level crates to lower-level foundations; `data_contracts` and `vision_core` sit on many paths. |
 | Change impact | Schema changes in `data_contracts` or interface changes in `vision_core` ripple across capture, training, and tools. |
 </details>
@@ -103,7 +104,6 @@ flowchart TD
     Core --> Runtime --> App
     CF[cortenforge] -. umbrella .- Core
     CF -. umbrella .- Runtime
-    CF -. umbrella .- App
 ```
 
 <br>
@@ -112,10 +112,10 @@ flowchart TD
 Critical foundations for runtime, contracts, and model definitions.
 | Crate | Version | Path | Type | Edition | Notes |
 | ----- | ------- | ---- | ---- | ------- | ----- |
-| **cortenforge-sim-core** | 0.3.0 | crates/sim_core | lib | 2021 | Bevy runtime scaffolding, hooks, recorder types |
-| **cortenforge-vision-core** | 0.3.0 | crates/vision_core | lib | 2021 | Vision interfaces, overlay math |
-| **cortenforge-data-contracts** | 0.3.0 | crates/data_contracts | lib | 2021 | Schemas/validation for captures/warehouse |
-| **cortenforge-models** | 0.3.0 | crates/models | lib | 2021 | TinyDet/BigDet definitions |
+| **cortenforge-sim-core** | 0.4.0 | crates/sim_core | lib | 2021 | Bevy runtime scaffolding, hooks, recorder types |
+| **cortenforge-vision-core** | 0.4.0 | crates/vision_core | lib | 2021 | Vision interfaces, overlay math |
+| **cortenforge-data-contracts** | 0.4.0 | crates/data_contracts | lib | 2021 | Schemas/validation for captures/warehouse |
+| **cortenforge-models** | 0.4.0 | crates/models | lib | 2021 | TinyDet/BigDet definitions |
 
 <br>
 <details>
@@ -131,11 +131,11 @@ Crates that adapt core capabilities into training, inference, and tooling utilit
 
 | Crate | Version | Path | Type | Edition | Notes |
 | ----- | ------- | ---- | ---- | ------- | ----- |
-| **cortenforge-inference** | 0.3.0 | crates/inference | lib | 2021 | Detector factory (Burn-backed/heuristic) |
-| **cortenforge-training** | 0.3.0 | crates/training | lib + bins | 2021 | Burn training/eval CLI (train/eval bins) |
-| **cortenforge-capture-utils** | 0.3.0 | crates/capture_utils | lib | 2021 | Recorder sinks and capture helpers |
-| **cortenforge-burn-dataset** | 0.3.0 | crates/burn_dataset | lib | 2021 | Burn dataset loading/splitting |
-| **cortenforge-cli-support** | 0.3.0 | crates/cli_support | lib | 2021 | Shared CLI args/helpers; optional Bevy feature |
+| **cortenforge-inference** | 0.4.0 | crates/inference | lib | 2021 | Detector factory (Burn-backed/heuristic) |
+| **cortenforge-training** | 0.4.0 | crates/training | lib + bins | 2021 | Burn training/eval CLI (train/eval bins) |
+| **cortenforge-capture-utils** | 0.4.0 | crates/capture_utils | lib | 2021 | Recorder sinks and capture helpers |
+| **cortenforge-burn-dataset** | 0.4.0 | crates/burn_dataset | lib | 2021 | Burn dataset loading/splitting |
+| **cortenforge-cli-support** | 0.4.0 | crates/cli_support | lib | 2021 | Shared CLI args/helpers; optional Bevy feature |
 
 <br>
 <details>
@@ -150,8 +150,8 @@ Runtime glue and app-facing tooling crates with fewer inward dependencies.
 
 | Crate | Version | Path | Type | Edition | Notes |
 | ----- | ------- | ---- | ---- | ------- | ----- |
-| **cortenforge-vision-runtime** | 0.3.0 | crates/vision_runtime | lib | 2021 | Capture/inference plugins for Bevy |
-| **cortenforge-tools** | 0.3.0 | tools | lib + bins | 2021 | Tooling crate (crate `cortenforge_tools`); app‑agnostic bins with feature‑gated optional tooling |
+| **cortenforge-vision-runtime** | 0.4.0 | crates/vision_runtime | lib | 2021 | Capture/inference plugins for Bevy |
+| **cortenforge-tools** | 0.4.0 | tools | lib + bins | 2021 | Tooling crate (crate `cortenforge_tools`); app‑agnostic bins with feature‑gated optional tooling |
 
 <br>
 <details>
@@ -166,7 +166,7 @@ Single entry-point facade that re-exports the stack behind feature flags.
 
 | Crate | Version | Path | Type | Edition | Notes |
 | ----- | ------- | ---- | ---- | ------- | ----- |
-| **cortenforge** | 0.3.0 | root | lib | 2024 | Umbrella re-export; feature wiring |
+| **cortenforge** | 0.4.0 | root | lib | 2024 | Umbrella re-export; feature wiring |
 
 <br>
 <details>
