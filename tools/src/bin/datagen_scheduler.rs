@@ -476,27 +476,25 @@ fn sample_intel_mem_text(text: &str) -> Option<u64> {
     None
 }
 
+#[cfg(target_os = "macos")]
 fn sample_apple_helper() -> Option<GpuStats> {
-    #[cfg(target_os = "macos")]
-    {
-        let output = Command::new("gpu_probe").output().ok()?;
-        if !output.status.success() {
-            return None;
-        }
-        #[derive(Deserialize)]
-        struct HelperPayload {
-            available: bool,
-            utilization: Option<f64>,
-            mem_used_mb: Option<u64>,
-        }
-        let payload: HelperPayload = serde_json::from_slice(&output.stdout).ok()?;
-        if payload.available {
-            if let Some(u) = payload.utilization {
-                return Some(GpuStats {
-                    utilization: u as f32,
-                    mem_used_mb: payload.mem_used_mb,
-                });
-            }
+    let output = Command::new("gpu_probe").output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    #[derive(Deserialize)]
+    struct HelperPayload {
+        available: bool,
+        utilization: Option<f64>,
+        mem_used_mb: Option<u64>,
+    }
+    let payload: HelperPayload = serde_json::from_slice(&output.stdout).ok()?;
+    if payload.available {
+        if let Some(u) = payload.utilization {
+            return Some(GpuStats {
+                utilization: u as f32,
+                mem_used_mb: payload.mem_used_mb,
+            });
         }
     }
     None
