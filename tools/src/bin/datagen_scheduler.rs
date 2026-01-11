@@ -476,20 +476,13 @@ fn sample_intel_mem_text(text: &str) -> Option<u64> {
     None
 }
 
-#[allow(dead_code)] // only used when wiring macOS GPU sampling paths
 fn sample_apple_helper() -> Option<GpuStats> {
     #[cfg(target_os = "macos")]
     {
-        let mut output = None;
-        for cmd in ["gpu_probe", "gpu_macos_helper"] {
-            if let Ok(attempt) = Command::new(cmd).output() {
-                if attempt.status.success() {
-                    output = Some(attempt);
-                    break;
-                }
-            }
+        let output = Command::new("gpu_probe").output().ok()?;
+        if !output.status.success() {
+            return None;
         }
-        let output = output?;
         #[derive(Deserialize)]
         struct HelperPayload {
             available: bool,

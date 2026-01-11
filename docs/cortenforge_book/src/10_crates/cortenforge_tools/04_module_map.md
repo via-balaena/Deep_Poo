@@ -11,7 +11,7 @@ Quick read: What each module owns and why it exists.
   - Types: WarehouseStore, ModelKind, CmdConfig, DEFAULT_CONFIG, Shell.
   - Functions: build_command.
 - `bin/`: Binaries (overlay_labels, prune_empty, warehouse_etl/export/cmd, single_infer, gpu_probe).
-  - App-gated bins: datagen, datagen_scheduler, tui. `gpu_macos_helper` is a deprecated alias for `gpu_probe` (remove in v0.3+).
+  - App-gated bins: datagen, datagen_scheduler, tui.
 
 Cross-module dependencies:
 - services/warehouse_commands use cli_support and substrate crates.

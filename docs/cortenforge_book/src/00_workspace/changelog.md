@@ -36,7 +36,7 @@ Copy/paste scaffold for new release notes.
 
 ### 2026-01-10 (v0.2.1)
 - Changed: added `gpu_probe` bin with stable JSON schema and `--format=json` flag.
-- Impact: compatible; `gpu_macos_helper` remains as a deprecated alias (planned removal in v0.3+).
+- Impact: compatible; `gpu_macos_helper` alias removed in v0.3+ (use `gpu_probe`).
 - Actions taken: updated tools crate docs to prefer `gpu_probe` and note alias/deprecation.
 
 ### 2026-01-10 (v0.3.0)

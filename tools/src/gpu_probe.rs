@@ -46,13 +46,13 @@ impl GpuProbe for MacGpuProbe {
         #[cfg(target_os = "macos")]
         {
             // TODO: replace with real Metal/GPU stats. For now report availability with zero utilization.
-            return GpuStatus {
+            GpuStatus {
                 available: true,
                 utilization: Some(0.0),
                 mem_used_mb: None,
                 vendor: None,
                 device_name: None,
-            };
+            }
         }
 
         #[cfg(not(target_os = "macos"))]
@@ -177,7 +177,7 @@ pub fn platform_probe() -> Box<dyn GpuProbe> {
 
     #[cfg(target_os = "macos")]
     {
-        return Box::new(MacGpuProbe);
+        Box::new(MacGpuProbe)
     }
 
     #[cfg(all(

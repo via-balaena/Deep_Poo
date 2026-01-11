@@ -21,7 +21,7 @@ Quick read: How data flows through this crate in practice.
 ## Execution flow (shared bins)
 - Parse CLI args using cli_support helpers.
 - Operate on capture/warehouse artifacts using capture_utils, data_contracts, burn_dataset, inference/models as needed.
-- App-facing bins (`datagen`, `datagen_scheduler`, `tui`) are gated by features and remain config-driven; app repos supply any app-specific flows. `gpu_probe` is shared; `gpu_macos_helper` is a deprecated alias (remove in v0.3+).
+- App-facing bins (`datagen`, `datagen_scheduler`, `tui`) are gated by features and remain config-driven; app repos supply any app-specific flows. `gpu_probe` is shared.
 
 ## Notes
 - Shared helpers (services/warehouse_commands) live here for now; keep the crate lean and config-driven while app repos own app-specific logic.

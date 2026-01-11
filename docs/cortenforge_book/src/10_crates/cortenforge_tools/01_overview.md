@@ -5,7 +5,7 @@ Quick read: What this crate does and where it fits.
 Bundle tooling bins and helpers for capture/overlay/ETL/export and simple inference, shared across apps. Bins are now config-driven and app-agnostic; app-specific behavior lives in app repos.
 
 ## Scope
-- Bins: overlay_labels, prune_empty, warehouse_etl/export/cmd, single_infer, gpu_probe (shared-ish); app-facing bins gated by features (datagen_scheduler, tui, datagen). `gpu_macos_helper` is a deprecated alias for `gpu_probe` (remove in v0.3+).
+- Bins: overlay_labels, prune_empty, warehouse_etl/export/cmd, single_infer, gpu_probe (shared-ish); app-facing bins gated by features (datagen_scheduler, tui, datagen).
 - Shared helpers: CLI services and warehouse commands in `services` / `warehouse_commands` (only live here today).
 - Uses substrate crates: capture_utils, data_contracts, vision_core, inference/models, cli_support, burn_dataset.
 
