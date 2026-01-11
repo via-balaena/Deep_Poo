@@ -67,10 +67,17 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
+      - name: Install mdbook
+        run: cargo install mdbook --locked
+
+      - name: mdbook build (cortenforge)
+        run: mdbook build docs/cortenforge_book
+
       - name: tests (full)
         run: cargo test --workspace --locked --all-features
 
   cargo-deny:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
