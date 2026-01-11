@@ -2,7 +2,7 @@
 
 ## Responsibility
 - Provide dataset ingestion, augmentation, validation, and batching utilities for capture datasets.
-- Support both eager dataset loading and Burn-ready batch iterators/sharded “warehouse” loaders (feature `burn-runtime`, alias `burn_runtime`).
+- Support both eager dataset loading and Burn-ready batch iterators/sharded “warehouse” loaders (feature `burn-runtime`).
 
 ## Key items
 - Error/modeling:
@@ -14,7 +14,7 @@
 - Loading/augmentation:
   - `load_run_dataset`, `load_sample_for_etl`, `load_sample` (internal), `build_sample_from_image`.
   - Aug helpers: `maybe_hflip`, `maybe_jitter`, `maybe_noise`, `maybe_scale_jitter`, `maybe_blur`, `letterbox_resize`, box normalization helpers.
-- Warehousing / streaming (feature `burn-runtime`, alias `burn_runtime`):
+- Warehousing / streaming (feature `burn-runtime`):
   - `BurnBatch`, `BatchIter` (in-memory iterator over captures with augmentation).
   - Sharded warehouse metadata: `ShardMetadata`, `WarehouseManifest`, `WarehouseStoreMode`.
   - Shard loaders/backing: `ShardBuffer`, `WarehouseShardStore` (trait), `WarehouseBatchIter`, `StreamingStore`, `InMemoryStore`, `WarehouseLoaders`.
@@ -29,5 +29,5 @@
 
 ## Cross-module deps
 - Consumed by `training` and downstream ETL/warehouse tooling.
-- Uses `rand`, `image`, `serde`, `sha2`, `crossbeam_channel`/`rayon`/`memmap2` when `burn-runtime` (alias `burn_runtime`) is enabled.
+- Uses `rand`, `image`, `serde`, `sha2`, `crossbeam_channel`/`rayon`/`memmap2` when `burn-runtime` is enabled.
 - Shard loaders output Burn tensors; align `max_boxes` and `target_size` with model expectations in `models`/`inference`.

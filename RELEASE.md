@@ -17,6 +17,9 @@ Follow these steps to publish the `cortenforge-*` crates and tag a release. Adju
 - Cross-platform GPU probing: macOS (stub), Linux (NVIDIA/AMD/Intel), Windows (NVIDIA + AMD stub feature flag).
 - `gpu_macos_helper` retained as a deprecated alias (planned removal in v0.3+); docs updated accordingly.
 
+## Release notes (v0.3.0 draft)
+- Feature flags normalized: use `burn-runtime` and `gpu-nvidia` (legacy aliases removed).
+
 ## Crate order (publish)
 1. `cortenforge-data-contracts`
 2. `cortenforge-models`

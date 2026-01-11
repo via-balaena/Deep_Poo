@@ -2,7 +2,7 @@
 Quick read: Extension points and the constraints they impose.
 
 ## Extensibility traits
-- `WarehouseShardStore` (feature `burn-runtime`, alias `burn_runtime`): trait abstraction for providing shard iterators. Methods: `train_iter`, `val_iter`, `train_len`, `val_len`, `total_shards`, `mode`.
+- `WarehouseShardStore` (feature `burn-runtime`): trait abstraction for providing shard iterators. Methods: `train_iter`, `val_iter`, `train_len`, `val_len`, `total_shards`, `mode`.
 
 ## Implementations
 - `InMemoryStore`: stores shard buffers in memory; implements `WarehouseShardStore`.

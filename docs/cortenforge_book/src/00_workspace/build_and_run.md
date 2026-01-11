@@ -20,9 +20,9 @@ Default behavior and opt-in switches for common workflows.
 
 | Topic | Default | Notes |
 | --- | --- | --- |
-| Backends | NdArray | GPU/WGPU opt‑in via `backend-wgpu` (training/inference/models); `gpu-nvidia` (alias `gpu_nvidia`) on tools. |
+| Backends | NdArray | GPU/WGPU opt‑in via `backend-wgpu` (training/inference/models); `gpu-nvidia` on tools. |
 | Model variants | `tinydet` | `bigdet` optional. |
-| Tools | none | `tui`, `scheduler`, `gpu-nvidia` (alias `gpu_nvidia`) gate app‑specific bins. |
+| Tools | none | `tui`, `scheduler`, `gpu-nvidia` gate app‑specific bins. |
 
 ## Common flags
 Flags that change dependency resolution or feature surfaces.

@@ -273,8 +273,8 @@ fn sample_gpu(vendor: GpuVendor) -> Option<GpuStats> {
 }
 
 fn sample_nvidia() -> Option<GpuStats> {
-    // Prefer NVML if available under the gpu_nvidia feature; otherwise fall back to nvidia-smi.
-    #[cfg(feature = "gpu_nvidia")]
+    // Prefer NVML if available under the gpu-nvidia feature; otherwise fall back to nvidia-smi.
+    #[cfg(feature = "gpu-nvidia")]
     {
         if let Some(stats) = sample_nvidia_nvml() {
             return Some(stats);
@@ -300,7 +300,7 @@ fn sample_nvidia() -> Option<GpuStats> {
     })
 }
 
-#[cfg(feature = "gpu_nvidia")]
+#[cfg(feature = "gpu-nvidia")]
 fn sample_nvidia_nvml() -> Option<GpuStats> {
     use nvml_wrapper::Nvml;
     let nvml = Nvml::init().ok()?;

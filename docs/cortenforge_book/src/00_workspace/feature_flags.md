@@ -3,7 +3,7 @@
 **How it fits**: Feature gates shape build size, runtime backends, and tooling.
 **Learn more**: See [Build & Run](build_and_run.md) for command patterns.
 
-Note: Feature names will be normalized in the 0.3.0 release. Expect an alias period and update flags accordingly.
+Note: 0.3.0 removes legacy feature aliases; use the normalized names only.
 
 ## Workspace-wide themes
 High-level defaults and stack-wide feature expectations.
@@ -12,8 +12,8 @@ High-level defaults and stack-wide feature expectations.
 | --- | --- |
 | Default backend | training/inference/models enable `backend-ndarray` by default; GPU/WGPU is opt-in via `backend-wgpu`. |
 | Model variants | `tinydet`/`bigdet` across models/training/inference. |
-| Tools | `tui`, `scheduler`, `gpu-nvidia` (alias `gpu_nvidia`) gate app-specific/heavy bins in cortenforge-tools. |
-| Umbrella crate | `cortenforge` re-exports features to enable stacks (sim-core, vision-core/runtime, training/inference); `burn-runtime` alias `burn_runtime`. |
+| Tools | `tui`, `scheduler`, `gpu-nvidia` gate app-specific/heavy bins in cortenforge-tools. |
+| Umbrella crate | `cortenforge` re-exports features to enable stacks (sim-core, vision-core/runtime, training/inference); `burn-runtime`. |
 | Burn-core | 0.19.1 avoids the prior bincode publish break; no patch required. |
 
 ## Per-crate highlights
@@ -25,9 +25,9 @@ Quick reference for feature toggles that matter most per crate.
 | training | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
 | inference | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
 | cortenforge (umbrella) | Features map to member crates (sim-core, vision-core/runtime, models, training, inference, capture-utils, cli-support, burn-dataset); `burn-runtime`/`burn-wgpu` stacks wire burn deps. |
-| cortenforge-tools | `tui`, `scheduler`, `gpu-nvidia` (alias `gpu_nvidia`); defaults are lean (no extra features). |
+| cortenforge-tools | `tui`, `scheduler`, `gpu-nvidia`; defaults are lean (no extra features). |
 | cli_support | Optional `bevy`/`bevy-resource` for resource integration. |
-| burn_dataset | `burn-runtime` enables burn + rayon/memmap2/crossbeam; legacy alias `burn_runtime`. |
+| burn_dataset | `burn-runtime` enables burn + rayon/memmap2/crossbeam. |
 
 ## Feature matrix (condensed)
 Single view of defaults vs opt-in flags across key crates.
@@ -38,9 +38,9 @@ Single view of defaults vs opt-in flags across key crates.
 | models | `tinydet` | `bigdet` |
 | training | `backend-ndarray`, `tinydet` | `backend-wgpu`, `bigdet` |
 | inference | `backend-ndarray`, `tinydet` | `backend-wgpu`, `bigdet` |
-| burn_dataset | (none) | `burn-runtime` (alias `burn_runtime`) |
+| burn_dataset | (none) | `burn-runtime` |
 | cli_support | (none) | `bevy-resource` |
-| cortenforge-tools | (none) | `tui`, `scheduler`, `gpu-nvidia` (alias `gpu_nvidia`) |
+| cortenforge-tools | (none) | `tui`, `scheduler`, `gpu-nvidia` |
 
 ## Hygiene guidance
 Rules of thumb for keeping features and builds predictable.

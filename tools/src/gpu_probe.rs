@@ -27,7 +27,7 @@ pub trait GpuProbe {
 
 pub struct MacGpuProbe;
 
-#[cfg(feature = "gpu_nvidia")]
+#[cfg(feature = "gpu-nvidia")]
 pub struct NvidiaGpuProbe;
 
 pub struct FallbackGpuProbe;
@@ -62,7 +62,7 @@ impl GpuProbe for MacGpuProbe {
     }
 }
 
-#[cfg(feature = "gpu_nvidia")]
+#[cfg(feature = "gpu-nvidia")]
 impl GpuProbe for NvidiaGpuProbe {
     fn status(&self) -> GpuStatus {
         use nvml_wrapper::Nvml;
@@ -104,7 +104,7 @@ impl GpuProbe for FallbackGpuProbe {
 #[cfg(target_os = "linux")]
 impl GpuProbe for LinuxGpuProbe {
     fn status(&self) -> GpuStatus {
-        #[cfg(feature = "gpu_nvidia")]
+        #[cfg(feature = "gpu-nvidia")]
         {
             let status = NvidiaGpuProbe.status();
             if status.available {
@@ -129,17 +129,17 @@ impl GpuProbe for LinuxGpuProbe {
 #[cfg(target_os = "windows")]
 impl GpuProbe for WindowsGpuProbe {
     fn status(&self) -> GpuStatus {
-        #[cfg(feature = "gpu_nvidia")]
+        #[cfg(feature = "gpu-nvidia")]
         {
             return NvidiaGpuProbe.status();
         }
 
-        #[cfg(all(not(feature = "gpu_nvidia"), feature = "gpu_amd_windows"))]
+        #[cfg(all(not(feature = "gpu-nvidia"), feature = "gpu_amd_windows"))]
         {
             return AmdWindowsProbe.status();
         }
 
-        #[cfg(all(not(feature = "gpu_nvidia"), not(feature = "gpu_amd_windows")))]
+        #[cfg(all(not(feature = "gpu-nvidia"), not(feature = "gpu_amd_windows")))]
         {
             return GpuStatus::unavailable();
         }
@@ -166,7 +166,7 @@ pub fn platform_probe() -> Box<dyn GpuProbe> {
     }
 
     #[cfg(all(
-        feature = "gpu_nvidia",
+        feature = "gpu-nvidia",
         not(target_os = "windows"),
         not(target_os = "linux"),
         not(target_os = "macos")
@@ -184,7 +184,7 @@ pub fn platform_probe() -> Box<dyn GpuProbe> {
         not(target_os = "macos"),
         not(target_os = "windows"),
         not(target_os = "linux"),
-        not(feature = "gpu_nvidia")
+        not(feature = "gpu-nvidia")
     ))]
     {
         return Box::new(FallbackGpuProbe);

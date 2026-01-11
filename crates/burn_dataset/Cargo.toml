@@ -17,9 +17,7 @@ name = "burn_dataset"
 
 [features]
 default = []
-# TODO(post-0.3): drop legacy `burn_runtime` after one compatibility cycle.
-burn-runtime = ["burn_runtime"]
-burn_runtime = ["burn", "burn-ndarray", "crossbeam-channel", "memmap2", "rayon"]
+burn-runtime = ["burn", "burn-ndarray", "crossbeam-channel", "memmap2", "rayon"]
 
 [dependencies]
 anyhow = { workspace = true }

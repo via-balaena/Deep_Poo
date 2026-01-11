@@ -11,7 +11,7 @@ CLI utilities packaged in the `tools` crate:
 - Feature-gated:
   - `tui` (enable `--features tui`): requires `crossterm`/`ratatui`.
   - `datagen_scheduler` (enable `--features scheduler`): requires `sysinfo`.
-  - `gpu-nvidia` (alias `gpu_nvidia`, optional): pulls in `nvml-wrapper` for NVML-based telemetry (used by datagen_scheduler).
+  - `gpu-nvidia` (optional): pulls in `nvml-wrapper` for NVML-based telemetry (used by datagen_scheduler).
 
 Shared deps:
 - `data_contracts` for capture/manifest schemas.

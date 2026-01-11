@@ -23,7 +23,7 @@ Feature flags that have cross-crate implications.
 | Backends | Default NdArray; enable `backend-wgpu` in `models`, `training`, `inference` to use GPU. |
 | Models | `bigdet` feature switches inference model type; downstream code should not assume TinyDet dimensions when `bigdet` is on. |
 | Thread safety | `vision_runtime` assumes detectors are `Send + Sync`; `InferenceFactory` supplies such detectors. |
-| Tooling features | `cortenforge-tools` bins: `tui`, `scheduler`, `gpu-nvidia` (alias `gpu_nvidia`) gate heavy deps; default footprint is minimal. |
+| Tooling features | `cortenforge-tools` bins: `tui`, `scheduler`, `gpu-nvidia` gate heavy deps; default footprint is minimal. |
 
 ## Runtime assumptions
 Operational assumptions that affect how runtime and tooling behave.

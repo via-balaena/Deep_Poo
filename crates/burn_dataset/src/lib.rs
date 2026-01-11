@@ -1,26 +1,26 @@
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use crossbeam_channel::{bounded, Receiver};
 use image::imageops::FilterType;
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use memmap2::MmapOptions;
 use rand::{seq::SliceRandom, Rng, SeedableRng};
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::fs;
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use std::fs::File;
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use std::thread;
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 use std::time::{Duration, Instant};
 use thiserror::Error;
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 const DEFAULT_LOG_EVERY_SAMPLES: usize = 1000;
 
 pub type DatasetResult<T> = Result<T, BurnDatasetError>;
@@ -863,7 +863,7 @@ impl WarehouseManifest {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub fn build_train_val_iters(
     root: &Path,
     val_ratio: f32,
@@ -954,7 +954,7 @@ fn label_has_box(meta: &LabelEntry) -> bool {
     })
 }
 
-#[cfg(all(test, feature = "burn_runtime"))]
+#[cfg(all(test, feature = "burn-runtime"))]
 mod streaming_tests {
     use super::*;
 
@@ -1530,7 +1530,7 @@ pub(crate) fn maybe_blur(
     *img = blurred;
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub struct BurnBatch<B: burn::tensor::backend::Backend> {
     pub images: burn::tensor::Tensor<B, 4>,
     pub boxes: burn::tensor::Tensor<B, 3>,
@@ -1538,7 +1538,7 @@ pub struct BurnBatch<B: burn::tensor::backend::Backend> {
     pub frame_ids: burn::tensor::Tensor<B, 1>,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub struct BatchIter {
     indices: Vec<SampleIndex>,
     cursor: usize,
@@ -1567,7 +1567,7 @@ pub struct BatchIter {
     pipeline: TransformPipeline,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl BatchIter {
     pub fn from_root(root: &Path, cfg: DatasetConfig) -> DatasetResult<Self> {
         let indices = index_runs(root)?;
@@ -1912,7 +1912,7 @@ impl BatchIter {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 struct ShardBuffer {
     samples: usize,
     width: u32,
@@ -1921,7 +1921,7 @@ struct ShardBuffer {
     backing: ShardBacking,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 enum ShardBacking {
     Owned {
         images: Vec<f32>,
@@ -1944,7 +1944,7 @@ enum ShardBacking {
     }, // placeholder for future extensions
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl ShardBuffer {
     fn copy_sample(
         &self,
@@ -2103,7 +2103,7 @@ impl ShardBuffer {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub struct WarehouseBatchIter {
     inner: WarehouseBatchIterKind,
     width: u32,
@@ -2111,7 +2111,7 @@ pub struct WarehouseBatchIter {
     max_boxes: usize,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 enum WarehouseBatchIterKind {
     Direct {
         order: Vec<(usize, usize)>,
@@ -2127,14 +2127,14 @@ enum WarehouseBatchIterKind {
     },
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 struct StreamedSample {
     images: Vec<f32>,
     boxes: Vec<f32>,
     masks: Vec<f32>,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 struct StreamingStore {
     shards: std::sync::Arc<Vec<ShardBuffer>>,
     train_order: Vec<(usize, usize)>,
@@ -2146,7 +2146,7 @@ struct StreamingStore {
     prefetch: usize,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl StreamingStore {
     pub fn from_manifest_path(
         manifest_path: &Path,
@@ -2256,7 +2256,7 @@ impl StreamingStore {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl WarehouseShardStore for StreamingStore {
     fn train_iter(&self) -> WarehouseBatchIter {
         self.spawn_iter(&self.train_order, self.drop_last)
@@ -2283,7 +2283,7 @@ impl WarehouseShardStore for StreamingStore {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub trait WarehouseShardStore: Send + Sync {
     fn train_iter(&self) -> WarehouseBatchIter;
     fn val_iter(&self) -> WarehouseBatchIter;
@@ -2296,12 +2296,12 @@ pub trait WarehouseShardStore: Send + Sync {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 pub struct WarehouseLoaders {
     store: Box<dyn WarehouseShardStore>,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 struct InMemoryStore {
     shards: std::sync::Arc<Vec<ShardBuffer>>,
     train_order: Vec<(usize, usize)>,
@@ -2312,7 +2312,7 @@ struct InMemoryStore {
     max_boxes: usize,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl InMemoryStore {
     pub fn from_manifest_path(
         manifest_path: &Path,
@@ -2373,7 +2373,7 @@ impl InMemoryStore {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl WarehouseShardStore for InMemoryStore {
     fn train_iter(&self) -> WarehouseBatchIter {
         WarehouseBatchIter {
@@ -2416,7 +2416,7 @@ impl WarehouseShardStore for InMemoryStore {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 struct MmapStore {
     shards: std::sync::Arc<Vec<ShardBuffer>>,
     train_order: Vec<(usize, usize)>,
@@ -2427,7 +2427,7 @@ struct MmapStore {
     max_boxes: usize,
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl MmapStore {
     pub fn from_manifest_path(
         manifest_path: &Path,
@@ -2488,7 +2488,7 @@ impl MmapStore {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl WarehouseShardStore for MmapStore {
     fn train_iter(&self) -> WarehouseBatchIter {
         WarehouseBatchIter {
@@ -2534,7 +2534,7 @@ impl WarehouseShardStore for MmapStore {
         WarehouseStoreMode::Mmap
     }
 }
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl WarehouseBatchIter {
     pub fn len(&self) -> usize {
         match &self.inner {
@@ -2658,7 +2658,7 @@ impl WarehouseBatchIter {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 impl WarehouseLoaders {
     pub fn store_len(&self) -> usize {
         self.store.total_shards()
@@ -2720,21 +2720,21 @@ impl WarehouseLoaders {
     }
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 fn read_u32_le(data: &[u8]) -> u32 {
     let mut arr = [0u8; 4];
     arr.copy_from_slice(data);
     u32::from_le_bytes(arr)
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 fn read_u64_le(data: &[u8]) -> u64 {
     let mut arr = [0u8; 8];
     arr.copy_from_slice(data);
     u64::from_le_bytes(arr)
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 fn load_shard_owned(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuffer> {
     let path = root.join(&meta.relative_path);
     let data = fs::read(&path).map_err(|e| BurnDatasetError::Io {
@@ -2849,7 +2849,7 @@ fn load_shard_owned(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuf
     })
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 fn load_shard_mmap(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuffer> {
     let path = root.join(&meta.relative_path);
     let file = File::open(&path).map_err(|e| BurnDatasetError::Io {
@@ -2949,7 +2949,7 @@ fn load_shard_mmap(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuff
     })
 }
 
-#[cfg(feature = "burn_runtime")]
+#[cfg(feature = "burn-runtime")]
 fn load_shard_streamed(root: &Path, meta: &ShardMetadata) -> DatasetResult<ShardBuffer> {
     let path = root.join(&meta.relative_path);
     let mut file = File::open(&path).map_err(|e| BurnDatasetError::Io {

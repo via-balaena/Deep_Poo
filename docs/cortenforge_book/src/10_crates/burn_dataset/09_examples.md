@@ -29,7 +29,7 @@ fn main() -> burn_dataset::DatasetResult<()> {
 }
 ```
 
-## 3) Build train/val iterators (burn-runtime feature; alias `burn_runtime`)
+## 3) Build train/val iterators (burn-runtime feature)
 ```rust,ignore
 fn main() -> burn_dataset::DatasetResult<()> {
     #[cfg(feature = "burn-runtime")]
