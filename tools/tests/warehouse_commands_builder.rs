@@ -4,7 +4,7 @@ use cortenforge_tools::warehouse_commands::{
 };
 
 #[test]
-fn powershell_amd_matches_legacy() {
+fn powershell_amd_uses_default_template() {
     let cfg = CmdConfig::default()
         .with_backend("dx12")
         .with_adapter("AMD");
@@ -14,7 +14,7 @@ fn powershell_amd_matches_legacy() {
 }
 
 #[test]
-fn bash_amd_matches_legacy() {
+fn bash_amd_uses_default_template() {
     let cfg = CmdConfig::default().with_adapter("AMD");
     let cmd = build_command(&cfg, Shell::Bash);
     let expected = "TENSOR_WAREHOUSE_MANIFEST=\"artifacts/tensor_warehouse/v<version>/manifest.json\" WAREHOUSE_STORE=\"stream\" WAREHOUSE_PREFETCH=\"8\" WGPU_BACKEND=\"vulkan\" WGPU_ADAPTER_NAME=\"AMD\" WGPU_POWER_PREF=\"high-performance\" RUST_LOG=\"trace,wgpu_core=trace,wgpu_hal=trace\" cargo train_hp --model big --batch-size 32 --log-every 1";
@@ -22,7 +22,7 @@ fn bash_amd_matches_legacy() {
 }
 
 #[test]
-fn powershell_nvidia_matches_legacy() {
+fn powershell_nvidia_uses_default_template() {
     let cfg = CmdConfig::default()
         .with_backend("dx12")
         .with_adapter("NVIDIA");
@@ -32,7 +32,7 @@ fn powershell_nvidia_matches_legacy() {
 }
 
 #[test]
-fn bash_nvidia_matches_legacy() {
+fn bash_nvidia_uses_default_template() {
     let cfg = CmdConfig::default().with_adapter("NVIDIA");
     let cmd = build_command(&cfg, Shell::Bash);
     let expected = "TENSOR_WAREHOUSE_MANIFEST=\"artifacts/tensor_warehouse/v<version>/manifest.json\" WAREHOUSE_STORE=\"stream\" WAREHOUSE_PREFETCH=\"8\" WGPU_BACKEND=\"vulkan\" WGPU_ADAPTER_NAME=\"NVIDIA\" WGPU_POWER_PREF=\"high-performance\" RUST_LOG=\"trace,wgpu_core=trace,wgpu_hal=trace\" cargo train_hp --model big --batch-size 32 --log-every 1";

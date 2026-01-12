@@ -1,10 +1,10 @@
 [package]
 name = "cortenforge-vision-runtime"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "Apache-2.0"
 publish = true
-description = "Bevy plugins for capture and inference runtime built on vision_core for the CortenForge stack. Renamed from vision_runtime; old crate deprecated—use this name."
+description = "Bevy plugins for capture and inference runtime built on vision_core for the CortenForge stack."
 repository = "https://github.com/via-balaena/CortenForge"
 homepage = "https://github.com/via-balaena/CortenForge"
 documentation = "https://docs.rs/cortenforge-vision-runtime"
@@ -19,8 +19,8 @@ name = "vision_runtime"
 [dependencies]
 bevy = { workspace = true, features = ["bevy_render", "bevy_asset", "bevy_core_pipeline", "bevy_winit", "bevy_log", "x11"] } # x11 required for winit on Linux CI
 bevy_camera = { workspace = true }
-sim_core = { package = "cortenforge-sim-core", version = "0.4.0" }
-vision_core = { package = "cortenforge-vision-core", version = "0.4.0" }
+sim_core = { package = "cortenforge-sim-core", version = "0.5.0" }
+vision_core = { package = "cortenforge-vision-core", version = "0.5.0" }
 anyhow = { workspace = true }
 image = { workspace = true, features = ["png"] }
 futures-lite = { workspace = true }

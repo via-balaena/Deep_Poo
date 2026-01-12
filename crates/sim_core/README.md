@@ -20,7 +20,6 @@ Adding systems
 - Inference-only: add to ModeSet::Inference.
 Use `SimRuntimePlugin` to keep registration in one place; avoid detector wiring here to keep the core crate lean. Recorder metadata/sink/world-state live here (`recorder_meta`); apps provide world-state updates and can inject custom sinks.
 
-> Deprecated: the old `sim_core` crate name was renamed to `cortenforge-sim-core`. Please depend on the new crate name.
 
 ## License
 Apache-2.0 (see `LICENSE` in the repo root).

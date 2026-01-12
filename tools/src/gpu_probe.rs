@@ -38,7 +38,7 @@ pub struct LinuxGpuProbe;
 #[cfg(target_os = "windows")]
 pub struct WindowsGpuProbe;
 
-#[cfg(all(target_os = "windows", feature = "gpu_amd_windows"))]
+#[cfg(all(target_os = "windows", feature = "gpu-windows"))]
 pub struct AmdWindowsProbe;
 
 impl GpuProbe for MacGpuProbe {
@@ -134,19 +134,19 @@ impl GpuProbe for WindowsGpuProbe {
             return NvidiaGpuProbe.status();
         }
 
-        #[cfg(all(not(feature = "gpu-nvidia"), feature = "gpu_amd_windows"))]
+        #[cfg(all(not(feature = "gpu-nvidia"), feature = "gpu-windows"))]
         {
             return AmdWindowsProbe.status();
         }
 
-        #[cfg(all(not(feature = "gpu-nvidia"), not(feature = "gpu_amd_windows")))]
+        #[cfg(all(not(feature = "gpu-nvidia"), not(feature = "gpu-windows")))]
         {
             return GpuStatus::unavailable();
         }
     }
 }
 
-#[cfg(all(target_os = "windows", feature = "gpu_amd_windows"))]
+#[cfg(all(target_os = "windows", feature = "gpu-windows"))]
 impl GpuProbe for AmdWindowsProbe {
     fn status(&self) -> GpuStatus {
         // TODO: replace with a Windows WMI/DirectX implementation.

@@ -4,7 +4,6 @@
 
 Schemas and validation helpers for capture metadata and warehouse manifests shared across the CortenForge stack.
 
-> Deprecated: this crate was renamed to `cortenforge-data-contracts`. Please use the new crate name for future installs.
 
 ## Features
 - No default features; serde-based types only.

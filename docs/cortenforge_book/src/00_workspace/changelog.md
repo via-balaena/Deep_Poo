@@ -34,6 +34,12 @@ Copy/paste scaffold for new release notes.
 - Actions taken: <pages updated, diagrams refreshed>
 ```
 
+### 2026-01-12 (v0.5.0)
+- Changed: removed `gpu_amd_windows` alias and legacy warehouse command fallback/tests in tools.
+- Changed: removed legacy crate-name deprecation notices from crate README/Cargo descriptions.
+- Impact: breaking; update scripts to use `gpu-windows` and ensure warehouse templates are non-empty.
+- Actions taken: updated feature flag docs and README to remove legacy alias guidance.
+
 ### 2026-01-10 (v0.2.1)
 - Changed: added `gpu_probe` bin with stable JSON schema and `--format=json` flag.
 - Impact: compatible; `gpu_macos_helper` alias removed in v0.3+ (use `gpu_probe`).

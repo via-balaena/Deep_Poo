@@ -3,7 +3,7 @@
 **How it fits**: Feature gates shape build size, runtime backends, and tooling.
 **Learn more**: See [Build & Run](build_and_run.md) for command patterns.
 
-Note: 0.3.0 removed legacy feature aliases; the remaining compatibility alias is `gpu_amd_windows` -> `gpu-windows` until the next breaking release.
+Note: legacy feature aliases are removed; use `gpu-windows` for Windows GPU probing.
 
 ## Workspace-wide themes
 High-level defaults and stack-wide feature expectations.

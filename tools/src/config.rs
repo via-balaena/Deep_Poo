@@ -183,6 +183,11 @@ impl ToolConfig {
         if self.train_bin.as_os_str().is_empty() {
             eprintln!("tools config: train_bin is empty; training tools may fail to launch");
         }
+        if self.warehouse_train_template.trim().is_empty() {
+            eprintln!(
+                "tools config: warehouse.train_template is empty; warehouse_cmd will fail to run"
+            );
+        }
         if self.train_status_paths.is_empty() {
             eprintln!("tools config: train_status_paths is empty; TUI status will be disabled");
         }

@@ -1,10 +1,10 @@
 [package]
 name = "cortenforge-data-contracts"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "Apache-2.0"
 publish = true
-description = "Data contracts for run manifests and capture metadata used across the CortenForge stack. Renamed to cortenforge-data-contracts; please use that crate instead."
+description = "Data contracts for run manifests and capture metadata used across the CortenForge stack."
 repository = "https://github.com/via-balaena/CortenForge"
 homepage = "https://github.com/via-balaena/CortenForge"
 documentation = "https://docs.rs/cortenforge-data-contracts"

@@ -1,6 +1,6 @@
 [package]
 name = "cortenforge-cli-support"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "Shared CLI argument helpers for CortenForge tools and apps (capture, warehouse, seeds, thresholds)."

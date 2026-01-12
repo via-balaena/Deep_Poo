@@ -4,7 +4,6 @@
 
 Bevy capture/inference plugins built on `vision_core`.
 
-> Deprecated: the old `vision_runtime` crate name was renamed to `cortenforge-vision-runtime`. Please depend on the new crate name.
 
 Contents:
 - Capture plugin: sets up a front capture camera, renders to an image target, enqueues GPU readbacks, and stores the latest frame/readback in resources.

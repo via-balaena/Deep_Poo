@@ -23,7 +23,6 @@ impl Shell {
     }
 }
 
-#[allow(dead_code)]
 pub fn build_command(cfg: &CmdConfig<'_>, shell: Shell) -> String {
     let tools_cfg = ToolConfig::load();
     build_command_with_template(cfg, shell, &tools_cfg.warehouse_train_template)
@@ -62,30 +61,18 @@ pub fn build_command_with_template(cfg: &CmdConfig<'_>, shell: Shell, template: 
     )
     .trim()
     .to_string();
-    let cmd = if cmd.trim().is_empty() {
-        eprintln!("warehouse_cmd: empty train_template; falling back to legacy command");
-        default_command(cfg)
-    } else {
-        cmd
-    };
+    if cmd.trim().is_empty() {
+        eprintln!(
+            "warehouse_cmd: empty train_template; set [warehouse].train_template in cortenforge-tools.toml"
+        );
+        std::process::exit(2);
+    }
 
     let sep = shell.separator();
     match shell {
         Shell::PowerShell => format!("{}; {}", env_parts.join(sep), cmd),
         Shell::Bash => format!("{} {}", env_parts.join(sep), cmd),
     }
-}
-
-fn default_command(cfg: &CmdConfig<'_>) -> String {
-    let mut cmd_parts = Vec::new();
-    cmd_parts.push("cargo train_hp".to_string());
-    cmd_parts.push(format!("--model {}", cfg.model.as_str()));
-    cmd_parts.push(format!("--batch-size {}", cfg.batch_size));
-    cmd_parts.push(format!("--log-every {}", cfg.log_every));
-    if !cfg.extra_args.as_ref().trim().is_empty() {
-        cmd_parts.push(cfg.extra_args.as_ref().trim().to_string());
-    }
-    cmd_parts.join(" ")
 }
 
 fn render_template(template: &str, replacements: &[(&str, &str)]) -> String {

@@ -11,7 +11,6 @@ Usage
 - Add `capture_utils` as a dependency and construct `JsonRecorder` for default file-based recording.
 - Recorder sinks are pluggable: the substrate recorder installs `JsonRecorder` by default; you can inject your own sink implementing `vision_core::Recorder`.
 
-> Deprecated: the old `capture_utils` crate name was renamed to `cortenforge-capture-utils`. Please depend on the new crate name.
 
 ## License
 Apache-2.0 (see `LICENSE` in the repo root).

@@ -4,13 +4,11 @@ tui = ["crossterm", "ratatui"]
 scheduler = ["sysinfo"]
 # Optional GPU feature flag to mirror root workspace flag.
 gpu-nvidia = ["nvml-wrapper"]
-gpu-windows = ["gpu_amd_windows"]
-# Legacy alias; remove in the next breaking release.
-gpu_amd_windows = []
+gpu-windows = []
 
 [package]
 name = "cortenforge-tools"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "Apache-2.0"
 description = "Tooling crate for CortenForge: shared CLI helpers and app-agnostic bins."
@@ -24,12 +22,12 @@ name = "cortenforge_tools"
 path = "src/lib.rs"
 
 [dependencies]
-cli_support = { package = "cortenforge-cli-support", version = "0.4.0" }
-burn_dataset = { package = "cortenforge-burn-dataset", version = "0.4.0", default-features = false }
-vision_core = { package = "cortenforge-vision-core", version = "0.4.0" }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.4.0" }
-inference = { package = "cortenforge-inference", version = "0.4.0" }
-capture_utils = { package = "cortenforge-capture-utils", version = "0.4.0" }
+cli_support = { package = "cortenforge-cli-support", version = "0.5.0" }
+burn_dataset = { package = "cortenforge-burn-dataset", version = "0.5.0", default-features = false }
+vision_core = { package = "cortenforge-vision-core", version = "0.5.0" }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.5.0" }
+inference = { package = "cortenforge-inference", version = "0.5.0" }
+capture_utils = { package = "cortenforge-capture-utils", version = "0.5.0" }
 clap = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
