@@ -3,7 +3,7 @@
 **How it fits**: Feature gates shape build size, runtime backends, and tooling.
 **Learn more**: See [Build & Run](build_and_run.md) for command patterns.
 
-Note: 0.3.0 removes legacy feature aliases; use the normalized names only.
+Note: 0.3.0 removed legacy feature aliases; the remaining compatibility alias is `gpu_amd_windows` -> `gpu-windows` until the next breaking release.
 
 ## Workspace-wide themes
 High-level defaults and stack-wide feature expectations.
@@ -12,7 +12,7 @@ High-level defaults and stack-wide feature expectations.
 | --- | --- |
 | Default backend | training/inference/models enable `backend-ndarray` by default; GPU/WGPU is opt-in via `backend-wgpu`. |
 | Model variants | `tinydet`/`bigdet` across models/training/inference. |
-| Tools | `tui`, `scheduler`, `gpu-nvidia` gate optional bins in cortenforge-tools. |
+| Tools | `tui`, `scheduler`, `gpu-nvidia`, `gpu-windows` gate optional bins in cortenforge-tools. |
 | Umbrella crate | `cortenforge` re-exports core stacks (sim-core, vision-core/runtime, training/inference); `burn-runtime`. |
 | Burn-core | 0.19.1 avoids the prior bincode publish break; no patch required. |
 
@@ -25,7 +25,7 @@ Quick reference for feature toggles that matter most per crate.
 | training | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
 | inference | `backend-ndarray` (default), `backend-wgpu`, `tinydet` (default), `bigdet`. |
 | cortenforge (umbrella) | Features map to member crates (sim-core, vision-core/runtime, models, training, inference, capture-utils, burn-dataset); `burn-runtime`/`burn-wgpu` stacks wire burn deps. |
-| cortenforge-tools | `tui`, `scheduler`, `gpu-nvidia`; defaults are lean (no extra features). |
+| cortenforge-tools | `tui`, `scheduler`, `gpu-nvidia`, `gpu-windows`; defaults are lean (no extra features). |
 | cli_support | Optional `bevy`/`bevy-resource` for resource integration. |
 | burn_dataset | `burn-runtime` enables burn + rayon/memmap2/crossbeam. |
 
@@ -40,7 +40,7 @@ Single view of defaults vs opt-in flags across key crates.
 | inference | `backend-ndarray`, `tinydet` | `backend-wgpu`, `bigdet` |
 | burn_dataset | (none) | `burn-runtime` |
 | cli_support | (none) | `bevy-resource` |
-| cortenforge-tools | (none) | `tui`, `scheduler`, `gpu-nvidia` |
+| cortenforge-tools | (none) | `tui`, `scheduler`, `gpu-nvidia`, `gpu-windows` |
 
 ## Hygiene guidance
 Rules of thumb for keeping features and builds predictable.

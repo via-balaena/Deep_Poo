@@ -149,9 +149,17 @@ impl GpuProbe for WindowsGpuProbe {
 #[cfg(all(target_os = "windows", feature = "gpu_amd_windows"))]
 impl GpuProbe for AmdWindowsProbe {
     fn status(&self) -> GpuStatus {
-        // TODO: replace with ADLX/WMI implementation when we add a Windows AMD backend.
+        // TODO: replace with a Windows WMI/DirectX implementation.
+        if let Some(status) = windows_wmi_status() {
+            return status;
+        }
         GpuStatus::unavailable()
     }
+}
+
+#[cfg(target_os = "windows")]
+fn windows_wmi_status() -> Option<GpuStatus> {
+    None
 }
 
 pub fn platform_probe() -> Box<dyn GpuProbe> {

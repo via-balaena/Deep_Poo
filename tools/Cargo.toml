@@ -4,6 +4,8 @@ tui = ["crossterm", "ratatui"]
 scheduler = ["sysinfo"]
 # Optional GPU feature flag to mirror root workspace flag.
 gpu-nvidia = ["nvml-wrapper"]
+gpu-windows = ["gpu_amd_windows"]
+# Legacy alias; remove in the next breaking release.
 gpu_amd_windows = []
 
 [package]
