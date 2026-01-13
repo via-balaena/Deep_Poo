@@ -2349,7 +2349,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bincode",
  "burn",
@@ -2368,7 +2368,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-burn-dataset"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "burn",
@@ -2388,7 +2388,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-capture-utils"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "cortenforge-data-contracts",
@@ -2401,7 +2401,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-cli-support"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bevy",
  "clap",
@@ -2409,7 +2409,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-data-contracts"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2418,7 +2418,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-inference"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "bevy",
@@ -2433,7 +2433,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-models"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bincode",
  "burn",
@@ -2441,7 +2441,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-sim-core"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bevy",
  "bevy_rapier3d",
@@ -2450,7 +2450,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-tools"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "arrow-array",
@@ -2480,7 +2480,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-training"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2499,7 +2499,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-vision-core"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "bevy",
@@ -2509,7 +2509,7 @@ dependencies = [
 
 [[package]]
 name = "cortenforge-vision-runtime"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "bevy",
