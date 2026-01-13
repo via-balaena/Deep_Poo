@@ -389,8 +389,6 @@ pub mod prelude {
         InferenceThresholdsResource, PrimaryCameraFrame,
         PrimaryCameraFrameBuffer, PrimaryCameraState,
     };
-    // Re-export the core type for convenience in non-Bevy contexts
-    pub use inference::InferenceThresholds;
 }
 pub fn poll_inference_task(
     mut jobs: ResMut<BurnInferenceState>,

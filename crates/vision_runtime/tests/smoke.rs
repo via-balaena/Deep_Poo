@@ -1,10 +1,11 @@
 use bevy::ecs::system::RunSystemOnce;
 use bevy::prelude::*;
 use bevy::tasks::AsyncComputeTaskPool;
+use inference::InferenceThresholds;
 use vision_core::interfaces::{self, DetectionResult, Detector, Frame};
 use vision_runtime::prelude::{
     BurnInferenceState, CapturePlugin, DetectionOverlayState, DetectorHandle, DetectorKind,
-    InferencePlugin, InferenceThresholds, InferenceThresholdsResource,
+    InferencePlugin, InferenceThresholdsResource,
 };
 
 struct DummyDetector;
