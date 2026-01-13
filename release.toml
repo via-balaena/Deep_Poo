@@ -1,0 +1,34 @@
+# Root workspace release configuration
+# This file coordinates releases across all CortenForge crates
+
+[workspace]
+# Allow publishing to crates.io
+allow-branch = ["main", "release/*"]
+# Consolidate all commits into one for the version bump
+consolidate-commits = true
+# Push changes after releasing
+push = true
+# Create and push git tags for releases
+tag = true
+tag-prefix = ""
+tag-name = "v{{version}}"
+# Disable individual package tags since we release in sync
+tag-message = "Release CortenForge {{version}}"
+
+# Pre-release replacements for version references in docs
+[[pre-release-replacements]]
+file = "README.md"
+search = "cortenforge = \"[0-9.]+\""
+replace = "cortenforge = \"{{version}}\""
+
+[[pre-release-replacements]]
+file = "README.md"
+search = "cortenforge-[a-z-]+ = \"[0-9.]+\""
+replace = "cortenforge-{{crate_name}} = \"{{version}}\""
+exactly = 0
+
+# Shared pre-release hook to run tests
+pre-release-hook = ["cargo", "test", "--workspace"]
+
+# Post-release hook to verify publish succeeded
+post-release-hook = ["echo", "Released CortenForge {{version}}"]

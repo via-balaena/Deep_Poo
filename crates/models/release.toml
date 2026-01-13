@@ -1,0 +1,10 @@
+# cortenforge-models release configuration
+# Part of synchronized CortenForge release
+
+[package]
+# This crate is published
+publish = true
+# Don't create individual tags (handled at workspace level)
+tag = false
+# Push changes to remote
+push = false

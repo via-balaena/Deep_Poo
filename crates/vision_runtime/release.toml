@@ -1,0 +1,7 @@
+# cortenforge-vision-runtime release configuration
+# Part of synchronized CortenForge release
+
+[package]
+publish = true
+tag = false
+push = false

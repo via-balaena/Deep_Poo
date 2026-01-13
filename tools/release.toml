@@ -1,0 +1,7 @@
+# cortenforge-tools release configuration
+# Standalone published crate, synchronized with CortenForge version
+
+[package]
+publish = true
+tag = false
+push = false
