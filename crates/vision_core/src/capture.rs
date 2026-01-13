@@ -5,20 +5,20 @@ pub struct CaptureLimit {
     pub max_frames: Option<u32>,
 }
 
+/// Marker component for the primary capture camera used for recording and inference.
 #[derive(Component)]
-pub struct FrontCamera;
+pub struct PrimaryCaptureCamera;
 
-#[derive(Component)]
-pub struct FrontCaptureCamera;
-
+/// Resource tracking the primary capture render target.
 #[derive(Resource)]
-pub struct FrontCaptureTarget {
+pub struct PrimaryCaptureTarget {
     pub handle: Handle<Image>,
     pub size: UVec2,
     pub entity: Entity,
 }
 
+/// Resource holding the latest GPU readback from the primary capture camera.
 #[derive(Resource, Default, Clone)]
-pub struct FrontCaptureReadback {
+pub struct PrimaryCaptureReadback {
     pub latest: Option<Vec<u8>>,
 }

@@ -8,7 +8,7 @@ use futures_lite::future::{block_on, poll_once};
 use image::RgbaImage;
 use sim_core::{ModeSet, SimRunMode};
 use vision_core::capture::{
-    FrontCamera, FrontCaptureCamera, FrontCaptureReadback, FrontCaptureTarget,
+    PrimaryCaptureCamera, PrimaryCaptureReadback, PrimaryCaptureTarget,
 };
 use vision_core::interfaces::{self, Frame};
 use vision_core::overlay::draw_rect;
@@ -22,22 +22,22 @@ type InferenceJobResult = (
 );
 
 #[derive(Clone)]
-pub struct FrontCameraFrame {
+pub struct PrimaryCameraFrame {
     pub id: u64,
     pub transform: GlobalTransform,
     pub captured_at: f64,
 }
 
 #[derive(Resource, Default)]
-pub struct FrontCameraState {
+pub struct PrimaryCameraState {
     pub active: bool,
     pub last_transform: Option<GlobalTransform>,
     pub frame_counter: u64,
 }
 
 #[derive(Resource, Default)]
-pub struct FrontCameraFrameBuffer {
-    pub latest: Option<FrontCameraFrame>,
+pub struct PrimaryCameraFrameBuffer {
+    pub latest: Option<PrimaryCameraFrame>,
 }
 
 #[derive(Resource, Default)]
@@ -114,11 +114,11 @@ impl interfaces::Detector for HeuristicDetector {
 
 // Capture setup/readback -----------------------------------------------------
 
-pub fn setup_front_capture(
+pub fn setup_primary_capture(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
-    mut state: ResMut<FrontCameraState>,
-    mut target: ResMut<FrontCaptureTarget>,
+    mut state: ResMut<PrimaryCameraState>,
+    mut target: ResMut<PrimaryCaptureTarget>,
 ) {
     // Only set up once.
     if target.size != UVec2::ZERO {
@@ -159,9 +159,8 @@ pub fn setup_front_capture(
             Visibility::default(),
             InheritedVisibility::default(),
             ViewVisibility::default(),
-            FrontCamera,
-            FrontCaptureCamera,
-            Name::new("FrontCaptureCamera"),
+            PrimaryCaptureCamera,
+            Name::new("PrimaryCaptureCamera"),
         ))
         .id();
 
@@ -171,11 +170,11 @@ pub fn setup_front_capture(
     state.active = true;
 }
 
-pub fn track_front_camera_state(
-    target: Res<FrontCaptureTarget>,
-    mut state: ResMut<FrontCameraState>,
-    mut buffer: ResMut<FrontCameraFrameBuffer>,
-    cameras: Query<&GlobalTransform, With<FrontCaptureCamera>>,
+pub fn track_primary_camera_state(
+    target: Res<PrimaryCaptureTarget>,
+    mut state: ResMut<PrimaryCameraState>,
+    mut buffer: ResMut<PrimaryCameraFrameBuffer>,
+    cameras: Query<&GlobalTransform, With<PrimaryCaptureCamera>>,
     time: Res<Time>,
 ) {
     let Ok(transform) = cameras.get(target.entity) else {
@@ -183,17 +182,17 @@ pub fn track_front_camera_state(
     };
     state.last_transform = Some(*transform);
     state.frame_counter = state.frame_counter.wrapping_add(1);
-    buffer.latest = Some(FrontCameraFrame {
+    buffer.latest = Some(PrimaryCameraFrame {
         id: state.frame_counter,
         transform: *transform,
         captured_at: time.elapsed_secs_f64(),
     });
 }
 
-pub fn capture_front_camera_frame(
+pub fn capture_primary_camera_frame(
     mode: Res<SimRunMode>,
     mut commands: Commands,
-    target: Res<FrontCaptureTarget>,
+    target: Res<PrimaryCaptureTarget>,
 ) {
     if !matches!(*mode, SimRunMode::Datagen | SimRunMode::Inference) {
         return;
@@ -203,10 +202,10 @@ pub fn capture_front_camera_frame(
         .insert(Readback::texture(target.handle.clone()));
 }
 
-pub fn on_front_capture_readback(
+pub fn on_primary_capture_readback(
     ev: On<ReadbackComplete>,
-    target: Res<FrontCaptureTarget>,
-    mut readback: ResMut<FrontCaptureReadback>,
+    target: Res<PrimaryCaptureTarget>,
+    mut readback: ResMut<PrimaryCaptureReadback>,
 ) {
     let expected_len = (target.size.x * target.size.y * 4) as usize;
     let ev = ev.event();
@@ -222,18 +221,18 @@ pub struct CapturePlugin;
 
 impl Plugin for CapturePlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(FrontCaptureTarget {
+        app.insert_resource(PrimaryCaptureTarget {
             handle: Handle::default(),
             size: UVec2::ZERO,
             entity: Entity::PLACEHOLDER,
         })
-        .init_resource::<FrontCaptureReadback>()
-        .init_resource::<FrontCameraState>()
-        .init_resource::<FrontCameraFrameBuffer>()
-        .add_systems(Startup, setup_front_capture)
-        .add_systems(Update, track_front_camera_state.in_set(ModeSet::Common))
-        .add_systems(Update, capture_front_camera_frame.in_set(ModeSet::Common))
-        .add_observer(on_front_capture_readback);
+        .init_resource::<PrimaryCaptureReadback>()
+        .init_resource::<PrimaryCameraState>()
+        .init_resource::<PrimaryCameraFrameBuffer>()
+        .add_systems(Startup, setup_primary_capture)
+        .add_systems(Update, track_primary_camera_state.in_set(ModeSet::Common))
+        .add_systems(Update, capture_primary_camera_frame.in_set(ModeSet::Common))
+        .add_observer(on_primary_capture_readback);
     }
 }
 
@@ -243,10 +242,10 @@ pub fn schedule_burn_inference(
     mode: Res<SimRunMode>,
     time: Res<Time>,
     mut jobs: ResMut<BurnInferenceState>,
-    mut buffer: ResMut<FrontCameraFrameBuffer>,
+    mut buffer: ResMut<PrimaryCameraFrameBuffer>,
     handle: Option<ResMut<DetectorHandle>>,
-    target: Res<FrontCaptureTarget>,
-    mut readback: ResMut<FrontCaptureReadback>,
+    target: Res<PrimaryCaptureTarget>,
+    mut readback: ResMut<PrimaryCaptureReadback>,
 ) {
     if !matches!(*mode, SimRunMode::Inference) {
         return;
@@ -366,8 +365,8 @@ pub fn recorder_draw_rect(
 pub mod prelude {
     pub use super::{
         BurnDetectionResult, BurnDetector, BurnInferenceState, CapturePlugin,
-        DetectionOverlayState, DetectorHandle, DetectorKind, FrontCameraFrame,
-        FrontCameraFrameBuffer, FrontCameraState, InferencePlugin, InferenceThresholds,
+        DetectionOverlayState, DetectorHandle, DetectorKind, PrimaryCameraFrame,
+        PrimaryCameraFrameBuffer, PrimaryCameraState, InferencePlugin, InferenceThresholds,
     };
 }
 pub fn poll_inference_task(

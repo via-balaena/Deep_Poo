@@ -2639,8 +2639,8 @@ dependencies = [
  "anyhow",
  "bevy",
  "bevy_camera",
- "cortenforge-sim-core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortenforge-vision-core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortenforge-sim-core 0.5.1",
+ "cortenforge-vision-core 0.5.1",
  "futures-lite",
  "image",
 ]
