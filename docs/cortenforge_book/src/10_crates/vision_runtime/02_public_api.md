@@ -3,15 +3,15 @@ Quick read: The public surface; use docs.rs for exact signatures.
 
 | Item | Kind | Purpose |
 | ---- | ---- | ------- |
-| FrontCameraFrame | struct | Captured frame resource |
-| FrontCameraState | struct | Tracks front camera state |
-| FrontCameraFrameBuffer | struct | Buffer for captured frames |
-| BurnDetector | struct | Burn-backed detector wrapper |
+| PrimaryCameraFrame | struct | Captured frame resource |
+| PrimaryCameraState | struct | Tracks primary camera state |
+| PrimaryCameraFrameBuffer | struct | Buffer for captured frames |
+| ModelLoadState | struct | Tracks whether a model is loaded |
 | DetectionOverlayState | struct | Overlay UI state for detections |
 | DetectorKind | enum | Detector type (Burn/Heuristic) |
-| InferenceThresholds | struct | Thresholds for inference (obj/iou) |
-| BurnDetectionResult | struct | Wrapper for detection results |
-| BurnInferenceState | struct | Tracks inference task state |
+| InferenceThresholdsResource | struct | Bevy wrapper for inference thresholds |
+| RuntimeDetectionResult | struct | Runtime detection results |
+| AsyncInferenceState | struct | Tracks async inference task state |
 | DetectorHandle | struct | Resource holding the active detector |
 | CapturePlugin | struct | Bevy plugin to set up capture pipeline |
 | InferencePlugin | struct | Bevy plugin to set up inference pipeline |

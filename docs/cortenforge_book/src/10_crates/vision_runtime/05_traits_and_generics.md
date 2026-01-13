@@ -6,9 +6,9 @@ Quick read: Extension points and the constraints they impose.
 
 ## Glue types / resources
 - `DetectorHandle`: boxed `vision_core::Detector` trait object + `DetectorKind` enum to track backend.
-- `BurnInferenceState`: holds async inference task (`Task<InferenceJobResult>`) and last result.
-- `InferenceThresholds`: simple thresholds resource; mutable via hotkeys.
-- `BurnDetector`, `DetectionOverlayState`, `FrontCameraState`, `FrontCameraFrameBuffer`, `FrontCaptureTarget`, `FrontCaptureReadback`: resources to coordinate capture/inference.
+- `AsyncInferenceState`: holds async inference task (`Task<InferenceJobResult>`) and last result.
+- `InferenceThresholdsResource`: Bevy resource wrapper for framework-agnostic `inference::InferenceThresholds`; mutable via hotkeys.
+- `ModelLoadState`, `DetectionOverlayState`, `PrimaryCameraState`, `PrimaryCameraFrameBuffer`, `PrimaryCaptureTarget`, `PrimaryCaptureReadback`: resources to coordinate capture/inference.
 
 ## Generics and bounds
 - Uses trait objects (`Box<dyn Detector + Send + Sync>`) to allow swapping heuristic/Burn detectors at runtime.

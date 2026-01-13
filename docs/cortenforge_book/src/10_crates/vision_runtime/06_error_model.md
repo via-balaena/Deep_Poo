@@ -7,7 +7,7 @@ Quick read: How errors are surfaced and handled.
 ## Patterns
 - Inference scheduling is fallible only through the detector implementation; failures are expected to be handled inside `vision_core::Detector` impls (e.g., return heuristic/fallback).
 - Capture readback and Bevy systems are written to early-return on missing state; no explicit errors surfaced.
-- Overlay/debounce state uses option types (`Option<Task<_>>`, `Option<BurnDetectionResult>`) to represent absence/in-progress work.
+- Overlay/debounce state uses option types (`Option<Task<_>>`, `Option<RuntimeDetectionResult>`) to represent absence/in-progress work.
 
 ## Recoverability
 - Missing detectors or failed loads should be represented by swapping to `DetectorKind::Heuristic` (as in `inference`); runtime itself won’t panic.

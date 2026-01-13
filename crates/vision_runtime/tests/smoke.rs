@@ -4,7 +4,7 @@ use bevy::tasks::AsyncComputeTaskPool;
 use inference::InferenceThresholds;
 use vision_core::interfaces::{self, DetectionResult, Detector, Frame};
 use vision_runtime::prelude::{
-    BurnInferenceState, CapturePlugin, DetectionOverlayState, DetectorHandle, DetectorKind,
+    AsyncInferenceState, CapturePlugin, DetectionOverlayState, DetectorHandle, DetectorKind,
     InferencePlugin, InferenceThresholdsResource,
 };
 
@@ -46,7 +46,7 @@ fn inference_plugin_smoke_updates_overlay() {
     {
         let mut jobs = app
             .world_mut()
-            .get_resource_mut::<BurnInferenceState>()
+            .get_resource_mut::<AsyncInferenceState>()
             .unwrap();
         let task = AsyncComputeTaskPool::get().spawn(async {
             (

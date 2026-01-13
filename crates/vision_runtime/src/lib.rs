@@ -66,8 +66,9 @@ pub struct PrimaryCameraFrameBuffer {
     pub latest: Option<PrimaryCameraFrame>,
 }
 
+/// Resource tracking whether a model detector is loaded (vs. heuristic fallback).
 #[derive(Resource, Default)]
-pub struct BurnDetector {
+pub struct ModelLoadState {
     pub model_loaded: bool,
 }
 
@@ -86,8 +87,12 @@ pub enum DetectorKind {
     Heuristic,
 }
 
+/// Detection result from vision_runtime async inference.
+///
+/// This is a runtime-specific result type that aggregates detection output.
+/// Not to be confused with `vision_core::interfaces::DetectionResult`.
 #[derive(Clone)]
-pub struct BurnDetectionResult {
+pub struct RuntimeDetectionResult {
     pub frame_id: u64,
     pub positive: bool,
     pub confidence: f32,
@@ -95,14 +100,17 @@ pub struct BurnDetectionResult {
     pub scores: Vec<f32>,
 }
 
+/// Resource managing async inference task state.
+///
+/// Tracks pending async inference jobs, debouncing, and the most recent result.
 #[derive(Resource)]
-pub struct BurnInferenceState {
+pub struct AsyncInferenceState {
     pub pending: Option<Task<InferenceJobResult>>,
-    pub last_result: Option<BurnDetectionResult>,
+    pub last_result: Option<RuntimeDetectionResult>,
     pub debounce: Timer,
 }
 
-impl Default for BurnInferenceState {
+impl Default for AsyncInferenceState {
     fn default() -> Self {
         Self {
             pending: None,
@@ -261,7 +269,7 @@ impl Plugin for CapturePlugin {
 pub fn schedule_burn_inference(
     mode: Res<SimRunMode>,
     time: Res<Time>,
-    mut jobs: ResMut<BurnInferenceState>,
+    mut jobs: ResMut<AsyncInferenceState>,
     mut buffer: ResMut<PrimaryCameraFrameBuffer>,
     handle: Option<ResMut<DetectorHandle>>,
     target: Res<PrimaryCaptureTarget>,
@@ -307,7 +315,7 @@ pub fn threshold_hotkeys(
     keys: Res<ButtonInput<KeyCode>>,
     thresh: Option<ResMut<InferenceThresholdsResource>>,
     handle: Option<ResMut<DetectorHandle>>,
-    burn_loaded: Option<ResMut<BurnDetector>>,
+    burn_loaded: Option<ResMut<ModelLoadState>>,
 ) {
     if !matches!(*mode, SimRunMode::Inference) {
         return;
@@ -356,8 +364,8 @@ pub struct InferencePlugin;
 
 impl Plugin for InferencePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<BurnInferenceState>()
-            .init_resource::<BurnDetector>()
+        app.init_resource::<AsyncInferenceState>()
+            .init_resource::<ModelLoadState>()
             .init_resource::<DetectionOverlayState>()
             .add_systems(
                 Update,
@@ -384,17 +392,16 @@ pub fn recorder_draw_rect(
 
 pub mod prelude {
     pub use super::{
-        BurnDetectionResult, BurnDetector, BurnInferenceState, CapturePlugin,
-        DetectionOverlayState, DetectorHandle, DetectorKind, InferencePlugin,
-        InferenceThresholdsResource, PrimaryCameraFrame,
-        PrimaryCameraFrameBuffer, PrimaryCameraState,
+        AsyncInferenceState, CapturePlugin, DetectionOverlayState, DetectorHandle, DetectorKind,
+        InferencePlugin, InferenceThresholdsResource, ModelLoadState, PrimaryCameraFrame,
+        PrimaryCameraFrameBuffer, PrimaryCameraState, RuntimeDetectionResult,
     };
 }
 pub fn poll_inference_task(
-    mut jobs: ResMut<BurnInferenceState>,
+    mut jobs: ResMut<AsyncInferenceState>,
     mut overlay: ResMut<DetectionOverlayState>,
     handle: Option<ResMut<DetectorHandle>>,
-    mut burn_detector: ResMut<BurnDetector>,
+    mut burn_detector: ResMut<ModelLoadState>,
 ) {
     let Some(mut task) = jobs.pending.take() else {
         return;
@@ -414,7 +421,7 @@ pub fn poll_inference_task(
         overlay.boxes = result.boxes.clone();
         overlay.scores = result.scores.clone();
         overlay.size = size;
-        jobs.last_result = Some(BurnDetectionResult {
+        jobs.last_result = Some(RuntimeDetectionResult {
             frame_id: result.frame_id,
             positive: result.positive,
             confidence: result.confidence,

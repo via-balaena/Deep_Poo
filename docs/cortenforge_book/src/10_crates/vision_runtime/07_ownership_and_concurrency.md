@@ -2,7 +2,7 @@
 Quick read: Ownership, threading, and async expectations.
 
 ## Ownership model
-- Bevy resources own state: `DetectorHandle` (boxed detector), `BurnInferenceState` (pending task), `FrontCaptureTarget/State/Buffer`, `DetectionOverlayState`, thresholds, etc.
+- Bevy resources own state: `DetectorHandle` (boxed detector), `AsyncInferenceState` (pending task), `PrimaryCaptureTarget/State/Buffer`, `DetectionOverlayState`, thresholds, etc.
 - Ownership of the detector moves into an async task and is returned to the resource when the task completes.
 
 ## Concurrency
