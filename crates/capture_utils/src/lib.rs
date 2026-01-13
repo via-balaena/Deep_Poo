@@ -1,4 +1,4 @@
-use data_contracts::capture::{CaptureMetadata, LabelSource as CaptureLabelSource, PolypLabel};
+use data_contracts::capture::{CaptureMetadata, DetectionLabel, LabelSource as CaptureLabelSource};
 use image::Rgba;
 use std::fs;
 use std::io::{BufWriter, Write};
@@ -56,8 +56,8 @@ pub fn build_capture_metadata(
         image,
         image_present: record.frame.path.is_some(),
         camera_active: record.camera_active,
-        polyp_seed: record.polyp_seed,
-        polyp_labels: record.labels.iter().map(label_to_polyp).collect(),
+        label_seed: record.polyp_seed,
+        labels: record.labels.iter().map(label_to_detection).collect(),
     }
 }
 
@@ -66,7 +66,7 @@ pub fn build_inference_metadata(
     frame: vision_core::prelude::Frame,
     labels: &[Label],
     camera_active: bool,
-    polyp_seed: u64,
+    label_seed: u64,
     unix_time: f64,
 ) -> CaptureMetadata {
     let image = frame
@@ -78,13 +78,13 @@ pub fn build_inference_metadata(
         frame,
         labels,
         camera_active,
-        polyp_seed,
+        polyp_seed: label_seed,
     };
     build_capture_metadata(&record, unix_time, image)
 }
 
-fn label_to_polyp(label: &Label) -> PolypLabel {
-    PolypLabel {
+fn label_to_detection(label: &Label) -> DetectionLabel {
+    DetectionLabel {
         center_world: label.center_world,
         bbox_px: label.bbox_px,
         bbox_norm: label.bbox_norm,
@@ -131,7 +131,7 @@ pub fn generate_overlays(run_dir: &Path) -> anyhow::Result<()> {
         let (w, h) = img.dimensions();
         let clamp =
             |v: f32, max: u32| -> u32 { v.max(0.0).min((max.saturating_sub(1)) as f32) as u32 };
-        for label in meta.polyp_labels.iter().filter_map(|l| l.bbox_px) {
+        for label in meta.labels.iter().filter_map(|l| l.bbox_px) {
             let bbox_px = [
                 clamp(label[0], w),
                 clamp(label[1], h),

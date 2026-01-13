@@ -17,8 +17,8 @@ rust-version = "1.75"
 name = "capture_utils"
 
 [dependencies]
-vision_core = { package = "cortenforge-vision-core", version = "0.5.1" }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.5.1" }
+vision_core = { package = "cortenforge-vision-core", path = "../vision_core", version = "0.5.1" }
+data_contracts = { package = "cortenforge-data-contracts", path = "../data_contracts", version = "0.5.1" }
 image = { workspace = true, features = ["png", "rayon"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

@@ -2412,8 +2412,8 @@ name = "cortenforge-capture-utils"
 version = "0.5.1"
 dependencies = [
  "anyhow",
- "cortenforge-data-contracts 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortenforge-vision-core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortenforge-data-contracts 0.5.1",
+ "cortenforge-vision-core 0.5.1",
  "image",
  "serde",
  "serde_json",

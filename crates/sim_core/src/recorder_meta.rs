@@ -2,7 +2,7 @@ use bevy::prelude::Resource;
 use vision_core::prelude::Recorder;
 
 pub trait RecorderMetadataProvider: Send + Sync + 'static {
-    fn polyp_seed(&self) -> u64;
+    fn label_seed(&self) -> u64;
 }
 
 #[derive(Resource)]
@@ -16,7 +16,7 @@ pub struct BasicRecorderMeta {
 }
 
 impl RecorderMetadataProvider for BasicRecorderMeta {
-    fn polyp_seed(&self) -> u64 {
+    fn label_seed(&self) -> u64 {
         self.seed
     }
 }
