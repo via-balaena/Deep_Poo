@@ -5,7 +5,7 @@ use burn::record::{BinFileRecorder, FullPrecisionSettings};
 use data_contracts::capture::{CaptureMetadata, DetectionLabel};
 use std::fs;
 use std::path::PathBuf;
-use training::dataset::{collate, DatasetConfig};
+use training::dataset::{collate, DatasetPathConfig};
 use training::{ConvolutionalDetector, ConvolutionalDetectorConfig};
 
 type ADBackend = Autodiff<NdArray<f32>>;
@@ -37,7 +37,7 @@ fn synthetic_dataset(tmp: &tempfile::TempDir) -> anyhow::Result<Vec<training::Ru
     let img_path = tmp.path().join("frame_00001.png");
     img.save(&img_path)?;
 
-    let cfg = DatasetConfig {
+    let cfg = DatasetPathConfig {
         root: PathBuf::from(tmp.path()),
         labels_subdir: "labels".into(),
         images_subdir: ".".into(),

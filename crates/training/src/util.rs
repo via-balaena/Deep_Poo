@@ -8,7 +8,7 @@ use burn_dataset::WarehouseLoaders;
 use std::path::Path;
 
 use crate::{
-    ConvolutionalDetector, ConvolutionalDetectorConfig, DatasetConfig, LinearDetector,
+    ConvolutionalDetector, ConvolutionalDetectorConfig, DatasetPathConfig, LinearDetector,
     LinearDetectorConfig, TrainBackend,
 };
 use clap::{Parser, ValueEnum};
@@ -140,7 +140,7 @@ pub fn run_train(args: TrainArgs) -> anyhow::Result<()> {
         }
         TrainingInputSource::CaptureLogs => {
             println!("training from capture logs (legacy path); prefer warehouse manifests");
-            let cfg = DatasetConfig {
+            let cfg = DatasetPathConfig {
                 root: args.dataset_root.clone().into(),
                 labels_subdir: args.labels_subdir.clone(),
                 images_subdir: args.images_subdir.clone(),

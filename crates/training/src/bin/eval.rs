@@ -1,5 +1,5 @@
 use clap::Parser;
-use training::dataset::{collate, DatasetConfig};
+use training::dataset::{collate, DatasetPathConfig};
 use training::util::{
     load_convolutional_detector_from_checkpoint, load_linear_detector_from_checkpoint, BackendKind,
     ModelKind,
@@ -45,7 +45,7 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     training::util::validate_backend_choice(args.backend)?;
 
-    let cfg = DatasetConfig {
+    let cfg = DatasetPathConfig {
         root: args.dataset_root.into(),
         labels_subdir: args.labels_subdir,
         images_subdir: args.images_subdir,

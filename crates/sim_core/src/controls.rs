@@ -1,8 +1,8 @@
 use bevy::prelude::Resource;
 
-/// Control parameters for articulated instrument actuation.
+/// Control configuration for articulated instrument actuation.
 #[derive(Resource, Clone)]
-pub struct ControlParams {
+pub struct ControlConfig {
     pub tension: f32,
     pub stiffness: f32,
     pub damping: f32,

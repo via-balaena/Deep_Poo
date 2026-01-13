@@ -3,7 +3,7 @@
 pub mod dataset;
 pub mod util;
 
-pub use dataset::{collate, collate_from_burn_batch, CollatedBatch, DatasetConfig, RunSample};
+pub use dataset::{collate, collate_from_burn_batch, CollatedBatch, DatasetPathConfig, RunSample};
 pub use models::{
     ConvolutionalDetector, ConvolutionalDetectorConfig, LinearDetector, LinearDetectorConfig,
 };

@@ -65,7 +65,7 @@ pub mod prelude {
         camera_controller, pov_toggle_system, setup_camera, Flycam, InstrumentPovCamera, PovState,
         UiOverlayCamera,
     };
-    pub use crate::controls::ControlParams;
+    pub use crate::controls::ControlConfig;
     pub use crate::hooks::{AutopilotHook, ControlsHook, SimHooks};
     pub use crate::recorder::{
         AutoRecordTimer, BasicMeta, Config as RecorderConfig, MetaProvider, MetadataProvider,

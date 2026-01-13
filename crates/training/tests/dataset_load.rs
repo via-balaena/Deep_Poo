@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use data_contracts::capture::{CaptureMetadata, DetectionLabel};
 use image::{Rgb, RgbImage};
-use training::{collate, DatasetConfig};
+use training::{collate, DatasetPathConfig};
 
 #[test]
 fn load_and_collate_synthetic() {
@@ -37,7 +37,7 @@ fn load_and_collate_synthetic() {
     let img_path = temp.path().join("frame_00001.png");
     img.save(&img_path).unwrap();
 
-    let cfg = DatasetConfig {
+    let cfg = DatasetPathConfig {
         root: PathBuf::from(temp.path()),
         labels_subdir: "labels".into(),
         images_subdir: ".".into(),
