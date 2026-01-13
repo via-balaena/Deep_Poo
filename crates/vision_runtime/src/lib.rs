@@ -6,10 +6,9 @@ use bevy::tasks::{AsyncComputeTaskPool, Task};
 use bevy_camera::{ImageRenderTarget, RenderTarget};
 use futures_lite::future::{block_on, poll_once};
 use image::RgbaImage;
+use inference::InferenceThresholds;
 use sim_core::{ModeSet, SimRunMode};
-use vision_core::capture::{
-    PrimaryCaptureCamera, PrimaryCaptureReadback, PrimaryCaptureTarget,
-};
+use vision_core::capture::{PrimaryCaptureCamera, PrimaryCaptureReadback, PrimaryCaptureTarget};
 use vision_core::interfaces::{self, Frame};
 use vision_core::overlay::draw_rect;
 
@@ -58,12 +57,6 @@ pub struct DetectionOverlayState {
 pub enum DetectorKind {
     Burn,
     Heuristic,
-}
-
-#[derive(Resource, Debug, Clone, Copy)]
-pub struct InferenceThresholds {
-    pub obj_thresh: f32,
-    pub iou_thresh: f32,
 }
 
 #[derive(Clone)]
@@ -365,9 +358,10 @@ pub fn recorder_draw_rect(
 pub mod prelude {
     pub use super::{
         BurnDetectionResult, BurnDetector, BurnInferenceState, CapturePlugin,
-        DetectionOverlayState, DetectorHandle, DetectorKind, PrimaryCameraFrame,
-        PrimaryCameraFrameBuffer, PrimaryCameraState, InferencePlugin, InferenceThresholds,
+        DetectionOverlayState, DetectorHandle, DetectorKind, InferencePlugin, PrimaryCameraFrame,
+        PrimaryCameraFrameBuffer, PrimaryCameraState,
     };
+    pub use inference::InferenceThresholds;
 }
 pub fn poll_inference_task(
     mut jobs: ResMut<BurnInferenceState>,

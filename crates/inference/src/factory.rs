@@ -1,4 +1,5 @@
 use crate::{InferenceBackend, InferenceModel, InferenceModelConfig};
+use bevy::prelude::Resource;
 use burn::module::Module;
 use burn::tensor::TensorData;
 #[cfg(feature = "convolutional_detector")]
@@ -8,7 +9,7 @@ use std::sync::{Arc, Mutex};
 use vision_core::interfaces::{DetectionResult, Detector, Frame};
 
 /// Thresholds for inference (objectness + IoU).
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Resource)]
 pub struct InferenceThresholds {
     pub obj_thresh: f32,
     pub iou_thresh: f32,
