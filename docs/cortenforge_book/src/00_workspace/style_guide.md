@@ -19,6 +19,54 @@ Consistent naming and placement rules for new pages.
 | Headings | Title Case; keep consistent order per crate. |
 | Templates | reuse `_templates/crate_template.md` when creating new crate pages. |
 
+### Crate Naming Strategy
+
+The CortenForge workspace uses descriptive crate names that signal architectural layers:
+
+**Core suffix**: `_core` indicates framework-agnostic interfaces and abstractions.
+
+- `vision_core`: Detector, Recorder, and Frame interfaces with no framework dependencies.
+- Can be used in CLI tools, web services, or any Rust application.
+
+**Runtime suffix**: `_runtime` indicates framework-specific integration layers.
+
+- `vision_runtime`: Bevy-specific plugins, resources, and systems wrapping `vision_core` interfaces.
+- Bridges framework-agnostic abstractions to Bevy ECS.
+
+**Other patterns**:
+
+- `_support`: Utility/helper crates (e.g., `cli_support` for shared CLI args).
+- `_utils`: Concrete implementations (e.g., `capture_utils` for filesystem recorders).
+- No suffix: Domain-focused crates (e.g., `models`, `inference`, `training`).
+
+This naming convention clarifies architectural boundaries and dependency direction:
+
+```text
+vision_core (interfaces) ← inference (detector impl) ← vision_runtime (Bevy integration)
+```
+
+### vision_core vs vision_runtime Split
+
+A key architectural pattern in CortenForge:
+
+**vision_core**: Framework-agnostic vision interfaces.
+
+- Defines `Detector`, `Recorder`, `Frame`, `Label` traits and types.
+- Zero Bevy dependencies; pure Rust abstractions.
+- Enables detector implementations in non-Bevy contexts (CLI tools, servers, etc.).
+
+**vision_runtime**: Bevy-integrated runtime layer.
+
+- Provides `CapturePlugin`, `InferenceRuntimePlugin` for Bevy apps.
+- Wraps `vision_core` interfaces as Bevy resources.
+- Handles async inference scheduling, GPU readback, detection overlays.
+
+**Why the split**:
+
+- Keeps core detection logic portable and testable without framework overhead.
+- Allows reuse of detector implementations across Bevy apps, CLI tools, and services.
+- Follows dependency inversion: high-level Bevy code depends on stable abstractions.
+
 ## Cross-link style
 Linking rules to keep references stable and readable.
 | Pattern | Example |
