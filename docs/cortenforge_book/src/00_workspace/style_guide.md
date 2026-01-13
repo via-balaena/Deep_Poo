@@ -215,6 +215,51 @@ Trait names use these patterns to signal their purpose:
 - Be specific: `Detector` is clearer than `Detectable` or `CanDetect`.
 - Match suffix to architectural role (Hook, Source, Factory, Store, Provider).
 
+### Type Alias Feature-Gating
+
+CortenForge uses feature-gated type aliases to select backends and models at compile time:
+
+**Backend selection**:
+
+```rust
+#[cfg(feature = "backend-wgpu")]
+pub type InferenceBackend = burn_wgpu::Wgpu<f32>;
+#[cfg(not(feature = "backend-wgpu"))]
+pub type InferenceBackend = burn_ndarray::NdArray<f32>;
+```
+
+- Used in `inference` and `training` crates.
+- Defaults to `NdArray` for CPU; opt-in to WGPU for GPU.
+
+**Model selection**:
+
+```rust
+#[cfg(feature = "convolutional_detector")]
+pub type InferenceModel<B> = models::MultiboxModel<B>;
+#[cfg(not(feature = "convolutional_detector"))]
+pub type InferenceModel<B> = models::LinearClassifier<B>;
+```
+
+- Used in `inference` crate to select model architecture.
+- Paired with `InferenceModelConfig` alias for consistency.
+
+**Benefits**:
+
+- Consumers import `InferenceBackend` or `InferenceModel` without conditional compilation.
+- Type aliases adapt based on enabled features.
+- Ensures consistent naming across feature configurations.
+
+**Naming pattern**:
+
+- Use descriptive aliases: `InferenceBackend`, `TrainBackend`, `InferenceModel`.
+- Avoid generic names like `Backend` or `Model` (too vague).
+- Pair model aliases with their config aliases (`InferenceModel` + `InferenceModelConfig`).
+
+**Result type aliases**:
+
+- Simple result aliases are acceptable: `pub type DatasetResult<T> = Result<T, BurnDatasetError>`.
+- Use when a crate has a dominant error type to reduce boilerplate.
+
 ## Cross-link style
 Linking rules to keep references stable and readable.
 | Pattern | Example |
