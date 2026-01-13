@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 use crate::autopilot_types::{AutoDrive, DataRun, DatagenInit};
-use crate::recorder_types::{AutoRecordTimer, RecorderConfig, RecorderMotion, RecorderState};
+use crate::recorder::{
+    AutoRecordTimer, Config as RecorderConfig, Motion as RecorderMotion, State as RecorderState,
+};
 use crate::ModeSet;
 
 /// Registers common runtime resources and ensures mode sets exist.

@@ -8,9 +8,9 @@ use cortenforge::{sim_core, vision_runtime};
 fn main() {
     // Build a Bevy app using re-exported crates
     let mut app = bevy::prelude::App::new();
-    app.add_plugins((vision_runtime::CapturePlugin, vision_runtime::InferencePlugin));
+    app.add_plugins((vision_runtime::CapturePlugin, vision_runtime::InferenceRuntimePlugin));
     // sim_core types are available through the facade
-    app.insert_resource(sim_core::recorder_meta::RecorderWorldState::default());
+    app.insert_resource(sim_core::recorder::WorldState::default());
 }
 ```
 
