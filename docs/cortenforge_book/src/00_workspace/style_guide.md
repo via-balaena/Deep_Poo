@@ -102,6 +102,42 @@ Consistent function naming conventions across the workspace:
 - Use `load` for I/O operations; `from_*` for pure conversions.
 - Avoid generic verbs like `process` or `handle`; be specific about what the function does.
 
+### Feature Flag Organization
+
+CortenForge uses feature flags to enable optional functionality and select backends/models:
+
+**Backend selection** (mutually exclusive):
+
+- `backend-ndarray`: CPU-based Burn backend (default for inference/training).
+- `backend-wgpu`: GPU-accelerated WGPU backend (opt-in).
+
+**Model selection** (mutually exclusive):
+
+- `linear_detector`: Simple LinearClassifier model (default).
+- `convolutional_detector`: MultiboxModel for multi-box detection (opt-in).
+
+**Runtime integration**:
+
+- `burn-runtime`: Enables Burn-specific batch iteration in `burn_dataset` (opt-in).
+- `bevy-resource`: Derives `Resource` for types in `cli_support` to enable Bevy integration (opt-in).
+
+**Naming conventions**:
+
+- Use `backend-*` prefix for Burn backend selection.
+- Use `*_detector` suffix for model architecture selection.
+- Use descriptive names for integration features (`bevy-resource`, `burn-runtime`).
+
+**Default features**:
+
+- Most crates default to `backend-ndarray` + `linear_detector` for minimal dependencies.
+- Feature flags are opt-in by default unless they provide baseline functionality.
+
+**Cross-crate coordination**:
+
+- `models` defines `linear_detector` and `convolutional_detector` as empty marker features.
+- `inference` and `training` enable corresponding `models` features transitively.
+- This ensures type aliases (`InferenceModel`, `InferenceModelConfig`) resolve consistently.
+
 ## Cross-link style
 Linking rules to keep references stable and readable.
 | Pattern | Example |
