@@ -27,15 +27,15 @@ burn-wgpu = ["burn-runtime", "dep:burn-wgpu"]
 burn-dataset = ["burn_dataset"]
 
 [dependencies]
-sim_core = { package = "cortenforge-sim-core", version = "0.5.0", optional = true }
-vision_core = { package = "cortenforge-vision-core", version = "0.5.0", optional = true }
-vision_runtime = { package = "cortenforge-vision-runtime", version = "0.5.0", optional = true }
-capture_utils = { package = "cortenforge-capture-utils", version = "0.5.0", optional = true }
-data_contracts = { package = "cortenforge-data-contracts", version = "0.5.0", optional = true }
-models = { package = "cortenforge-models", version = "0.5.0", optional = true }
-inference = { package = "cortenforge-inference", version = "0.5.0", optional = true }
-training = { package = "cortenforge-training", version = "0.5.0", optional = true }
-burn_dataset = { package = "cortenforge-burn-dataset", version = "0.5.0", optional = true }
+sim_core = { package = "cortenforge-sim-core", version = "0.5.1", optional = true }
+vision_core = { package = "cortenforge-vision-core", version = "0.5.1", optional = true }
+vision_runtime = { package = "cortenforge-vision-runtime", version = "0.5.1", optional = true }
+capture_utils = { package = "cortenforge-capture-utils", version = "0.5.1", optional = true }
+data_contracts = { package = "cortenforge-data-contracts", version = "0.5.1", optional = true }
+models = { package = "cortenforge-models", version = "0.5.1", optional = true }
+inference = { package = "cortenforge-inference", version = "0.5.1", optional = true }
+training = { package = "cortenforge-training", version = "0.5.1", optional = true }
+burn_dataset = { package = "cortenforge-burn-dataset", version = "0.5.1", optional = true }
 burn = { workspace = true, optional = true, features = ["autodiff", "std"] }
 burn-ndarray = { workspace = true, optional = true }
 burn-wgpu = { workspace = true, optional = true }
