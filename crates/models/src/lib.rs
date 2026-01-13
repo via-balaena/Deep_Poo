@@ -130,5 +130,7 @@ impl<B: burn::tensor::backend::Backend> ConvolutionalDetector<B> {
 }
 
 pub mod prelude {
-    pub use super::{ConvolutionalDetector, ConvolutionalDetectorConfig, LinearDetector, LinearDetectorConfig};
+    pub use super::{
+        ConvolutionalDetector, ConvolutionalDetectorConfig, LinearDetector, LinearDetectorConfig,
+    };
 }

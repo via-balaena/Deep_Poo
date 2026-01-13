@@ -42,7 +42,6 @@ pub fn build_train_val_iters(
     Ok((train_iter, val_iter))
 }
 
-
 pub struct BurnBatch<B: burn::tensor::backend::Backend> {
     pub images: burn::tensor::Tensor<B, 4>,
     pub boxes: burn::tensor::Tensor<B, 3>,
@@ -423,4 +422,3 @@ impl BatchIter {
         }
     }
 }
-

@@ -1,13 +1,13 @@
 //! Warehouse manifest and shard storage backends.
 
 #[cfg(feature = "burn-runtime")]
+use crate::batch::BurnBatch;
+#[cfg(feature = "burn-runtime")]
 use crate::types::{BurnDatasetError, DatasetResult};
 use crate::types::{
     CacheableTransformConfig, DatasetSummary, ResizeMode, ShardDType, ShardMetadata,
     ValidationThresholds, WarehouseStoreMode,
 };
-#[cfg(feature = "burn-runtime")]
-use crate::batch::BurnBatch;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -153,7 +153,6 @@ impl WarehouseManifest {
         }
     }
 }
-
 
 struct ShardBuffer {
     samples: usize,
@@ -344,7 +343,6 @@ impl ShardBuffer {
         }
     }
 }
-
 
 pub struct WarehouseBatchIter {
     inner: WarehouseBatchIterKind,

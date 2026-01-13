@@ -142,7 +142,11 @@ impl TransformPipeline {
         )
     }
 
-    pub(crate) fn apply(&self, img: image::RgbImage, meta: &LabelEntry) -> DatasetResult<DatasetSample> {
+    pub(crate) fn apply(
+        &self,
+        img: image::RgbImage,
+        meta: &LabelEntry,
+    ) -> DatasetResult<DatasetSample> {
         let (mut width, mut height) = img.dimensions();
         // Choose RNG: seeded if provided (per-frame deterministic), else thread-local.
         let mut rng_local;
@@ -330,7 +334,6 @@ impl TransformPipelineBuilder {
         self.inner
     }
 }
-
 
 fn build_sample_from_image(
     img: image::RgbImage,

@@ -7,7 +7,10 @@ use burn::tensor::{Tensor, TensorData};
 use burn_dataset::WarehouseLoaders;
 use std::path::Path;
 
-use crate::{ConvolutionalDetector, ConvolutionalDetectorConfig, DatasetConfig, LinearDetector, LinearDetectorConfig, TrainBackend};
+use crate::{
+    ConvolutionalDetector, ConvolutionalDetectorConfig, DatasetConfig, LinearDetector,
+    LinearDetectorConfig, TrainBackend,
+};
 use clap::{Parser, ValueEnum};
 use std::fs;
 
@@ -42,7 +45,10 @@ pub enum TrainingInputSource {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "train", about = "Train LinearDetector/ConvolutionalDetector (warehouse-first)")]
+#[command(
+    name = "train",
+    about = "Train LinearDetector/ConvolutionalDetector (warehouse-first)"
+)]
 pub struct TrainArgs {
     /// Model to train.
     #[arg(long, value_enum, default_value_t = ModelKind::Tiny)]
@@ -127,7 +133,9 @@ pub fn run_train(args: TrainArgs) -> anyhow::Result<()> {
             }
             match args.model {
                 ModelKind::Tiny => train_linear_detector_warehouse(&args, &loaders, &ckpt_path)?,
-                ModelKind::Big => train_convolutional_detector_warehouse(&args, &loaders, &ckpt_path)?,
+                ModelKind::Big => {
+                    train_convolutional_detector_warehouse(&args, &loaders, &ckpt_path)?
+                }
             }
         }
         TrainingInputSource::CaptureLogs => {

@@ -5,7 +5,9 @@
 //! 2. Warehouse → Training batch iteration
 //! 3. Capture → Validation → Stratified splits
 
-use burn_dataset::{index_runs, split_runs_stratified, summarize_with_thresholds, ValidationThresholds};
+use burn_dataset::{
+    index_runs, split_runs_stratified, summarize_with_thresholds, ValidationThresholds,
+};
 
 #[cfg(feature = "burn-runtime")]
 use burn_dataset::{
@@ -23,7 +25,12 @@ use std::io::Write;
 /// Helper to create a synthetic capture run with N frames.
 /// Note: boxes_per_frame must be > 0 because validation requires at least bbox_norm or bbox_px.
 /// For testing "empty" samples, set boxes to tiny values that get filtered during training.
-fn create_synthetic_run(root: &Path, run_name: &str, frame_count: usize, boxes_per_frame: usize) -> anyhow::Result<PathBuf> {
+fn create_synthetic_run(
+    root: &Path,
+    run_name: &str,
+    frame_count: usize,
+    boxes_per_frame: usize,
+) -> anyhow::Result<PathBuf> {
     let run_dir = root.join(run_name);
     let labels_dir = run_dir.join("labels");
     fs::create_dir_all(&labels_dir)?;
@@ -35,7 +42,8 @@ fn create_synthetic_run(root: &Path, run_name: &str, frame_count: usize, boxes_p
 
         // Create synthetic labels
         let mut labels = Vec::new();
-        for j in 0..boxes_per_frame.max(1) { // Ensure at least 1 for validation
+        for j in 0..boxes_per_frame.max(1) {
+            // Ensure at least 1 for validation
             let offset = j as f32 * 0.1;
             labels.push(DetectionLabel {
                 center_world: [offset, offset, 0.0],
@@ -78,7 +86,7 @@ fn workflow_capture_to_warehouse_etl() -> anyhow::Result<()> {
     let tmp = tempfile::tempdir()?;
     let root = tmp.path();
 
-    create_synthetic_run(root, "run_1box", 3, 1)?;   // Single box
+    create_synthetic_run(root, "run_1box", 3, 1)?; // Single box
     create_synthetic_run(root, "run_2boxes", 4, 2)?; // Multiple boxes
     create_synthetic_run(root, "run_3boxes", 3, 3)?; // Even more boxes
 
@@ -181,7 +189,8 @@ fn workflow_capture_to_warehouse_etl() -> anyhow::Result<()> {
 
     let code_version = WarehouseManifest::default_code_version();
     let version = WarehouseManifest::compute_version(root, &transform, false, &code_version);
-    let version_recipe = "sha256(dataset_root + transform + max_boxes + skip_empty + code_version)".to_string();
+    let version_recipe =
+        "sha256(dataset_root + transform + max_boxes + skip_empty + code_version)".to_string();
 
     let shard_meta = ShardMetadata {
         id: "shard_001".into(),
@@ -223,8 +232,8 @@ fn workflow_capture_to_warehouse_etl() -> anyhow::Result<()> {
 #[cfg(feature = "burn-runtime")]
 #[test]
 fn workflow_warehouse_to_training_iteration() -> anyhow::Result<()> {
-    use burn_dataset::WarehouseLoaders;
     use burn::tensor::backend::Backend;
+    use burn_dataset::WarehouseLoaders;
 
     type TestBackend = burn_ndarray::NdArray<f32>;
 
@@ -278,9 +287,9 @@ fn workflow_warehouse_to_training_iteration() -> anyhow::Result<()> {
     cursor = boxes_offset;
     let boxes_per_sample = vec![
         vec![[0.1f32, 0.1, 0.3, 0.3], [0.5, 0.5, 0.7, 0.7]], // sample 0: 2 boxes
-        vec![[0.2f32, 0.2, 0.4, 0.4]],                        // sample 1: 1 box
-        vec![],                                             // sample 2: 0 boxes
-        vec![[0.3f32, 0.3, 0.6, 0.6]],                        // sample 3: 1 box
+        vec![[0.2f32, 0.2, 0.4, 0.4]],                       // sample 1: 1 box
+        vec![],                                              // sample 2: 0 boxes
+        vec![[0.3f32, 0.3, 0.6, 0.6]],                       // sample 3: 1 box
     ];
 
     for boxes in &boxes_per_sample {
@@ -332,7 +341,8 @@ fn workflow_warehouse_to_training_iteration() -> anyhow::Result<()> {
     };
 
     let code_version = WarehouseManifest::default_code_version();
-    let version = WarehouseManifest::compute_version(&warehouse_dir, &transform, false, &code_version);
+    let version =
+        WarehouseManifest::compute_version(&warehouse_dir, &transform, false, &code_version);
     let version_recipe = "test".to_string();
 
     let manifest = WarehouseManifest::new(
@@ -362,24 +372,37 @@ fn workflow_warehouse_to_training_iteration() -> anyhow::Result<()> {
     let device = <TestBackend as Backend>::Device::default();
     let batch_size = 2;
 
-    let batch1 = train_iter.next_batch::<TestBackend>(batch_size, &device)?
+    let batch1 = train_iter
+        .next_batch::<TestBackend>(batch_size, &device)?
         .expect("Expected first training batch");
-    assert_eq!(batch1.images.dims()[0], 2, "First batch should have 2 samples");
+    assert_eq!(
+        batch1.images.dims()[0],
+        2,
+        "First batch should have 2 samples"
+    );
     assert_eq!(batch1.images.dims()[1], channels as usize);
     assert_eq!(batch1.images.dims()[2], height as usize);
     assert_eq!(batch1.images.dims()[3], width as usize);
     assert_eq!(batch1.boxes.dims(), [2, max_boxes, 4]);
     assert_eq!(batch1.box_mask.dims(), [2, max_boxes]);
 
-    let batch2 = train_iter.next_batch::<TestBackend>(batch_size, &device)?
+    let batch2 = train_iter
+        .next_batch::<TestBackend>(batch_size, &device)?
         .expect("Expected second training batch");
-    assert_eq!(batch2.images.dims()[0], 1, "Second batch should have 1 sample (remainder)");
+    assert_eq!(
+        batch2.images.dims()[0],
+        1,
+        "Second batch should have 1 sample (remainder)"
+    );
 
     // Should be exhausted
-    assert!(train_iter.next_batch::<TestBackend>(batch_size, &device)?.is_none());
+    assert!(train_iter
+        .next_batch::<TestBackend>(batch_size, &device)?
+        .is_none());
 
     // Step 4: Iterate validation batch
-    let val_batch = val_iter.next_batch::<TestBackend>(1, &device)?
+    let val_batch = val_iter
+        .next_batch::<TestBackend>(1, &device)?
         .expect("Expected validation batch");
     assert_eq!(val_batch.images.dims()[0], 1);
 
@@ -433,18 +456,27 @@ fn workflow_capture_validation_and_stratified_split() -> anyhow::Result<()> {
 
     // Verify split sizes
     assert_eq!(train_indices.len() + val_indices.len(), 37);
-    assert!(val_indices.len() >= 5 && val_indices.len() <= 10, "Expected ~20% validation (5-10 of 37)");
+    assert!(
+        val_indices.len() >= 5 && val_indices.len() <= 10,
+        "Expected ~20% validation (5-10 of 37)"
+    );
 
     // Step 5: Verify stratification worked (both splits should have varied box counts from different runs)
-    let train_has_single = train_indices.iter()
+    let train_has_single = train_indices
+        .iter()
         .any(|idx| idx.run_dir.to_string_lossy().contains("single"));
-    let train_has_multi = train_indices.iter()
+    let train_has_multi = train_indices
+        .iter()
         .any(|idx| idx.run_dir.to_string_lossy().contains("multi"));
-    let train_has_sparse = train_indices.iter()
+    let train_has_sparse = train_indices
+        .iter()
         .any(|idx| idx.run_dir.to_string_lossy().contains("sparse"));
 
     // With 37 samples across 3 runs and good stratification, we should get representation
-    assert!(train_has_single || train_has_multi || train_has_sparse, "Training set should have representation");
+    assert!(
+        train_has_single || train_has_multi || train_has_sparse,
+        "Training set should have representation"
+    );
     assert!(!val_indices.is_empty(), "Validation set should exist");
 
     Ok(())

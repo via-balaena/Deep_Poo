@@ -1,7 +1,10 @@
 //! Dataset validation and quality checks.
 
 use crate::capture::{index_runs, summarize_runs};
-use crate::types::{DatasetResult, DatasetSummary, SampleIndex, ValidationOutcome, ValidationReport, ValidationThresholds};
+use crate::types::{
+    DatasetResult, DatasetSummary, SampleIndex, ValidationOutcome, ValidationReport,
+    ValidationThresholds,
+};
 use std::path::Path;
 
 fn apply_thresholds(
@@ -98,4 +101,3 @@ pub fn summarize_root_with_thresholds(
     let indices = index_runs(root)?;
     summarize_with_thresholds(&indices, thresholds)
 }
-
