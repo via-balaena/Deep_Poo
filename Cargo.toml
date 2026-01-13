@@ -87,15 +87,3 @@ thiserror = "2.0.17"
 toml = "0.9.11"
 ratatui = { version = "0.30.0", default-features = false, features = ["crossterm"] }
 sysinfo = { version = "0.37.2", features = ["multithread"] }
-
-[patch.crates-io]
-cortenforge-models = { path = "crates/models" }
-cortenforge-data-contracts = { path = "crates/data_contracts" }
-cortenforge-burn-dataset = { path = "crates/burn_dataset" }
-cortenforge-cli-support = { path = "crates/cli_support" }
-cortenforge-vision-core = { path = "crates/vision_core" }
-cortenforge-sim-core = { path = "crates/sim_core" }
-cortenforge-capture-utils = { path = "crates/capture_utils" }
-cortenforge-vision-runtime = { path = "crates/vision_runtime" }
-cortenforge-inference = { path = "crates/inference" }
-cortenforge-training = { path = "crates/training" }
