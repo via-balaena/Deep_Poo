@@ -61,12 +61,12 @@ pub mod prelude {
     pub use super::{ModeSet, SimConfig, SimPlugin, SimRunMode};
     pub use crate::autopilot_types::{AutoDir, AutoDrive, AutoStage, DataRun, DatagenInit};
     pub use crate::camera::{
-        camera_controller, pov_toggle_system, setup_camera, Flycam, PovState, ProbePovCamera,
+        camera_controller, pov_toggle_system, setup_camera, Flycam, InstrumentPovCamera, PovState,
         UiOverlayCamera,
     };
     pub use crate::controls::ControlParams;
     pub use crate::hooks::{AutopilotHook, ControlsHook, SimHooks};
-    pub use crate::probe_types::{ProbeSegment, SegmentSpring};
+    pub use crate::articulated_types::{ArticulatedSegment, SegmentSpring};
     pub use crate::recorder_meta::{
         BasicRecorderMeta, RecorderMetaProvider, RecorderMetadataProvider, RecorderSink,
         RecorderWorldState,
@@ -98,11 +98,11 @@ pub fn build_app(sim_config: SimConfig) -> App {
     app
 }
 
+pub mod articulated_types;
 pub mod autopilot_types;
 pub mod camera;
 pub mod controls;
 pub mod hooks;
-pub mod probe_types;
 pub mod recorder_meta;
 pub mod recorder_types;
 pub mod runtime;

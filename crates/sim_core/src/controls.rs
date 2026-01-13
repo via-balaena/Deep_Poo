@@ -1,6 +1,6 @@
 use bevy::prelude::Resource;
 
-/// Control parameters for probe actuation.
+/// Control parameters for articulated instrument actuation.
 #[derive(Resource, Clone)]
 pub struct ControlParams {
     pub tension: f32,

@@ -10,11 +10,11 @@ pub struct Flycam {
 }
 
 #[derive(Component)]
-pub struct ProbePovCamera;
+pub struct InstrumentPovCamera;
 
 #[derive(Resource, Default)]
 pub struct PovState {
-    pub use_probe: bool,
+    pub use_instrument: bool,
 }
 
 #[derive(Component)]
@@ -111,21 +111,21 @@ pub fn camera_controller(
 pub fn pov_toggle_system(
     keys: Res<ButtonInput<KeyCode>>,
     mut state: ResMut<PovState>,
-    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<ProbePovCamera>)>,
-    mut probe_cams: Query<&mut Camera, With<ProbePovCamera>>,
+    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<InstrumentPovCamera>)>,
+    mut instrument_cams: Query<&mut Camera, With<InstrumentPovCamera>>,
 ) {
     if !keys.just_pressed(KeyCode::KeyC) {
         return;
     }
 
-    state.use_probe = !state.use_probe;
-    let use_probe = state.use_probe;
-    let use_free = !use_probe;
+    state.use_instrument = !state.use_instrument;
+    let use_instrument = state.use_instrument;
+    let use_free = !use_instrument;
 
     for mut cam in &mut free_cams {
         cam.is_active = use_free;
     }
-    for mut cam in &mut probe_cams {
-        cam.is_active = use_probe;
+    for mut cam in &mut instrument_cams {
+        cam.is_active = use_instrument;
     }
 }
