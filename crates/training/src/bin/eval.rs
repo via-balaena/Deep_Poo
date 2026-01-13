@@ -78,7 +78,10 @@ fn main() -> anyhow::Result<()> {
                 }
                 None => {
                     println!("No checkpoint provided; using fresh LinearClassifier");
-                    LinearClassifier::<TrainBackend>::new(LinearClassifierConfig::default(), &device)
+                    LinearClassifier::<TrainBackend>::new(
+                        LinearClassifierConfig::default(),
+                        &device,
+                    )
                 }
             };
             for chunk in samples.chunks(batch_size) {
@@ -110,20 +113,18 @@ fn main() -> anyhow::Result<()> {
         }
         ModelKind::Big => {
             let model = match ckpt {
-                Some(ref p) => {
-                    load_multibox_model_from_checkpoint(p, &device, args.max_boxes)
-                        .unwrap_or_else(|e| {
-                            println!("Failed to load checkpoint {p}; using fresh model ({e})");
-                            MultiboxModel::<TrainBackend>::new(
-                                MultiboxModelConfig {
-                                    input_dim: Some(4 + 8),
-                                    max_boxes: args.max_boxes,
-                                    ..Default::default()
-                                },
-                                &device,
-                            )
-                        })
-                }
+                Some(ref p) => load_multibox_model_from_checkpoint(p, &device, args.max_boxes)
+                    .unwrap_or_else(|e| {
+                        println!("Failed to load checkpoint {p}; using fresh model ({e})");
+                        MultiboxModel::<TrainBackend>::new(
+                            MultiboxModelConfig {
+                                input_dim: Some(4 + 8),
+                                max_boxes: args.max_boxes,
+                                ..Default::default()
+                            },
+                            &device,
+                        )
+                    }),
                 None => {
                     println!("No checkpoint provided; using fresh MultiboxModel");
                     MultiboxModel::<TrainBackend>::new(

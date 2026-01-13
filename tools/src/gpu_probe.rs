@@ -45,7 +45,7 @@ impl GpuProbe for MacGpuProbe {
     fn status(&self) -> GpuStatus {
         #[cfg(target_os = "macos")]
         {
-            // TODO: replace with real Metal/GPU stats. For now report availability with zero utilization.
+            // TODO(#19): Implement Metal-based GPU stats for macOS
             GpuStatus {
                 available: true,
                 utilization: Some(0.0),
@@ -149,7 +149,7 @@ impl GpuProbe for WindowsGpuProbe {
 #[cfg(all(target_os = "windows", feature = "gpu-windows"))]
 impl GpuProbe for AmdWindowsProbe {
     fn status(&self) -> GpuStatus {
-        // TODO: replace with a Windows WMI/DirectX implementation.
+        // TODO(#20): Implement WMI/DirectX GPU stats for Windows AMD
         if let Some(status) = windows_wmi_status() {
             return status;
         }

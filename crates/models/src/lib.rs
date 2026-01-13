@@ -143,7 +143,5 @@ impl<B: burn::tensor::backend::Backend> MultiboxModel<B> {
 }
 
 pub mod prelude {
-    pub use super::{
-        LinearClassifier, LinearClassifierConfig, MultiboxModel, MultiboxModelConfig,
-    };
+    pub use super::{LinearClassifier, LinearClassifierConfig, MultiboxModel, MultiboxModelConfig};
 }

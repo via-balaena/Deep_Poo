@@ -31,14 +31,8 @@ use vision_core::overlay::draw_rect;
 /// This bridges the framework-agnostic `inference` crate with Bevy ECS.
 /// The inner `InferenceThresholds` type can be used in non-Bevy contexts
 /// (CLI tools, web services, etc.) without pulling in Bevy dependencies.
-#[derive(Resource, Debug, Clone, Copy)]
+#[derive(Resource, Debug, Clone, Copy, Default)]
 pub struct InferenceThresholdsResource(pub InferenceThresholds);
-
-impl Default for InferenceThresholdsResource {
-    fn default() -> Self {
-        Self(InferenceThresholds::default())
-    }
-}
 
 impl std::ops::Deref for InferenceThresholdsResource {
     type Target = InferenceThresholds;
