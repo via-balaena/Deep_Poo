@@ -25,8 +25,8 @@ Shared Rust crates for the CortenForge simulation substrate (capture, ETL, train
 - Tools config: create `cortenforge-tools.toml` at repo root (or set `CORTENFORGE_TOOLS_CONFIG`) to customize paths/commands.
 
 ## Using the crates from crates.io
-- Add deps with `version = "0.4.0"` (examples: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`, `cortenforge-tools`).
-- Umbrella crate: `cortenforge` is at `0.4.0` (core stacks only; add `cortenforge-cli-support` and `cortenforge-tools` directly if needed).
+- Add deps with `version = "0.5.1"` (examples: `cortenforge-sim-core`, `cortenforge-vision-core`, `cortenforge-vision-runtime`, `cortenforge-data-contracts`, `cortenforge-capture-utils`, `cortenforge-models`, `cortenforge-training`, `cortenforge-inference`, `cortenforge-cli-support`, `cortenforge-burn-dataset`, `cortenforge-tools`).
+- Umbrella crate: `cortenforge` is at `0.5.1` (core stacks only; add `cortenforge-cli-support` and `cortenforge-tools` directly if needed).
 - Feature flags:
   - `cortenforge-training`: `backend-wgpu` (optional GPU); defaults to NdArray.
   - `cortenforge-inference`: `backend-wgpu` (optional GPU); defaults to NdArray; `tinydet`/`bigdet` feature gates.
