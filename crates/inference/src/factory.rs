@@ -13,15 +13,15 @@ use vision_core::interfaces::{DetectionResult, Detector, Frame};
 /// `InferenceThresholdsResource` from the `vision_runtime` crate.
 #[derive(Debug, Clone, Copy)]
 pub struct InferenceThresholds {
-    pub obj_thresh: f32,
-    pub iou_thresh: f32,
+    pub objectness_threshold: f32,
+    pub iou_threshold: f32,
 }
 
 impl Default for InferenceThresholds {
     fn default() -> Self {
         Self {
-            obj_thresh: 0.3,
-            iou_thresh: 0.5,
+            objectness_threshold: 0.3,
+            iou_threshold: 0.5,
         }
     }
 }
@@ -116,7 +116,7 @@ impl InferenceFactory {
         }
         eprintln!("InferenceFactory: no valid checkpoint provided; using heuristic detector.");
         Box::new(HeuristicDetector {
-            obj_thresh: thresh.obj_thresh,
+            obj_thresh: thresh.objectness_threshold,
         })
     }
 
@@ -144,8 +144,8 @@ impl InferenceFactory {
         {
             Ok(model) => Some(Box::new(BurnDetector {
                 model: Arc::new(Mutex::new(model)),
-                obj_thresh: thresh.obj_thresh,
-                iou_thresh: thresh.iou_thresh,
+                obj_thresh: thresh.objectness_threshold,
+                iou_thresh: thresh.iou_threshold,
             })),
             Err(err) => {
                 eprintln!(

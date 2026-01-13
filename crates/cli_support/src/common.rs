@@ -4,15 +4,15 @@ use std::path::PathBuf;
 /// Shared thresholds used by inference-related tools.
 #[derive(Debug, Clone, Copy)]
 pub struct ThresholdOpts {
-    pub obj_thresh: f32,
-    pub iou_thresh: f32,
+    pub objectness_threshold: f32,
+    pub iou_threshold: f32,
 }
 
 impl ThresholdOpts {
-    pub fn new(obj_thresh: f32, iou_thresh: f32) -> Self {
+    pub fn new(objectness_threshold: f32, iou_threshold: f32) -> Self {
         Self {
-            obj_thresh,
-            iou_thresh,
+            objectness_threshold,
+            iou_threshold,
         }
     }
 }

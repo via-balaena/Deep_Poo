@@ -38,7 +38,7 @@ struct Args {
     checkpoint: Option<String>,
     /// IoU threshold for true positive.
     #[arg(long, default_value_t = 0.5)]
-    iou_thresh: f32,
+    iou_threshold: f32,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -186,7 +186,7 @@ fn main() -> anyhow::Result<()> {
                         let mut matched = false;
                         for (i, gb_box) in gt_list.iter().enumerate() {
                             let iou = iou_xyxy(pb_box, *gb_box);
-                            if iou >= args.iou_thresh {
+                            if iou >= args.iou_threshold {
                                 matched = true;
                                 gt_matched[i] = true;
                                 break;
@@ -221,7 +221,7 @@ fn main() -> anyhow::Result<()> {
 
     println!(
         "Eval complete: precision={:.3}, recall={:.3} (tp={}, fp={}, fn={}, iou_thresh={})",
-        precision, recall, total_tp, total_fp, total_fn, args.iou_thresh
+        precision, recall, total_tp, total_fp, total_fn, args.iou_threshold
     );
 
     Ok(())

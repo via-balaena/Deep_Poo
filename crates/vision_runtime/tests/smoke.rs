@@ -32,8 +32,8 @@ fn inference_plugin_smoke_updates_overlay() {
             kind: DetectorKind::Heuristic,
         })
         .insert_resource(InferenceThresholdsResource(InferenceThresholds {
-            obj_thresh: 0.3,
-            iou_thresh: 0.5,
+            objectness_threshold: 0.3,
+            iou_threshold: 0.5,
         }))
         .add_plugins(CapturePlugin)
         .add_plugins(InferenceRuntimePlugin)

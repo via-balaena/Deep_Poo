@@ -329,19 +329,19 @@ pub fn threshold_hotkeys(
 
     let mut changed = false;
     if keys.just_pressed(KeyCode::Minus) {
-        thresh.obj_thresh = (thresh.obj_thresh - 0.05).clamp(0.0, 1.0);
+        thresh.objectness_threshold = (thresh.objectness_threshold - 0.05).clamp(0.0, 1.0);
         changed = true;
     }
     if keys.just_pressed(KeyCode::Equal) {
-        thresh.obj_thresh = (thresh.obj_thresh + 0.05).clamp(0.0, 1.0);
+        thresh.objectness_threshold = (thresh.objectness_threshold + 0.05).clamp(0.0, 1.0);
         changed = true;
     }
     if keys.just_pressed(KeyCode::BracketLeft) {
-        thresh.iou_thresh = (thresh.iou_thresh - 0.05).clamp(0.1, 0.95);
+        thresh.iou_threshold = (thresh.iou_threshold - 0.05).clamp(0.1, 0.95);
         changed = true;
     }
     if keys.just_pressed(KeyCode::BracketRight) {
-        thresh.iou_thresh = (thresh.iou_thresh + 0.05).clamp(0.1, 0.95);
+        thresh.iou_threshold = (thresh.iou_threshold + 0.05).clamp(0.1, 0.95);
         changed = true;
     }
 
@@ -355,7 +355,7 @@ pub fn threshold_hotkeys(
     if changed {
         info!(
             "Updated inference thresholds: obj {:.2}, iou {:.2}",
-            thresh.obj_thresh, thresh.iou_thresh
+            thresh.objectness_threshold, thresh.iou_threshold
         );
     }
 }

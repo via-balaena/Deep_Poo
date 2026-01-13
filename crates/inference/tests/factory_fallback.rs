@@ -7,8 +7,8 @@ fn factory_uses_heuristic_without_weights() {
     let factory = InferenceFactory;
     let mut detector = factory.build(
         InferenceThresholds {
-            obj_thresh: 0.3,
-            iou_thresh: 0.5,
+            objectness_threshold: 0.3,
+            iou_threshold: 0.5,
         },
         None,
     );
