@@ -10,7 +10,7 @@ pub enum LabelSource {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PolypLabel {
+pub struct DetectionLabel {
     pub center_world: [f32; 3],
     pub bbox_px: Option<[f32; 4]>,
     pub bbox_norm: Option<[f32; 4]>,
@@ -26,8 +26,8 @@ pub struct CaptureMetadata {
     pub image: String,
     pub image_present: bool,
     pub camera_active: bool,
-    pub polyp_seed: u64,
-    pub polyp_labels: Vec<PolypLabel>,
+    pub label_seed: u64,
+    pub labels: Vec<DetectionLabel>,
 }
 
 #[derive(Debug, Error)]
@@ -42,7 +42,7 @@ pub enum ValidationError {
     MissingImage,
 }
 
-impl PolypLabel {
+impl DetectionLabel {
     pub fn validate(&self) -> Result<(), ValidationError> {
         if let Some(px) = self.bbox_px {
             if px[0].is_nan()
@@ -75,7 +75,7 @@ impl CaptureMetadata {
         if self.image_present && self.image.trim().is_empty() {
             return Err(ValidationError::MissingImage);
         }
-        for label in &self.polyp_labels {
+        for label in &self.labels {
             label.validate()?;
         }
         Ok(())

@@ -1,4 +1,4 @@
-use data_contracts::capture::{CaptureMetadata, LabelSource, PolypLabel, ValidationError};
+use data_contracts::capture::{CaptureMetadata, DetectionLabel, LabelSource, ValidationError};
 
 #[test]
 fn invalid_bbox_norm_rejected() {
@@ -9,8 +9,8 @@ fn invalid_bbox_norm_rejected() {
         image: "images/frame.png".into(),
         image_present: true,
         camera_active: true,
-        polyp_seed: 42,
-        polyp_labels: vec![PolypLabel {
+        label_seed: 42,
+        labels: vec![DetectionLabel {
             center_world: [0.0, 0.0, 0.0],
             bbox_px: None,
             bbox_norm: Some([0.8, 0.2, 0.1, 0.9]),
@@ -31,8 +31,8 @@ fn valid_bbox_passes() {
         image: "images/frame.png".into(),
         image_present: true,
         camera_active: true,
-        polyp_seed: 42,
-        polyp_labels: vec![PolypLabel {
+        label_seed: 42,
+        labels: vec![DetectionLabel {
             center_world: [0.0, 0.0, 0.0],
             bbox_px: Some([0.0, 0.0, 10.0, 10.0]),
             bbox_norm: Some([0.1, 0.1, 0.2, 0.2]),
@@ -52,8 +52,8 @@ fn provenance_roundtrip_validates() {
         image: "images/frame.png".into(),
         image_present: true,
         camera_active: true,
-        polyp_seed: 7,
-        polyp_labels: vec![PolypLabel {
+        label_seed: 7,
+        labels: vec![DetectionLabel {
             center_world: [0.0, 0.0, 0.0],
             bbox_px: Some([0.0, 0.0, 10.0, 10.0]),
             bbox_norm: Some([0.1, 0.1, 0.2, 0.2]),
