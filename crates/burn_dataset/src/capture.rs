@@ -220,7 +220,7 @@ pub fn load_run_dataset(run_dir: &Path) -> DatasetResult<Vec<DatasetSample>> {
     Ok(samples)
 }
 
-fn load_sample(idx: &SampleIndex, pipeline: &TransformPipeline) -> DatasetResult<DatasetSample> {
+pub(crate) fn load_sample(idx: &SampleIndex, pipeline: &TransformPipeline) -> DatasetResult<DatasetSample> {
     static ONCE: std::sync::Once = std::sync::Once::new();
     let raw = fs::read(&idx.label_path).map_err(|e| BurnDatasetError::Io {
         path: idx.label_path.clone(),

@@ -1,18 +1,19 @@
 //! Batch iteration for training and validation.
 
-#[cfg(feature = "burn-runtime")]
-use crate::capture::load_sample;
 use crate::aug::{DatasetConfig, TransformPipeline};
+use crate::capture::index_runs;
 use crate::splits::split_runs;
 use crate::types::{BurnDatasetError, DatasetResult, DatasetSample, SampleIndex};
 use rand::{seq::SliceRandom, SeedableRng};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
 
 #[cfg(feature = "burn-runtime")]
-use rayon::prelude::*;
+use crate::capture::load_sample;
 #[cfg(feature = "burn-runtime")]
-use std::time::Instant;
+use rayon::prelude::*;
 
 #[cfg(feature = "burn-runtime")]
 pub(crate) const DEFAULT_LOG_EVERY_SAMPLES: usize = 1000;

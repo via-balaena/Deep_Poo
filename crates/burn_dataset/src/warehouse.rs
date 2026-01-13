@@ -2,7 +2,12 @@
 
 #[cfg(feature = "burn-runtime")]
 use crate::types::{BurnDatasetError, DatasetResult};
-use crate::types::{CacheableTransformConfig, Endianness, ResizeMode, ShardDType, ShardMetadata};
+use crate::types::{
+    CacheableTransformConfig, DatasetSummary, Endianness, ResizeMode, ShardDType, ShardMetadata,
+    ValidationThresholds, WarehouseStoreMode,
+};
+#[cfg(feature = "burn-runtime")]
+use crate::batch::BurnBatch;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -12,7 +17,9 @@ use crossbeam_channel::{bounded, Receiver};
 #[cfg(feature = "burn-runtime")]
 use memmap2::MmapOptions;
 #[cfg(feature = "burn-runtime")]
-use rayon::prelude::*;
+use rand::prelude::SliceRandom;
+#[cfg(feature = "burn-runtime")]
+use rand::SeedableRng;
 #[cfg(feature = "burn-runtime")]
 use std::fs::File;
 #[cfg(feature = "burn-runtime")]
@@ -24,6 +31,7 @@ use std::thread;
 #[cfg(feature = "burn-runtime")]
 use std::time::{Duration, Instant};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WarehouseManifest {
     /// Source dataset root as a UTF-8 string.
     pub dataset_root: String,
@@ -515,7 +523,7 @@ impl WarehouseShardStore for StreamingStore {
     }
 
     fn mode(&self) -> WarehouseStoreMode {
-        WarehouseStoreMode::Streaming
+        WarehouseStoreMode::default_streaming()
     }
 }
 
@@ -923,8 +931,7 @@ impl WarehouseLoaders {
                     store: Box::new(store),
                 })
             }
-            WarehouseStoreMode::Streaming => {
-                let prefetch = WarehouseStoreMode::prefetch_from_env();
+            WarehouseStoreMode::Streaming { prefetch } => {
                 println!("[warehouse] streaming prefetch depth: {}", prefetch);
                 let store = StreamingStore::from_manifest_path(
                     manifest_path,

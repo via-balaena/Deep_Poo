@@ -200,4 +200,18 @@ impl WarehouseStoreMode {
     pub fn is_streaming(&self) -> bool {
         matches!(self, WarehouseStoreMode::Streaming { .. })
     }
+    pub fn from_env() -> Self {
+        match std::env::var("WAREHOUSE_STORE_MODE").as_deref() {
+            Ok("inmemory") => WarehouseStoreMode::InMemory,
+            Ok("mmap") => WarehouseStoreMode::Mmap,
+            Ok("streaming") => Self::default_streaming(),
+            _ => WarehouseStoreMode::Mmap, // default
+        }
+    }
+    pub fn prefetch_from_env() -> usize {
+        std::env::var("WAREHOUSE_PREFETCH")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(2)
+    }
 }
