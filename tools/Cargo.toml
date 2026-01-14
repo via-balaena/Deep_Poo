@@ -2,6 +2,7 @@
 default = []
 tui = ["crossterm", "ratatui"]
 scheduler = ["sysinfo"]
+warehouse = ["burn_dataset/burn-runtime"]
 # Optional GPU feature flag to mirror root workspace flag.
 gpu-nvidia = ["nvml-wrapper"]
 gpu-windows = []
@@ -62,3 +63,18 @@ path = "src/bin/gpu_probe.rs"
 name = "datagen_scheduler"
 path = "src/bin/datagen_scheduler.rs"
 required-features = ["scheduler"]
+
+[[bin]]
+name = "warehouse_cmd"
+path = "src/bin/warehouse_cmd.rs"
+required-features = ["warehouse"]
+
+[[bin]]
+name = "warehouse_etl"
+path = "src/bin/warehouse_etl.rs"
+required-features = ["warehouse"]
+
+[[bin]]
+name = "warehouse_export"
+path = "src/bin/warehouse_export.rs"
+required-features = ["warehouse"]
