@@ -221,7 +221,7 @@ CortenForge uses feature-gated type aliases to select backends and models at com
 
 **Backend selection**:
 
-```rust
+```rust,ignore
 #[cfg(feature = "backend-wgpu")]
 pub type InferenceBackend = burn_wgpu::Wgpu<f32>;
 #[cfg(not(feature = "backend-wgpu"))]
@@ -233,7 +233,7 @@ pub type InferenceBackend = burn_ndarray::NdArray<f32>;
 
 **Model selection**:
 
-```rust
+```rust,ignore
 #[cfg(feature = "convolutional_detector")]
 pub type InferenceModel<B> = models::MultiboxModel<B>;
 #[cfg(not(feature = "convolutional_detector"))]
@@ -272,7 +272,7 @@ CortenForge uses consistent error type patterns across the workspace:
 
 **Error variant patterns**:
 
-```rust
+```rust,ignore
 #[derive(Debug, Error)]
 pub enum BurnDatasetError {
     // Context-rich variants with named fields
@@ -335,7 +335,7 @@ CortenForge uses minimal async code, primarily for offloading CPU-intensive work
 
 The workspace uses Bevy's `AsyncComputeTaskPool` for non-blocking inference:
 
-```rust
+```rust,ignore
 use bevy::tasks::{AsyncComputeTaskPool, Task};
 use futures_lite::future::{block_on, poll_once};
 
@@ -389,7 +389,7 @@ Bevy Resources and Components follow consistent patterns across the workspace:
 
 **Resource initialization patterns**:
 
-```rust
+```rust,ignore
 // Pattern 1: Derive Default for simple state
 #[derive(Resource, Default)]
 pub struct PrimaryCameraState {
@@ -435,7 +435,7 @@ pub struct AsyncInferenceState {
 
 For bridging framework-agnostic types into Bevy:
 
-```rust
+```rust,ignore
 // Framework-agnostic type (no Bevy dependency)
 pub struct InferenceThresholds {
     pub objectness_threshold: f32,
@@ -460,7 +460,7 @@ impl std::ops::Deref for InferenceThresholdsResource {
 
 Components mark entities with specific behavior or identity:
 
-```rust
+```rust,ignore
 // Marker components (zero-sized types)
 #[derive(Component)]
 pub struct InstrumentPovCamera;
@@ -496,7 +496,7 @@ pub struct Flycam {
 
 **System initialization pattern**:
 
-```rust
+```rust,ignore
 pub fn setup_camera(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
@@ -512,7 +512,7 @@ pub fn setup_camera(mut commands: Commands) {
 
 CortenForge currently does not use Bevy States (no `States` enum or `NextState` found). Runtime modes are handled via Resource enums:
 
-```rust
+```rust,ignore
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SimRunMode {
     Datagen,
@@ -560,7 +560,7 @@ crates/
 
 **Test organization patterns**:
 
-```rust
+```rust,ignore
 // Pattern 1: Simple validation tests
 #[test]
 fn invalid_bbox_norm_rejected() {
