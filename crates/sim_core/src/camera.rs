@@ -102,10 +102,11 @@ pub fn camera_controller(
 }
 
 pub fn pov_toggle_system(
+    mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     mut state: ResMut<ActiveCameraMode>,
-    mut free_cams: Query<&mut Camera, (With<Flycam>, Without<InstrumentPovCamera>)>,
-    mut instrument_cams: Query<&mut Camera, With<InstrumentPovCamera>>,
+    mut free_cams: Query<(Entity, &mut Camera), (With<Flycam>, Without<InstrumentPovCamera>)>,
+    mut instrument_cams: Query<(Entity, &mut Camera), With<InstrumentPovCamera>>,
 ) {
     if !keys.just_pressed(KeyCode::KeyC) {
         return;
@@ -115,10 +116,22 @@ pub fn pov_toggle_system(
     let use_instrument = state.use_instrument;
     let use_free = !use_instrument;
 
-    for mut cam in &mut free_cams {
+    for (entity, mut cam) in &mut free_cams {
         cam.is_active = use_free;
+        // Move IsDefaultUiCamera marker to active camera
+        if use_free {
+            commands.entity(entity).insert(IsDefaultUiCamera);
+        } else {
+            commands.entity(entity).remove::<IsDefaultUiCamera>();
+        }
     }
-    for mut cam in &mut instrument_cams {
+    for (entity, mut cam) in &mut instrument_cams {
         cam.is_active = use_instrument;
+        // Move IsDefaultUiCamera marker to active camera
+        if use_instrument {
+            commands.entity(entity).insert(IsDefaultUiCamera);
+        } else {
+            commands.entity(entity).remove::<IsDefaultUiCamera>();
+        }
     }
 }
