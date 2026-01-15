@@ -1,0 +1,886 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Style Guide - CortenForge Book</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-e33db564.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-433c19f3.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CortenForge Book</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="book-style-guide"><a class="header" href="#book-style-guide">Book Style Guide</a></h1>
+<p><strong>Why</strong>: Keep the book consistent and easy to skim.
+<strong>How it fits</strong>: Use this before adding or refactoring pages.
+<strong>Learn more</strong>: See <a href="linking_style.html">Linking Style</a> and <a href="docsrs_alignment.html">docs.rs Alignment</a>.</p>
+<h2 id="chapters--structure"><a class="header" href="#chapters--structure">Chapters &amp; structure</a></h2>
+<p>How the book is organized and what belongs where.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Area</th><th>Scope</th></tr>
+</thead>
+<tbody>
+<tr><td>Top-level</td><td>workspace overview, feature flags, build/dev workflow.</td></tr>
+<tr><td>Per-crate</td><td><code>10_crates/&lt;crate&gt;</code>: overview, public API, lifecycle/data flow, module map, error model, performance notes, examples, design review.</td></tr>
+<tr><td>Cross-crate</td><td>canonical flows, integration contracts, docs.rs alignment, linking style, quality gates, changelog, reader’s guide.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="naming-conventions"><a class="header" href="#naming-conventions">Naming conventions</a></h2>
+<p>Consistent naming and placement rules for new pages.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Convention</th><th>Guidance</th></tr>
+</thead>
+<tbody>
+<tr><td>Paths</td><td><code>10_crates/&lt;crate&gt;/0X_*.md</code> for crate pages; <code>00_workspace/*.md</code> for workspace-wide topics.</td></tr>
+<tr><td>Headings</td><td>Title Case; keep consistent order per crate.</td></tr>
+<tr><td>Templates</td><td>reuse <code>_templates/crate_template.md</code> when creating new crate pages.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="crate-naming-strategy"><a class="header" href="#crate-naming-strategy">Crate Naming Strategy</a></h3>
+<p>The CortenForge workspace uses descriptive crate names that signal architectural layers:</p>
+<p><strong>Core suffix</strong>: <code>_core</code> indicates framework-agnostic interfaces and abstractions.</p>
+<ul>
+<li><code>vision_core</code>: Detector, Recorder, and Frame interfaces with no framework dependencies.</li>
+<li>Can be used in CLI tools, web services, or any Rust application.</li>
+</ul>
+<p><strong>Runtime suffix</strong>: <code>_runtime</code> indicates framework-specific integration layers.</p>
+<ul>
+<li><code>vision_runtime</code>: Bevy-specific plugins, resources, and systems wrapping <code>vision_core</code> interfaces.</li>
+<li>Bridges framework-agnostic abstractions to Bevy ECS.</li>
+</ul>
+<p><strong>Other patterns</strong>:</p>
+<ul>
+<li><code>_support</code>: Utility/helper crates (e.g., <code>cli_support</code> for shared CLI args).</li>
+<li><code>_utils</code>: Concrete implementations (e.g., <code>capture_utils</code> for filesystem recorders).</li>
+<li>No suffix: Domain-focused crates (e.g., <code>models</code>, <code>inference</code>, <code>training</code>).</li>
+</ul>
+<p>This naming convention clarifies architectural boundaries and dependency direction:</p>
+<pre><code class="language-text">vision_core (interfaces) ← inference (detector impl) ← vision_runtime (Bevy integration)
+</code></pre>
+<h3 id="vision_core-vs-vision_runtime-split"><a class="header" href="#vision_core-vs-vision_runtime-split">vision_core vs vision_runtime Split</a></h3>
+<p>A key architectural pattern in CortenForge:</p>
+<p><strong>vision_core</strong>: Framework-agnostic vision interfaces.</p>
+<ul>
+<li>Defines <code>Detector</code>, <code>Recorder</code>, <code>Frame</code>, <code>Label</code> traits and types.</li>
+<li>Zero Bevy dependencies; pure Rust abstractions.</li>
+<li>Enables detector implementations in non-Bevy contexts (CLI tools, servers, etc.).</li>
+</ul>
+<p><strong>vision_runtime</strong>: Bevy-integrated runtime layer.</p>
+<ul>
+<li>Provides <code>CapturePlugin</code>, <code>InferenceRuntimePlugin</code> for Bevy apps.</li>
+<li>Wraps <code>vision_core</code> interfaces as Bevy resources.</li>
+<li>Handles async inference scheduling, GPU readback, detection overlays.</li>
+</ul>
+<p><strong>Why the split</strong>:</p>
+<ul>
+<li>Keeps core detection logic portable and testable without framework overhead.</li>
+<li>Allows reuse of detector implementations across Bevy apps, CLI tools, and services.</li>
+<li>Follows dependency inversion: high-level Bevy code depends on stable abstractions.</li>
+</ul>
+<h3 id="function-verb-usage"><a class="header" href="#function-verb-usage">Function Verb Usage</a></h3>
+<p>Consistent function naming conventions across the workspace:</p>
+<p><strong>Action verbs</strong> (imperative):</p>
+<ul>
+<li><code>build_*</code>: Construct complex objects from inputs (e.g., <code>build_app</code>, <code>build_train_val_iters</code>).</li>
+<li><code>setup_*</code>: Initialize resources or Bevy entities once (e.g., <code>setup_camera</code>).</li>
+<li><code>register_*</code>: Add systems/plugins to an app (e.g., <code>register_runtime_systems</code>).</li>
+<li><code>load_*</code>: Read from filesystem or deserialize (e.g., <code>load_run_dataset</code>, <code>load_linear_classifier_from_checkpoint</code>).</li>
+<li><code>resolve_*</code>: Apply precedence rules or compute from multiple sources (e.g., <code>resolve_seed</code>).</li>
+<li><code>validate_*</code>: Check invariants and return errors (e.g., <code>validate_summary</code>, <code>validate_backend_choice</code>).</li>
+</ul>
+<p><strong>Query verbs</strong> (return information):</p>
+<ul>
+<li><code>index_*</code>: Scan filesystem and build index structures (e.g., <code>index_runs</code>).</li>
+<li><code>summarize_*</code>: Aggregate stats from datasets (e.g., <code>summarize_runs</code>, <code>summarize_with_thresholds</code>).</li>
+<li><code>count_*</code>: Return count metrics (e.g., <code>count_boxes</code>).</li>
+</ul>
+<p><strong>Mutation verbs</strong> (modify state):</p>
+<ul>
+<li><code>draw_*</code>: Render visuals onto images (e.g., <code>draw_rect</code>).</li>
+<li><code>split_*</code>: Partition data (e.g., <code>split_runs</code>, <code>split_runs_stratified</code>).</li>
+</ul>
+<p><strong>Bevy system naming</strong>:</p>
+<ul>
+<li>Systems that modify state: descriptive nouns with <code>_system</code> suffix (e.g., <code>pov_toggle_system</code>, <code>camera_controller</code>).</li>
+<li>Systems that setup/initialize: <code>setup_*</code> prefix (e.g., <code>setup_camera</code>).</li>
+</ul>
+<p><strong>Consistency rules</strong>:</p>
+<ul>
+<li>Use <code>build</code> for complex construction with configuration; <code>new</code> for simple struct constructors.</li>
+<li>Use <code>load</code> for I/O operations; <code>from_*</code> for pure conversions.</li>
+<li>Avoid generic verbs like <code>process</code> or <code>handle</code>; be specific about what the function does.</li>
+</ul>
+<h3 id="feature-flag-organization"><a class="header" href="#feature-flag-organization">Feature Flag Organization</a></h3>
+<p>CortenForge uses feature flags to enable optional functionality and select backends/models:</p>
+<p><strong>Backend selection</strong> (mutually exclusive):</p>
+<ul>
+<li><code>backend-ndarray</code>: CPU-based Burn backend (default for inference/training).</li>
+<li><code>backend-wgpu</code>: GPU-accelerated WGPU backend (opt-in).</li>
+</ul>
+<p><strong>Model selection</strong> (mutually exclusive):</p>
+<ul>
+<li><code>linear_detector</code>: Simple LinearClassifier model (default).</li>
+<li><code>convolutional_detector</code>: MultiboxModel for multi-box detection (opt-in).</li>
+</ul>
+<p><strong>Runtime integration</strong>:</p>
+<ul>
+<li><code>burn-runtime</code>: Enables Burn-specific batch iteration in <code>burn_dataset</code> (opt-in).</li>
+<li><code>bevy-resource</code>: Derives <code>Resource</code> for types in <code>cli_support</code> to enable Bevy integration (opt-in).</li>
+</ul>
+<p><strong>Naming conventions</strong>:</p>
+<ul>
+<li>Use <code>backend-*</code> prefix for Burn backend selection.</li>
+<li>Use <code>*_detector</code> suffix for model architecture selection.</li>
+<li>Use descriptive names for integration features (<code>bevy-resource</code>, <code>burn-runtime</code>).</li>
+</ul>
+<p><strong>Default features</strong>:</p>
+<ul>
+<li>Most crates default to <code>backend-ndarray</code> + <code>linear_detector</code> for minimal dependencies.</li>
+<li>Feature flags are opt-in by default unless they provide baseline functionality.</li>
+</ul>
+<p><strong>Cross-crate coordination</strong>:</p>
+<ul>
+<li><code>models</code> defines <code>linear_detector</code> and <code>convolutional_detector</code> as empty marker features.</li>
+<li><code>inference</code> and <code>training</code> enable corresponding <code>models</code> features transitively.</li>
+<li>This ensures type aliases (<code>InferenceModel</code>, <code>InferenceModelConfig</code>) resolve consistently.</li>
+</ul>
+<h3 id="module-naming-conventions"><a class="header" href="#module-naming-conventions">Module Naming Conventions</a></h3>
+<p>Module file names use <code>snake_case</code> and follow these patterns:</p>
+<p><strong>Domain modules</strong> (singular nouns):</p>
+<ul>
+<li>Name describes primary concept: <code>capture</code>, <code>overlay</code>, <code>recorder</code>, <code>camera</code>, <code>runtime</code>.</li>
+<li>Contains related types and functions for that domain.</li>
+</ul>
+<p><strong>Type collection modules</strong> (plural nouns with <code>_types</code> suffix):</p>
+<ul>
+<li>Groups related type definitions: <code>articulated_types</code>, <code>autopilot_types</code>.</li>
+<li>Use when a module primarily exports structs/enums without much behavior.</li>
+</ul>
+<p><strong>Utility modules</strong> (descriptive names):</p>
+<ul>
+<li><code>common</code>: Shared utilities used across the crate.</li>
+<li><code>util</code>: Helper functions for the crate’s primary purpose.</li>
+<li><code>factory</code>: Builder/factory patterns for complex construction.</li>
+<li><code>hooks</code>: Extension points or callback systems.</li>
+</ul>
+<p><strong>Data modules</strong>:</p>
+<ul>
+<li><code>splits</code>: Data partitioning logic.</li>
+<li><code>validation</code>: Validation logic for data structures.</li>
+<li><code>batch</code>: Batching/collation for ML pipelines.</li>
+<li><code>aug</code>: Augmentation pipelines.</li>
+</ul>
+<p><strong>Integration modules</strong> (external system name):</p>
+<ul>
+<li><code>warehouse</code>: Shard-based storage integration.</li>
+<li><code>preprocess</code>: Data preprocessing for external systems.</li>
+</ul>
+<p><strong>Avoid</strong>:</p>
+<ul>
+<li>Generic names like <code>core</code>, <code>base</code>, <code>main</code> (too vague).</li>
+<li>Redundant prefixes matching the crate name (e.g., don’t name a module <code>sim_camera</code> in <code>sim_core</code>).</li>
+<li>Abbreviations unless domain-standard (e.g., <code>aug</code> for augmentation is acceptable in ML contexts).</li>
+</ul>
+<h3 id="trait-naming"><a class="header" href="#trait-naming">Trait Naming</a></h3>
+<p>Trait names use these patterns to signal their purpose:</p>
+<p><strong>Capability traits</strong> (verb/noun describing what implementors do):</p>
+<ul>
+<li><code>Detector</code>: Types that detect objects in frames.</li>
+<li><code>Recorder</code>: Types that persist frame records.</li>
+<li><code>MetadataProvider</code>: Types that provide metadata.</li>
+</ul>
+<p><strong>Source traits</strong> (*Source suffix):</p>
+<ul>
+<li><code>FrameSource</code>: Types that produce frames.</li>
+<li>Indicates producer/generator semantics.</li>
+</ul>
+<p><strong>Hook traits</strong> (*Hook suffix):</p>
+<ul>
+<li><code>ControlsHook</code>: Extension point for control behavior.</li>
+<li><code>AutopilotHook</code>: Extension point for autopilot behavior.</li>
+<li>Indicates callback/observer pattern.</li>
+</ul>
+<p><strong>Factory traits</strong> (*Factory suffix):</p>
+<ul>
+<li><code>BurnDetectorFactory</code>: Types that construct detectors.</li>
+<li>Indicates builder/factory pattern.</li>
+</ul>
+<p><strong>Store traits</strong> (*Store suffix):</p>
+<ul>
+<li><code>WarehouseShardStore</code>: Types that store shard data.</li>
+<li>Indicates storage/persistence layer.</li>
+</ul>
+<p><strong>General rules</strong>:</p>
+<ul>
+<li>Use noun or verb-noun phrases (not adjectives).</li>
+<li>Avoid <code>Trait</code> suffix (redundant; <code>DetectorTrait</code> is just <code>Detector</code>).</li>
+<li>Be specific: <code>Detector</code> is clearer than <code>Detectable</code> or <code>CanDetect</code>.</li>
+<li>Match suffix to architectural role (Hook, Source, Factory, Store, Provider).</li>
+</ul>
+<h3 id="type-alias-feature-gating"><a class="header" href="#type-alias-feature-gating">Type Alias Feature-Gating</a></h3>
+<p>CortenForge uses feature-gated type aliases to select backends and models at compile time:</p>
+<p><strong>Backend selection</strong>:</p>
+<pre><code class="language-rust ignore">#[cfg(feature = "backend-wgpu")]
+pub type InferenceBackend = burn_wgpu::Wgpu&lt;f32&gt;;
+#[cfg(not(feature = "backend-wgpu"))]
+pub type InferenceBackend = burn_ndarray::NdArray&lt;f32&gt;;</code></pre>
+<ul>
+<li>Used in <code>inference</code> and <code>training</code> crates.</li>
+<li>Defaults to <code>NdArray</code> for CPU; opt-in to WGPU for GPU.</li>
+</ul>
+<p><strong>Model selection</strong>:</p>
+<pre><code class="language-rust ignore">#[cfg(feature = "convolutional_detector")]
+pub type InferenceModel&lt;B&gt; = models::MultiboxModel&lt;B&gt;;
+#[cfg(not(feature = "convolutional_detector"))]
+pub type InferenceModel&lt;B&gt; = models::LinearClassifier&lt;B&gt;;</code></pre>
+<ul>
+<li>Used in <code>inference</code> crate to select model architecture.</li>
+<li>Paired with <code>InferenceModelConfig</code> alias for consistency.</li>
+</ul>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Consumers import <code>InferenceBackend</code> or <code>InferenceModel</code> without conditional compilation.</li>
+<li>Type aliases adapt based on enabled features.</li>
+<li>Ensures consistent naming across feature configurations.</li>
+</ul>
+<p><strong>Naming pattern</strong>:</p>
+<ul>
+<li>Use descriptive aliases: <code>InferenceBackend</code>, <code>TrainBackend</code>, <code>InferenceModel</code>.</li>
+<li>Avoid generic names like <code>Backend</code> or <code>Model</code> (too vague).</li>
+<li>Pair model aliases with their config aliases (<code>InferenceModel</code> + <code>InferenceModelConfig</code>).</li>
+</ul>
+<p><strong>Result type aliases</strong>:</p>
+<ul>
+<li>Simple result aliases are acceptable: <code>pub type DatasetResult&lt;T&gt; = Result&lt;T, BurnDatasetError&gt;</code>.</li>
+<li>Use when a crate has a dominant error type to reduce boilerplate.</li>
+</ul>
+<h3 id="error-types-naming"><a class="header" href="#error-types-naming">Error Types Naming</a></h3>
+<p>CortenForge uses consistent error type patterns across the workspace:</p>
+<p><strong>Error naming convention</strong>:</p>
+<ul>
+<li>All custom error types use <code>*Error</code> suffix: <code>ValidationError</code>, <code>BurnDatasetError</code>, <code>ImageStatsError</code>, <code>ServiceError</code>.</li>
+<li>Error enums derive <code>Debug</code> and <code>thiserror::Error</code> for automatic trait implementations.</li>
+<li>Error struct variants use structured fields for context (never tuple variants for complex errors).</li>
+</ul>
+<p><strong>Error variant patterns</strong>:</p>
+<pre><code class="language-rust ignore">#[derive(Debug, Error)]
+pub enum BurnDatasetError {
+    // Context-rich variants with named fields
+    #[error("io error at {path}: {source}")]
+    Io {
+        path: PathBuf,
+        #[source]
+        source: std::io::Error,
+    },
+
+    // Simple variants with descriptive messages
+    #[error("image missing for label {path}")]
+    MissingImage { path: PathBuf },
+
+    // Catch-all for migration (avoid in new code)
+    #[error("{0}")]
+    Other(String),
+}</code></pre>
+<p><strong>Error message formatting</strong>:</p>
+<ul>
+<li>Use <code>#[error("...")]</code> with interpolation: <code>#[error("bbox_px invalid order or negative: {0:?}")]</code>.</li>
+<li>Include relevant context in the message (paths, values, expected vs actual).</li>
+<li>Keep messages lowercase and concise (error context is shown in stack traces).</li>
+</ul>
+<p><strong>When to use custom errors vs anyhow</strong>:</p>
+<ul>
+<li>
+<p><strong>Custom error types</strong> (<code>*Error</code> enums): Use in library crates with public APIs where callers need structured error handling.</p>
+<ul>
+<li>Examples: <code>data_contracts</code>, <code>burn_dataset</code>, <code>tools/services</code>.</li>
+<li>Provides type-safe error matching and clear API contracts.</li>
+</ul>
+</li>
+<li>
+<p><strong>anyhow::Result</strong>: Use in binaries and private functions where errors propagate to top-level handlers.</p>
+<ul>
+<li>Examples: <code>main()</code> functions, CLI tools, tests, internal helpers.</li>
+<li>Simplifies error propagation with <code>.context()</code> for additional information.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Result type aliases</strong>:</p>
+<ul>
+<li>Define a type alias when a crate has a dominant error type: <code>pub type DatasetResult&lt;T&gt; = Result&lt;T, BurnDatasetError&gt;</code>.</li>
+<li>Place the alias near the error definition in the same module.</li>
+<li>Use consistently across the crate’s public API.</li>
+</ul>
+<p><strong>Error source chaining</strong>:</p>
+<ul>
+<li>Use <code>#[source]</code> attribute on nested error fields to preserve error chains.</li>
+<li>Enables <code>.source()</code> method for error introspection and better debugging.</li>
+</ul>
+<p><strong>Avoid</strong>:</p>
+<ul>
+<li>Generic error names like <code>Error</code> (use <code>DatasetError</code>, <code>ValidationError</code> instead).</li>
+<li>Tuple variants for errors with context: <code>Io(PathBuf, std::io::Error)</code> is worse than structured fields.</li>
+<li>String-based errors in library code (use typed enums).</li>
+<li>Overly broad catch-all variants (<code>Other(String)</code>) in new code.</li>
+</ul>
+<h3 id="async-patterns"><a class="header" href="#async-patterns">Async Patterns</a></h3>
+<p>CortenForge uses minimal async code, primarily for offloading CPU-intensive work in Bevy systems:</p>
+<p><strong>Bevy async compute tasks</strong>:</p>
+<p>The workspace uses Bevy’s <code>AsyncComputeTaskPool</code> for non-blocking inference:</p>
+<pre><code class="language-rust ignore">use bevy::tasks::{AsyncComputeTaskPool, Task};
+use futures_lite::future::{block_on, poll_once};
+
+// Spawn inference on thread pool
+let task = AsyncComputeTaskPool::get().spawn(async move {
+    let result = detector.detect(&amp;frame);
+    (detector, result)
+});
+
+// Poll non-blockingly in a Bevy system
+if let Some((detector, result)) = block_on(poll_once(&amp;mut task)) {
+    // Task completed, handle result
+}</code></pre>
+<p><strong>Pattern rationale</strong>:</p>
+<ul>
+<li>Bevy systems run on the main thread; blocking I/O or CPU work freezes the frame.</li>
+<li><code>AsyncComputeTaskPool</code> offloads work to a thread pool without blocking.</li>
+<li><code>poll_once</code> checks completion without blocking (returns <code>None</code> if not ready).</li>
+<li>Task state stored in a Bevy <code>Resource</code> for cross-frame polling.</li>
+</ul>
+<p><strong>When to use async in CortenForge</strong>:</p>
+<ul>
+<li><strong>Use Bevy async tasks</strong>: For CPU-intensive work in Bevy systems (model inference, image processing).</li>
+<li><strong>Avoid async otherwise</strong>: Most workspace code is synchronous.
+<ul>
+<li>CLI tools and binaries block directly (no need for async).</li>
+<li>Library crates use synchronous APIs (simpler, no async trait issues).</li>
+</ul>
+</li>
+</ul>
+<p><strong>Task state management</strong>:</p>
+<ul>
+<li>Store <code>Task&lt;T&gt;</code> in a Bevy <code>Resource</code> to persist across frames.</li>
+<li>Take ownership with <code>Option::take()</code> when polling to avoid double-polling.</li>
+<li>Replace resources (e.g., <code>std::mem::replace</code>) to move ownership into async closures.</li>
+</ul>
+<p><strong>Naming conventions</strong>:</p>
+<ul>
+<li>System names that spawn tasks: <code>schedule_*_task</code> or <code>spawn_*</code> (e.g., <code>schedule_inference_task</code>).</li>
+<li>System names that poll tasks: <code>poll_*_task</code> (e.g., <code>poll_inference_task</code>).</li>
+<li>Resource names for task state: <code>Async*State</code> or <code>*TaskState</code> (e.g., <code>AsyncInferenceState</code>).</li>
+</ul>
+<p><strong>No async traits or channels</strong>:</p>
+<ul>
+<li>CortenForge avoids <code>async fn</code> in trait definitions (unstable, complex).</li>
+<li>No async channels (<code>async_channel</code>, <code>tokio::mpsc</code>) - Bevy’s task pool is sufficient.</li>
+<li>No tokio runtime - Bevy provides its own thread pool primitives.</li>
+</ul>
+<h3 id="resource-lifecycle"><a class="header" href="#resource-lifecycle">Resource Lifecycle</a></h3>
+<p>Bevy Resources and Components follow consistent patterns across the workspace:</p>
+<p><strong>Resource initialization patterns</strong>:</p>
+<pre><code class="language-rust ignore">// Pattern 1: Derive Default for simple state
+#[derive(Resource, Default)]
+pub struct PrimaryCameraState {
+    pub active: bool,
+    pub last_transform: Option&lt;GlobalTransform&gt;,
+    pub frame_counter: u64,
+}
+
+// Pattern 2: Manual Default for configuration
+#[derive(Resource)]
+pub struct Config {
+    pub output_root: PathBuf,
+    pub capture_interval: Timer,
+}
+
+impl Default for Config {
+    fn default() -&gt; Self {
+        Self {
+            output_root: PathBuf::from("assets/datasets/captures"),
+            capture_interval: Timer::from_seconds(0.33, TimerMode::Repeating),
+        }
+    }
+}
+
+// Pattern 3: No Default for required initialization
+#[derive(Resource)]
+pub struct AsyncInferenceState {
+    pub pending: Option&lt;Task&lt;InferenceJobResult&gt;&gt;,
+    pub debounce: Timer,
+}</code></pre>
+<p><strong>When to use Default vs manual construction</strong>:</p>
+<ul>
+<li><strong>Derive Default</strong>: Use for simple state with sensible zero/empty defaults.
+<ul>
+<li>Examples: counters starting at 0, flags starting false, empty collections.</li>
+</ul>
+</li>
+<li><strong>Manual Default impl</strong>: Use for configuration with non-trivial defaults.
+<ul>
+<li>Examples: timer durations, filesystem paths, resolution settings.</li>
+</ul>
+</li>
+<li><strong>No Default</strong>: Use when Resources require construction parameters or external data.
+<ul>
+<li>Examples: trait object wrappers, loaded models, task state with timers.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Resource wrapper pattern</strong>:</p>
+<p>For bridging framework-agnostic types into Bevy:</p>
+<pre><code class="language-rust ignore">// Framework-agnostic type (no Bevy dependency)
+pub struct InferenceThresholds {
+    pub objectness_threshold: f32,
+    pub iou_threshold: f32,
+}
+
+// Bevy wrapper Resource
+#[derive(Resource, Debug, Clone, Copy, Default)]
+pub struct InferenceThresholdsResource(pub InferenceThresholds);
+
+impl std::ops::Deref for InferenceThresholdsResource {
+    type Target = InferenceThresholds;
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.0
+    }
+}</code></pre>
+<p><strong>Benefits</strong>: Core types remain portable; wrapper provides Bevy integration.</p>
+<p><strong>Component patterns</strong>:</p>
+<p>Components mark entities with specific behavior or identity:</p>
+<pre><code class="language-rust ignore">// Marker components (zero-sized types)
+#[derive(Component)]
+pub struct InstrumentPovCamera;
+
+// Data components (carry state)
+#[derive(Component)]
+pub struct Flycam {
+    pub yaw: f32,
+    pub pitch: f32,
+    pub speed: f32,
+}</code></pre>
+<p><strong>Component vs Resource</strong>:</p>
+<ul>
+<li><strong>Component</strong>: Per-entity data (camera settings, physics state, markers).</li>
+<li><strong>Resource</strong>: Global/singleton data (game config, runtime state, subsystem state).</li>
+</ul>
+<p><strong>Resource naming conventions</strong>:</p>
+<ul>
+<li>Configuration: <code>*Config</code> or just <code>Config</code> in subsystem modules (e.g., <code>recorder::Config</code>).</li>
+<li>Runtime state: <code>*State</code> suffix (e.g., <code>PrimaryCameraState</code>, <code>AsyncInferenceState</code>).</li>
+<li>Flags/toggles: Descriptive names ending in <code>Flag</code> or <code>Mode</code> (e.g., <code>ModelLoadedFlag</code>, <code>ActiveCameraMode</code>).</li>
+<li>Buffers: <code>*Buffer</code> suffix (e.g., <code>PrimaryCameraFrameBuffer</code>).</li>
+<li>Trait object wrappers: Short names matching the trait (e.g., <code>Sink</code> wraps <code>Recorder</code>).</li>
+</ul>
+<p><strong>Resource lifecycle management</strong>:</p>
+<ul>
+<li>Initialize Resources in plugin <code>build()</code> methods via <code>app.init_resource::&lt;T&gt;()</code> or <code>app.insert_resource(T::new())</code>.</li>
+<li>Update Resources via <code>ResMut&lt;T&gt;</code> system parameters.</li>
+<li>Query Resources optionally via <code>Option&lt;Res&lt;T&gt;&gt;</code> or <code>Option&lt;ResMut&lt;T&gt;&gt;</code> when presence is conditional.</li>
+<li>No explicit cleanup needed - Bevy handles Drop when the app/world is torn down.</li>
+</ul>
+<p><strong>System initialization pattern</strong>:</p>
+<pre><code class="language-rust ignore">pub fn setup_camera(mut commands: Commands) {
+    commands.spawn((
+        Camera3d::default(),
+        Flycam { yaw: 0.0, pitch: 0.0, speed: 5.0 },
+    ));
+}</code></pre>
+<ul>
+<li>Systems named <code>setup_*</code> run once during app initialization.</li>
+<li>Use <code>Commands</code> to spawn entities with component bundles.</li>
+</ul>
+<p><strong>State management</strong>:</p>
+<p>CortenForge currently does not use Bevy States (no <code>States</code> enum or <code>NextState</code> found). Runtime modes are handled via Resource enums:</p>
+<pre><code class="language-rust ignore">#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SimRunMode {
+    Datagen,
+    Inference,
+    Interactive,
+}</code></pre>
+<p><strong>Avoid</strong>:</p>
+<ul>
+<li>Deriving <code>Resource</code> on types with lifetimes (Bevy Resources must be <code>'static</code>).</li>
+<li>Storing non-<code>Send + Sync</code> types in Resources (Bevy is multi-threaded).</li>
+<li>Using <code>Default</code> for Resources that need external parameters (use explicit constructors).</li>
+</ul>
+<h3 id="test-organization"><a class="header" href="#test-organization">Test Organization</a></h3>
+<p>CortenForge uses integration tests exclusively (no unit test modules in source files):</p>
+<p><strong>Test file structure</strong>:</p>
+<p>All tests live in <code>tests/</code> directories within crates:</p>
+<pre><code class="language-text">crates/
+  capture_utils/
+    tests/
+      recorder_sink.rs
+  burn_dataset/
+    tests/
+      integration_workflows.rs
+  data_contracts/
+    tests/
+      capture_validation.rs
+      manifest_schema_smoke.rs
+</code></pre>
+<p><strong>Test naming conventions</strong>:</p>
+<ul>
+<li>Test function names describe the behavior under test in <code>snake_case</code>:
+<ul>
+<li><code>invalid_bbox_norm_rejected</code> - tests that invalid input is rejected.</li>
+<li><code>valid_bbox_passes</code> - tests that valid input succeeds.</li>
+<li><code>workflow_capture_to_warehouse_etl</code> - tests end-to-end workflow.</li>
+</ul>
+</li>
+<li>Use descriptive names that read like sentences when prefixed with “it should”.</li>
+<li>No <code>test_</code> prefix (Rust’s <code>#[test]</code> attribute makes it redundant).</li>
+</ul>
+<p><strong>Test organization patterns</strong>:</p>
+<pre><code class="language-rust ignore">// Pattern 1: Simple validation tests
+#[test]
+fn invalid_bbox_norm_rejected() {
+    let input = /* ... */;
+    let err = validate(input).unwrap_err();
+    matches!(err, ValidationError::InvalidBboxNorm(_));
+}
+
+// Pattern 2: Integration workflow tests with tempfile
+#[test]
+fn workflow_capture_to_warehouse_etl() -&gt; anyhow::Result&lt;()&gt; {
+    let tmp = tempfile::tempdir()?;
+    let root = tmp.path();
+
+    // Test workflow steps...
+    Ok(())
+}
+
+// Pattern 3: Fixture helper functions
+fn create_synthetic_run(
+    root: &amp;Path,
+    run_name: &amp;str,
+    frame_count: usize,
+) -&gt; anyhow::Result&lt;PathBuf&gt; {
+    // Build test fixture...
+}</code></pre>
+<p><strong>Tempfile usage for filesystem tests</strong>:</p>
+<ul>
+<li>Use <code>tempfile::tempdir()</code> for tests that write to disk.</li>
+<li>Store <code>TempDir</code> in a variable to ensure cleanup at scope end.</li>
+<li>Extract path with <code>.path()</code> for passing to functions under test.</li>
+<li>Helper functions return <code>PathBuf</code> to the created fixture location.</li>
+</ul>
+<p><strong>Return type conventions</strong>:</p>
+<ul>
+<li>Tests that can fail use <code>-&gt; anyhow::Result&lt;()&gt;</code> for ergonomic error propagation.</li>
+<li>Simple assertion-based tests return <code>()</code> (no explicit return type).</li>
+<li>Use <code>?</code> operator freely in tests returning <code>Result</code> (no manual unwrapping).</li>
+</ul>
+<p><strong>Integration test scope</strong>:</p>
+<p>CortenForge tests focus on:</p>
+<ul>
+<li><strong>API contracts</strong>: Validate that public APIs work as documented (e.g., validation logic, recorder sinks).</li>
+<li><strong>Workflows</strong>: Test end-to-end pipelines (capture → ETL → training iteration).</li>
+<li><strong>Smoke tests</strong>: Verify compilation and basic functionality (e.g., model forward passes, checkpoint loading).</li>
+</ul>
+<p><strong>No unit test modules</strong>:</p>
+<ul>
+<li>CortenForge does not use <code>#[cfg(test)] mod tests</code> in source files.</li>
+<li>All tests are integration tests in <code>tests/</code> directories.</li>
+<li>This keeps source files clean and focuses tests on public API usage.</li>
+</ul>
+<p><strong>Test helper patterns</strong>:</p>
+<ul>
+<li>Helper functions are plain functions in test files (not in a <code>mod tests</code>).</li>
+<li>Fixtures are created via functions like <code>create_synthetic_run</code>, <code>create_synthetic_labels</code>.</li>
+<li>Reusable test data structures are defined inline or in helper functions.</li>
+</ul>
+<p><strong>Feature-gated tests</strong>:</p>
+<p>Some tests require specific features:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(feature = "burn-runtime")]
+#[test]
+fn workflow_warehouse_to_training_iteration() -&gt; anyhow::Result&lt;()&gt; {
+    // Test that requires burn-runtime feature...
+}
+<span class="boring">}</span></code></pre>
+<p><strong>Test file naming</strong>:</p>
+<ul>
+<li>Descriptive names matching what’s being tested: <code>capture_validation.rs</code>, <code>recorder_sink.rs</code>.</li>
+<li>Workflow tests: <code>integration_workflows.rs</code>, <code>integration_checkpoint.rs</code>.</li>
+<li>Smoke tests: <code>smoke.rs</code>, <code>smoke_train.rs</code>, <code>smoke_bigdet.rs</code>.</li>
+</ul>
+<h2 id="cross-link-style"><a class="header" href="#cross-link-style">Cross-link style</a></h2>
+<p>Linking rules to keep references stable and readable.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Pattern</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td>Relative links</td><td><code>../&lt;crate&gt;/01_overview.md</code> for intra-book references.</td></tr>
+<tr><td>Source links</td><td><code>crate/path.rs:L123</code> format when pointing to GitHub code.</td></tr>
+<tr><td>Cross-references</td><td>Mention related crates/flows inline; avoid duplicate content by linking to existing sections.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="auto-generated-vs-manual"><a class="header" href="#auto-generated-vs-manual">Auto-generated vs manual</a></h2>
+<p>Which sections are machine-derived versus hand-curated.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Items</th></tr>
+</thead>
+<tbody>
+<tr><td>Auto-generated</td><td>feature flags list, pub API tables, module maps, canonical flow diagrams.</td></tr>
+<tr><td>Manual curation</td><td>lifecycle narratives, design reviews, performance notes, examples, error model nuances, integration contracts.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="examples--code-blocks"><a class="header" href="#examples--code-blocks">Examples &amp; code blocks</a></h2>
+<p>Rules for concise, copyable examples.</p>
+<ol>
+<li>Prefer small, focused snippets; mark non-runnable blocks with <code>ignore</code>/<code>no_run</code>.</li>
+<li>Include inputs/outputs when helpful; tie examples to public API.</li>
+</ol>
+<h2 id="diagrams"><a class="header" href="#diagrams">Diagrams</a></h2>
+<p>When and how to use Mermaid.</p>
+<ul>
+<li>Use Mermaid for dependency graphs and flows; place inline in relevant pages.
+<ul>
+<li>Keep diagrams minimal and update when APIs/flows change.</li>
+</ul>
+</li>
+</ul>
+<h2 id="quality"><a class="header" href="#quality">Quality</a></h2>
+<p>Baseline expectations for every page.</p>
+<ol>
+<li>Each page should answer: what is this, how to use/extend it, boundaries, failure modes.</li>
+<li>Keep prose concise; favor tables/diagrams over long text.</li>
+<li>Note NdArray default and feature-gated GPU paths where relevant.</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../00_workspace/glossary.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../00_workspace/linking_style.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../00_workspace/glossary.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../00_workspace/linking_style.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/mermaid-616a109f.min.js"></script>
+        <script src="../theme/mermaid-init-ddd6903b.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
